@@ -1,0 +1,157 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#include <algorithm>
+#include <cstring>
+#include <set>
+#include <cmath>
+#include <ctime>
+#include <random> 
+
+using namespace std;
+
+#define SEED 1234
+#define INF 987654321
+
+#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
+
+//아래는 교수님이 주신 파일 기반. 코드 보니까 클라이언트 수 x 유저 수를 채널로 해도 될 것 같다. 필요 시 coord.c 파일 수정해서 파일들 다시 뽑으면 될 듯.
+//#define NUM_OF_CLIENT	816
+//#define NUM_OF_SERVER	125
+//#define NUM_OF_USER	10 // the number of user for each ip block
+#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
+
+#define AWS_NUM 2
+#define MS_AZURE_NUM 3
+#define ES_TYPE_NUM (AWS_NUM+MS_AZURE_NUM)
+#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
+
+//#define VERSION_NUM 7
+//#define VERSION_SET_NUM 32 // 오리지널 버전 제외하고, 마지막 버전은 반드시 저장. 2^(7-2) set 1이 오리지널과 마지막 버전만 들어있는 것.
+//set 1 = (1)00000(1)이라서 1번, 오리지널 버전만
+//set 2 = (1)00001(1)이라서 1번, 오리지널 버전과 함께 2번 버전만,
+//set 3 = (1)00010(1)이라서 1번, 오리지널 버전과 함께 3번 버전만.
+
+#define HVP 1
+#define MVP 2
+#define LVP 3
+#define RVP 4
+
+#define VMAF 0
+#define SSIM 1
+#define PSNR 2
+#define MOS 3
+
+//#define ALPHA 2.0 // 인기도 - 지프 분포에 사용하는 알파 베타 값
+//#define BETA 1.0
+
+#define SIGMA 1 // 버전 인기도 - 노멀 분포에 사용하는 값
+ //0.25 0.5 0.75 <Default 1> 1.25 1.5 1.75 2 사이의 값.
+
+#define K_gamma 0.399 // 인기도 - 감마 분포에 사용하는 k, 세타값
+#define THETA_gamma 14260.0
+
+#define M_E 2.7182818284590452354 /* e */
+#define PI 3.1415926535897932384 /* pi */
+
+#define RR_HPF 1
+#define RR_AP 2
+#define RA_HPF 3
+#define RA_AP 4
+#define PA_HPF 5
+#define PA_AP 6
+
+struct location {
+	double latitude;
+	double longitude;
+};
+
+class server {
+public:
+	int index;
+	int processing_capacity;
+	location server_location; // int capacity; // server's capacity
+
+	int coverage; // 커버리지
+	double cost_coefficient_for_GHz;
+	double cost_coefficient_for_data_size;
+
+	//아래는 채널 할당으로 인해 갱신되는 값.
+	int total_GHz;
+	double total_transfer_data_size;
+	double total_cost;
+};
+
+class channel {
+public:
+	location broadcaster_location; // 이 채널 broadcaster의 위치. 이것과 엣지의 distance를 구해야함.
+
+	int index; // channel;
+	int version_pop_type; //HVP MVP LVP RVP
+
+	double* video_quality;//[VERSION_NUM + 1];
+	double* popularity;//[VERSION_NUM + 1]; // [0] 여기는 전체 채널의 pop, 즉 전체 버전 version의 pop 합.
+	double* video_GHz;//[VERSION_NUM + 1];
+	double* pwq;//[VERSION_NUM + 1]; // weighted video quality라고 쓰여있음. 하도 평소에 video pwq이라 불러서 코딩때도 이렇게 함.
+
+	double* sum_of_video_quality;//[VERSION_SET_NUM + 1];
+	double* sum_of_pwq;//[VERSION_SET_NUM + 1];
+	double* sum_of_transfer_data_size;//[VERSION_SET_NUM + 1];
+	//이 set 지우지 말것. pwq 합 계산할때 이걸로 돌리는게 제일 편하다.
+	double* sum_of_version_set_GHz;
+
+	double get_channel_popularity();
+	bool available_server_list[ES_NUM]; // true: user i is in server j's coverage
+
+	//아래는 알고리즘의 결과로 결정될 파라미터
+	int allocated_server_index; //이게 중요함. 교수님이 주신 파일에서 int assign[NUM_OF_CLIENT * NUM_OF_USER]; // assigned server index -> 이것과 같은 역할임.
+	int determined_version_set; //이게 중요함 2.
+};
+
+class bitrate_version_set {
+public: //그냥 전부 public 가자
+	int index; // 0은 우리가 쓰는 zencoder 조합.
+
+	int version_num;
+	int version_set_num;
+
+	int* resolution; //1080p면 값이 1080임
+	int* bitrate; // 논문에서의 r을 위한 값. 단 여기선 kbps고, r은 Mbps(GHz 구할 때 변환함). set_GHz 최상단의 논문의 수식 참고.
+	double* data_size; 
+	// 엣지에서 데이터 외부 전송에 대한 돈을 받기 때문에...  bitrate(kbps) -> MB/s로 변환함. 
+	// GHz도 초당 사용량이니 이쪽도 초당 데이터 전송량으로 하면 되니까. 그러므로 이 값이 데이터 전송량이 되는 것.
+
+	int number_for_bit_opration;
+	int set_versions_number_for_bit_opration;
+
+	bitrate_version_set(int _index); //initiation.cpp에 구현 있음
+};
+
+/* channel.cpp */
+void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type);
+void set_VMAF(channel* _channel, bitrate_version_set* _version_set);
+void set_GHz(channel* _channel, bitrate_version_set* _version_set);
+void set_PWQ(channel* _channel, bitrate_version_set* _version_set);
+double* set_gamma_pop(int length, double k, double theta);
+double* set_version_pop(bitrate_version_set* _bitrate_version_set, int _version_pop_type);
+
+/* server.cpp */
+void server_initalization(server* _server_list);
+double calculate_ES_cost(server* _server, double _total_transfer_data_size);
+void set_coverage_infomation(channel* _channel_list, server* _server_list);
+double calculate_distance(channel* _channel, server* _server);
+double deg2rad(double deg);
+double rad2deg(double rad);
+
+/* algorithm.cpp */
+void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+
+/* comparison_schemes*/
+void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set);
+void method_RR_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void method_PA_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
