@@ -43,7 +43,7 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 		method_CA_AP(_server_list, _channel_list, _version_set, cost_limit);
 	}
 	else if (method_index == PA_HPF) {
-		method_PA_HPF(_server_list, _channel_list, _version_set, cost_limit);
+		method_CA_HPF(_server_list, _channel_list, _version_set, cost_limit);
 	}
 
 	for (int channel = 1; channel <= CHANNEL_NUM; channel++) {
@@ -122,7 +122,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 		total_cost += calculate_ES_cost(ES_ptr, total_transfer_data_size_in_comparison_schemes[ES]/1024); // 전체에서 남은 걸 빼면 사용한 GHz
 		total_GHz += used_GHz;
 	}
-	printf("\n사용 비용 : %d W\n", total_cost);
+	printf("\n사용 비용 : %d $\n", total_cost);
 	printf("사용 GHz : %lf GHz\n\n", total_GHz);
 
 	/*for (int ver = _version_set->version_num - 1; ver >= 2; ver--) {
@@ -734,7 +734,7 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 	}
 }
 
-void method_PA_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
+void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
 	set<pair<int, int>, less<pair<int, int>>> low_cost_first; // 가장 사용 전력이 낮은 노드 선택
 
 	for (int es = 1; es <= ES_NUM; es++) {

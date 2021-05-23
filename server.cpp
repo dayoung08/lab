@@ -53,7 +53,7 @@ double calculate_ES_cost(server* _server, double _total_transfer_data_size) {
 	double basic_charge[ES_TYPE_NUM + 1] = { 0, 80, 150, 23.9, 78.6, 45.6 }; // 하루 기준으로 몇 달러인가
 	double transmission_charge[ES_TYPE_NUM + 1] = { 0, 0.04, 0.04, 0, 0 }; // GB당 몇 달러인가
 
-	double cost = PERIOD * (basic_charge[bn_type] + _total_transfer_data_size * transmission_charge[bn_type] * 3600 * 24);
+	double cost = (basic_charge[bn_type] + _total_transfer_data_size * transmission_charge[bn_type] * 3600 * 24) * PERIOD;
 	return cost;
 }
 
@@ -65,19 +65,22 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// server read
 	fopen_s(&fp, "servercoord.txt", "r");
 
-	for (int ES = 1; ES <= ES_NUM; ES++) {
+	for (int ES = 1; ES <= ES_NUM/(ES_NUM/125); ES++) {
 		double latitude, longitude;
 
 		fscanf(fp, "%lf\t%lf\n", &latitude, &longitude);
 		_server_list[ES].server_location.latitude = latitude;
 		_server_list[ES].server_location.longitude = longitude;
+		
+		_server_list[ES * (ES_NUM / 125)].server_location.latitude = latitude;
+		_server_list[ES * (ES_NUM / 125)].server_location.longitude = longitude;
 	}
 	fclose(fp);
 
 	// user read
 	fopen_s(&fp, "usercoord.txt", "r");
 
-	for (int ch = 0; ch < CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double latitude, longitude;
 
 		fscanf(fp, "%lf\t%lf\n", &latitude, &longitude);

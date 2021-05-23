@@ -1,7 +1,6 @@
 #include "head.h"
 
 //알고리즘 여기서부터 이제 짜야함
-
 short selected_set[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
 short selected_ES[CHANNEL_NUM + 1];// 각 채널이 어떤 es에서 할당되었는가.
 //오리지널 버전은 트랜스코딩 안해서 배열 크기가 저렇다.
@@ -13,7 +12,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	//각 페이즈마다 함수 생성할 것. 그래야 보는 게 편하다.
 	double GHz_limit = 0;
 	for (int ES = 0; ES <= ES_NUM; ES++) {
-		remained_GHz[ES] = _server_list[ES].processing_capacity;
+		remained_GHz[ES] = 0;
 		GHz_limit += _server_list[ES].processing_capacity;
 		total_transfer_data_size[ES] = 0;
 	}
@@ -66,12 +65,12 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		list_CA_initialization.insert(make_pair(slope, ch));
 	}
 
-	set<pair<double, int>, greater<pair<double, int>>> highest_remained_utility_first; // set을 쓰면 자동 정렬이 되어 가장 남은 GHz가 많은 엣지 서버가 맨 위로 감.
-	double highest_remained_utility_first_array[ES_NUM + 1]; // set으로는 GHz 변경에 따른 update가 좀 복잡해서 따로 array도 선언해서 update를 도움.
+	set<pair<double, int>, greater<pair<double, int>>> highest_GHz_first; // set을 쓰면 자동 정렬이 되어 가장 남은 GHz가 많은 엣지 서버가 맨 위로 감.
+	double highest_GHz_first_array[ES_NUM + 1]; // set으로는 GHz 변경에 따른 update가 좀 복잡해서 따로 array도 선언해서 update를 도움.
 	//각 페이즈마다 함수 생성할 것. 그래야 보는 게 편하다.
 	for (int ES = 1; ES <= ES_NUM; ES++) {
-		highest_remained_utility_first.insert(make_pair(0, ES)); //set
-		highest_remained_utility_first_array[ES] = 0; //array
+		highest_GHz_first.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
+		highest_GHz_first_array[ES] = _server_list[ES].processing_capacity; //array
 	}
 
 	while (list_CA_initialization.size()) {
@@ -79,68 +78,93 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		list_CA_initialization.erase(list_CA_initialization.begin());//맨 앞 삭제함
 
 		int queue_cnt = 1;
-		short unavailable_ES_queue[ES_NUM+1];
-		memset(unavailable_ES_queue, 0, (sizeof(short) * (ES_NUM + 1)));
+		int confirm_cnt = 1;
+		int unavailable_ES_queue[ES_NUM+1];
+		memset(unavailable_ES_queue, 0, (sizeof(int) * (ES_NUM + 1)));
 
-		while (!highest_remained_utility_first.empty()) {
-			int es = (*highest_remained_utility_first.begin()).second;
+		while (!highest_GHz_first.empty()) {
+			int es = (*highest_GHz_first.begin()).second;
 			if (!_channel_list[ch].available_server_list[es]) {
 				unavailable_ES_queue[queue_cnt] = es;
 				queue_cnt++;
-				highest_remained_utility_first.erase(*highest_remained_utility_first.begin());
+				highest_GHz_first.erase(*highest_GHz_first.begin());
 			}
-			else {
+			confirm_cnt++;
+			if (confirm_cnt > ES_NUM){
 				break;
 			}
 		}
+
 		//커버리지 제약을 만족하는 ES를 선택하기 위함.
+		//만약 highest_remained_utility_first가 비었다면 이건 그냥 ingestion server로 가야함.
+		if (!highest_GHz_first.empty()) { // 선택된 노드가 아직 꽉 차지 않았다면
+			int ES = (*highest_GHz_first.begin()).second;
+			if (remained_GHz[ES] + _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]] <= _server_list[ES].processing_capacity) {// ingestion server
+				double slope = _channel_list[ch].sum_of_pwq[selected_set[ch]] / _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+				selected_ES[ch] = ES;
+				remained_GHz[ES] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+				
+				highest_GHz_first.erase(*highest_GHz_first.begin());
+				highest_GHz_first.insert(make_pair(_server_list[ES].processing_capacity - remained_GHz[ES], ES)); //선택된 엣지에 할당
+				highest_GHz_first_array[ES] = _server_list[ES].processing_capacity - remained_GHz[ES]; //array 갱신
 
-		int ES = (*highest_remained_utility_first.begin()).second;
-		double utility = (*highest_remained_utility_first.begin()).first;
-		if (!highest_remained_utility_first.empty() && remained_GHz[ES] >= 0) { // 선택된 노드가 아직 꽉 차지 않았다면
-			double slope = _channel_list[ch].sum_of_pwq[selected_set[ch]] / _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
-			selected_ES[ch] = ES;
-
-			highest_remained_utility_first.erase(*highest_remained_utility_first.begin());
-			highest_remained_utility_first.insert(make_pair(utility + slope, ES)); //선택된 엣지에 할당
-			highest_remained_utility_first_array[ES] = utility + slope; //array 갱신
+				total_transfer_data_size[ES] += _channel_list[ch].sum_of_transfer_data_size[selected_set[ch]];
+			}
+			else { // ingestion server
+				selected_ES[ch] = 0;
+			}
 		}
 		else { // ingestion server
 			selected_ES[ch] = 0;
 		}
-		remained_GHz[ES] -= _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
-		total_transfer_data_size[ES] += _channel_list[ch].sum_of_transfer_data_size[selected_set[ch]];
 
 		//highest_remained_utility_first에 다시 커버리지 안 맞았던 ES들 삽입.
-		for (int cnt = 1; cnt <= queue_cnt; cnt++) {
-			highest_remained_utility_first.insert(make_pair(highest_remained_utility_first_array[unavailable_ES_queue[cnt]], unavailable_ES_queue[cnt]));
+		for (int cnt = 1; cnt < queue_cnt; cnt++) {
+			highest_GHz_first.insert(make_pair(highest_GHz_first_array[unavailable_ES_queue[cnt]], unavailable_ES_queue[cnt]));
 		}
-
 	}
 
 	// 2-2. CA-migration phase
 	double total_cost = 0;
+	for (int ES = 1; ES <= ES_NUM; ES++) {
+		if (remained_GHz[ES] > 0) {
+			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
+		}
+	}
+	//remained_GHz 확인해보기
+
 	set<pair<double, int>, greater<pair<double, int>> > list_CA_migration;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		if (selected_ES[ch] != 0) {
 			double slope = _channel_list[ch].sum_of_pwq[selected_set[ch]] / calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
 			list_CA_migration.insert(make_pair(slope, ch));
-			total_cost += calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]]/1024);
 		}
 	}
+	cout << total_cost << endl;
 
-	while (list_CA_migration.size() && total_cost > cost_limit) {
+	while (total_cost > cost_limit) {
+		if (!list_CA_migration.size()) {
+			cout << "마이그레이션 더 이상 못해";
+			break;
+		}
+
 		int ch = (*list_CA_migration.begin()).second; // slope가 가장 큰 것은 어떤 채널인가?
 		list_CA_migration.erase(list_CA_migration.begin());//맨 앞 삭제함
 
-		total_cost -= calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
 
-		remained_GHz[selected_ES[ch]] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+		double prev_cost =  calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
 		total_transfer_data_size[selected_ES[ch]] -= _channel_list[ch].sum_of_transfer_data_size[selected_set[ch]];
-		selected_ES[ch] = 0;
+		double curr_cost = calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
+		
 
-		total_cost += calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
+		selected_ES[ch] = 0;
+		remained_GHz[selected_ES[ch]] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+		remained_GHz[0] -= _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+		
+		total_cost -= (prev_cost - curr_cost);
 	}
+
+	cout << total_cost << endl;
 
 	//finalization은 알고리즘 상에서 temp값 -> 진짜 값 확정하는 과정이라 여기선 필요 x
 	//but 아래는 각 노드 마다 할당된 채널들을 정리하려고 하는 과정.

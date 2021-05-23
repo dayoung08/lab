@@ -19,7 +19,8 @@ using namespace std;
 //#define NUM_OF_CLIENT	816
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
-#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
+//#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER로 하니 너무 적은데 ^^;;;
+#define ES_NUM 500
 
 #define AWS_NUM 2
 #define MS_AZURE_NUM 3
@@ -154,4 +155,4 @@ void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version
 void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
 void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
 void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void method_PA_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
