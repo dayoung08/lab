@@ -19,13 +19,14 @@ using namespace std;
 //#define NUM_OF_CLIENT	816
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
-//#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER로 하니 너무 적은데 ^^;;;
-#define ES_NUM 500
+//#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
+#define ES_NUM 1000
 
 #define AWS_NUM 2
 #define MS_AZURE_NUM 3
 #define ES_TYPE_NUM (AWS_NUM+MS_AZURE_NUM)
-#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
+//#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
+#define CHANNEL_NUM 6000
 
 //#define VERSION_NUM 7
 //#define VERSION_SET_NUM 32 // 오리지널 버전 제외하고, 마지막 버전은 반드시 저장. 2^(7-2) set 1이 오리지널과 마지막 버전만 들어있는 것.
@@ -59,8 +60,8 @@ using namespace std;
 #define RR_AP 2
 #define RA_HPF 3
 #define RA_AP 4
-#define PA_HPF 5
-#define PA_AP 6
+#define CA_HPF 5
+#define CA_AP 6
 
 struct location {
 	double latitude;

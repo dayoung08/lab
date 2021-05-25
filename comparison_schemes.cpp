@@ -39,10 +39,10 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 	else if (method_index == RA_HPF) {
 		method_RD_HPF(_server_list, _channel_list, _version_set, cost_limit);
 	}
-	else if (method_index == PA_AP) {
+	else if (method_index == CA_AP) {
 		method_CA_AP(_server_list, _channel_list, _version_set, cost_limit);
 	}
-	else if (method_index == PA_HPF) {
+	else if (method_index == CA_HPF) {
 		method_CA_HPF(_server_list, _channel_list, _version_set, cost_limit);
 	}
 
@@ -70,10 +70,10 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	else if (method_index == RA_HPF) {
 		printf("<<RA_HPF>>\n");
 	}
-	else if (method_index == PA_AP) {
+	else if (method_index == CA_AP) {
 		printf("<<PA_AP>>\n");
 	}
-	else if (method_index == PA_HPF) {
+	else if (method_index == CA_HPF) {
 		printf("<<PA_HPF>>\n");
 	}
 	double pwq_sum = 0;

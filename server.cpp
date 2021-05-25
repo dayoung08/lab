@@ -22,7 +22,7 @@ void server_initalization(server* _server_list) {
 	//0번은 ingression server
 	//Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
 	//위의 것이 10대 있다고 가정하자.
-	double edge_server_max_GHz[ES_TYPE_NUM + 1] = { 18144, 28.8, 108.8,  52.8, 44, 20.8}; // 소숫점 내림 총 합 3517
+	double edge_server_max_GHz[ES_TYPE_NUM + 1] = { 1814.4, 28.8, 108.8, 52.8, 44, 20.8}; // 소숫점 내림 총 합 3517
 	//1. Snowball Edge Storage Optimized(EC2 컴퓨팅 기능 포함) - Intel Xeon D 프로세서, 16코어, 1.8Ghz
 	//2. Snowball Edge Compute Optimized - AMD Naples, 32코어, 3.4Ghz
 	//3. Azure Stack Edge Pro - 2 X Intel Xeon 실버 4214 CPU, 2.20 GHz, 24 개 물리적 코어(CPU 당 12 개)
@@ -95,7 +95,7 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	srand((unsigned)time(NULL));
 	_server_list[0].coverage = INF; // ingestion server.
 	for (int ES = 1; ES <= ES_NUM; ES++) {
-		_server_list[ES].coverage = rand() % 450 + (750 - 450);
+		_server_list[ES].coverage = rand() % 301 + 450;
 	}
 
 	// assign

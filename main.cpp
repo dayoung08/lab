@@ -4,7 +4,7 @@ int main() {
 
 	//모든 버전을 트랜스코딩하고 전송할 경우의 가격이 어떻게 되려나 ^_^;;;
 	//우선 가격 제한이 전혀 없을 경우로 해서 돌려보자.
-	int cost_limit = 200000; // INF;
+	int cost_limit = INF; // INF;
 	int pop_type = MVP;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
@@ -31,8 +31,8 @@ int main() {
 	comparison_schemes(RR_HPF, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(RA_AP, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(RA_HPF, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(PA_AP, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(PA_HPF, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(CA_AP, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(CA_HPF, server_list, channel_list, &version_set, cost_limit);
 
 	printf("===== FINISH =====\n");
 }
