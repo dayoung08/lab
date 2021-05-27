@@ -65,15 +65,16 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// server read
 	fopen_s(&fp, "servercoord.txt", "r");
 
-	for (int ES = 1; ES <= ES_NUM/(ES_NUM/125); ES++) {
+	for (int ES = 1; ES <= 125; ES++) {
 		double latitude, longitude;
 
 		fscanf(fp, "%lf\t%lf\n", &latitude, &longitude);
-		_server_list[ES].server_location.latitude = latitude;
-		_server_list[ES].server_location.longitude = longitude;
 		
-		_server_list[ES * (ES_NUM / 125)].server_location.latitude = latitude;
-		_server_list[ES * (ES_NUM / 125)].server_location.longitude = longitude;
+		for (int cnt = 0; cnt < (ES_NUM / 125); cnt++) {
+			_server_list[ES + 125 * cnt].server_location.latitude = latitude;
+			_server_list[ES + 125 * cnt].server_location.longitude = longitude;
+			//cout << ES + 125 * cnt << endl;
+		}
 	}
 	fclose(fp);
 

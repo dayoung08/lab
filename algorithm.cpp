@@ -89,6 +89,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		highest_GHz_first_array[ES] = _server_list[ES].processing_capacity; //array
 	}
 
+	int alloc_num = 0;
 	while (list_CA_initialization.size()) {
 		int ch = (*list_CA_initialization.begin()).second; // slope가 가장 큰 것은 어떤 채널인가?
 		list_CA_initialization.erase(list_CA_initialization.begin());//맨 앞 삭제함
@@ -97,6 +98,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		int confirm_cnt = 1;
 		short unavailable_ES_queue[ES_NUM+1];
 		memset(unavailable_ES_queue, 0, (sizeof(short) * (ES_NUM + 1)));
+
+		alloc_num++;
 
 		while (!highest_GHz_first.empty()) {
 			int es = (*highest_GHz_first.begin()).second;
@@ -131,11 +134,21 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			else { // ingestion server
 				selected_ES[ch] = 0;
 				ES_count[0]++;
+				remained_GHz[0] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+
+				if (remained_GHz[0] >= _server_list[0].processing_capacity) {
+					//printf("문제 발생함, 할당한 채널 개수 %d\n", alloc_num);
+				}
 			}
 		}
 		else { // ingestion server
 			selected_ES[ch] = 0;
 			ES_count[0]++;
+			remained_GHz[0] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+
+			if (remained_GHz[0] >= _server_list[0].processing_capacity) {
+				//printf("문제 발생함, 할당한 채널 개수 %d\n", alloc_num);
+			}
 		}
 
 		//highest_remained_utility_first에 다시 커버리지 안 맞았던 ES들 삽입.
@@ -162,8 +175,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 	}
 
-	while (total_cost > cost_limit) {
-		if (!list_CA_migration.size()) {
+	while (list_CA_migration.size()) {
+		if (total_cost < cost_limit) {
 			break;
 		}
 
@@ -178,13 +191,20 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 		ES_count[selected_ES[ch]]--;
 		ES_count[0]++;
+
+		remained_GHz[0] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+		if (!ES_count[selected_ES[ch]]) {
+			remained_GHz[selected_ES[ch]] = 0;
+			total_cost -= prev_cost;
+		}
+		else {
+			remained_GHz[selected_ES[ch]] -= _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+			total_cost -= (prev_cost - curr_cost);
+		}
 		selected_ES[ch] = 0;
 
-		remained_GHz[selected_ES[ch]] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
-		remained_GHz[0] -= _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
-		
-		total_cost -= (prev_cost - curr_cost);
 	}
+	printf("%lf\n", total_cost);
 
 	//finalization은 알고리즘 상에서 temp값 -> 진짜 값 확정하는 과정이라 여기선 필요 x
 	//but 아래는 각 노드 마다 할당된 채널들을 정리하려고 하는 과정.

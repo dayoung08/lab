@@ -13,7 +13,7 @@ using namespace std;
 #define SEED 1234
 #define INF 987654321
 
-#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
+#define PERIOD 31 // 한 달에 한 번 돈 낸다고 가정하자
 
 //아래는 교수님이 주신 파일 기반. 코드 보니까 클라이언트 수 x 유저 수를 채널로 해도 될 것 같다. 필요 시 coord.c 파일 수정해서 파일들 다시 뽑으면 될 듯.
 //#define NUM_OF_CLIENT	816
