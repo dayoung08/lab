@@ -174,8 +174,11 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	// 2-2. CA-migration phase
 	double total_GHz_2 = 0;
 	double total_cost = 0;
+	int all_cnt = 0;
+
 	for (int ES = 1; ES <= ES_NUM; ES++) {
 		if (ES_count[ES] > 0) {
+			all_cnt += ES_count[ES];
 			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
 			total_GHz_2 += remained_GHz[ES];
 		}
