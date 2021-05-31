@@ -34,11 +34,21 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	//나중에 각 페이즈마다 함수 생성할 것. 그래야 보는 게 편하다.
 	//1. VSD phase
 	double total_GHz = 0;
+	//각 ES의 커버리지를 확인하고 전체 채널 중 각 몇개의 채널에서 할당이 가능한지 퍼센테이지를 구하고, 그 걸 processing capacity에 곱해보자.
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
-		//selected_ES[ch] = 0;
+		int alloc_ch_cnt = 0;
+		for (int ES = 1; ES <= ES_NUM; ES++) {
+			if (_channel_list[ch].available_server_list[ES]) {
+				alloc_ch_cnt++;
+			}
+		}
+
+		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num] * (((double)alloc_ch_cnt) / CHANNEL_NUM);
 		selected_set[ch] = _version_set->version_set_num;
-		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
+
 	}
+	//여기까지 210530 수정. coverage를 따져서 processing capacity를 노멀라이즈 했음.
+
 	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_VSD;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		for (int set = 1; set <= _version_set->version_set_num - 1; set++) { //소스는 전부 1080p
@@ -96,7 +106,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 		int queue_cnt = 1;
 		int confirm_cnt = 1;
-		short unavailable_ES_queue[ES_NUM+1];
+		short unavailable_ES_queue[ES_NUM + 1];
 		memset(unavailable_ES_queue, 0, (sizeof(short) * (ES_NUM + 1)));
 
 		alloc_num++;
@@ -109,7 +119,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 				highest_GHz_first.erase(*highest_GHz_first.begin());
 			}
 			confirm_cnt++;
-			if (confirm_cnt > ES_NUM){
+			if (confirm_cnt > ES_NUM) {
 				break;
 			}
 		}
@@ -122,7 +132,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 				double slope = _channel_list[ch].sum_of_pwq[selected_set[ch]] / _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
 				selected_ES[ch] = ES;
 				remained_GHz[ES] += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
-				
+
 				highest_GHz_first.erase(*highest_GHz_first.begin());
 				highest_GHz_first.insert(make_pair(_server_list[ES].processing_capacity - remained_GHz[ES], ES)); //선택된 엣지에 할당
 				highest_GHz_first_array[ES] = _server_list[ES].processing_capacity - remained_GHz[ES]; //array 갱신
@@ -184,10 +194,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		list_CA_migration.erase(list_CA_migration.begin());//맨 앞 삭제함
 
 
-		double prev_cost =  calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
+		double prev_cost = calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
 		total_transfer_data_size[selected_ES[ch]] -= _channel_list[ch].sum_of_transfer_data_size[selected_set[ch]];
 		double curr_cost = calculate_ES_cost(&(_server_list[selected_ES[ch]]), total_transfer_data_size[selected_ES[ch]] / 1024);
-		
+
 
 		ES_count[selected_ES[ch]]--;
 		ES_count[0]++;
@@ -240,7 +250,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	double sum_cost_final = 0;
 	double sum_GHz_final = 0;
 	for (int ES = 0; ES <= ES_NUM; ES++) {
-		if(ES > 0 && ES_count[ES] > 0)
+		if (ES > 0 && ES_count[ES] > 0)
 			sum_cost_final += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
 		sum_GHz_final += used_GHz[ES];
 	}
