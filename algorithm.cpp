@@ -13,8 +13,7 @@ short ES_count[ES_NUM + 1];
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
 	memset(ES_count, 0, (sizeof(short) * (ES_NUM + 1)));
 	double first_GHz_temp = 0; //lowest version만 트랜스코딩할때
-
-	int alloc_ch_cnt = 0;
+	
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		first_GHz_temp += _channel_list[ch].sum_of_version_set_GHz[1];
 	}
@@ -24,19 +23,18 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 
 	//각 ES의 커버리지를 확인하고 전체 채널 중 각 몇개의 채널에서 할당이 가능한지 퍼센테이지를 구하고, 그 걸 processing capacity에 곱해보자.
-	double GHz_limit = 0;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	double GHz_limit = _server_list[0].processing_capacity;
+	for (int ES = 1; ES <= ES_NUM; ES++) {
 		int alloc_ch_cnt = 0;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 			if (_channel_list[ch].available_server_list[ES]) {
 				alloc_ch_cnt++;
 			}
 		}
 
-		GHz_limit += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num] * (((double)alloc_ch_cnt) / CHANNEL_NUM);
-		selected_set[ch] = _version_set->version_set_num;
-
+		GHz_limit += _server_list[ES].processing_capacity * (((double)alloc_ch_cnt) / CHANNEL_NUM);
 	}
+
 	//여기까지 210530 수정. coverage를 따져서 processing capacity를 노멀라이즈 했음.
 
 	if (GHz_limit < first_GHz_temp) {
