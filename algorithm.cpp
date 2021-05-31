@@ -13,16 +13,31 @@ short ES_count[ES_NUM + 1];
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
 	memset(ES_count, 0, (sizeof(short) * (ES_NUM + 1)));
 	double first_GHz_temp = 0; //lowest version만 트랜스코딩할때
+
+	int alloc_ch_cnt = 0;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		first_GHz_temp += _channel_list[ch].sum_of_version_set_GHz[1];
 	}
-
-	double GHz_limit = 0;
 	for (int ES = 0; ES <= ES_NUM; ES++) {
 		remained_GHz[ES] = 0;
-		GHz_limit += _server_list[ES].processing_capacity;
 		total_transfer_data_size[ES] = 0;
 	}
+
+	//각 ES의 커버리지를 확인하고 전체 채널 중 각 몇개의 채널에서 할당이 가능한지 퍼센테이지를 구하고, 그 걸 processing capacity에 곱해보자.
+	double GHz_limit = 0;
+	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+		int alloc_ch_cnt = 0;
+		for (int ES = 1; ES <= ES_NUM; ES++) {
+			if (_channel_list[ch].available_server_list[ES]) {
+				alloc_ch_cnt++;
+			}
+		}
+
+		GHz_limit += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num] * (((double)alloc_ch_cnt) / CHANNEL_NUM);
+		selected_set[ch] = _version_set->version_set_num;
+
+	}
+	//여기까지 210530 수정. coverage를 따져서 processing capacity를 노멀라이즈 했음.
 
 	if (GHz_limit < first_GHz_temp) {
 		printf("GHz가 모자란 상황/Channel 수를 줄이거나, 엣지 수를 늘릴 것\n");
@@ -34,21 +49,11 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	//나중에 각 페이즈마다 함수 생성할 것. 그래야 보는 게 편하다.
 	//1. VSD phase
 	double total_GHz = 0;
-	//각 ES의 커버리지를 확인하고 전체 채널 중 각 몇개의 채널에서 할당이 가능한지 퍼센테이지를 구하고, 그 걸 processing capacity에 곱해보자.
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
-		int alloc_ch_cnt = 0;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
-			if (_channel_list[ch].available_server_list[ES]) {
-				alloc_ch_cnt++;
-			}
-		}
-
-		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num] * (((double)alloc_ch_cnt) / CHANNEL_NUM);
+		//selected_ES[ch] = 0;
 		selected_set[ch] = _version_set->version_set_num;
-
+		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
 	}
-	//여기까지 210530 수정. coverage를 따져서 processing capacity를 노멀라이즈 했음.
-
 	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_VSD;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		for (int set = 1; set <= _version_set->version_set_num - 1; set++) { //소스는 전부 1080p
@@ -169,10 +174,12 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 
 	// 2-2. CA-migration phase
+	double total_GHz_2 = 0;
 	double total_cost = 0;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
 		if (ES_count[ES] > 0) {
 			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
+			total_GHz_2 += remained_GHz[ES];
 		}
 	}
 	//remained_GHz 확인해보기
