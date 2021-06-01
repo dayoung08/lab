@@ -12,7 +12,7 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 		_channel_list[ch].sum_of_video_quality = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_pwq = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_version_set_GHz = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
-		_channel_list[ch].sum_of_transfer_data_size = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
+		//_channel_list[ch].sum_of_transfer_data_size = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 
 		_channel_list[ch].version_pop_type = _version_pop_type;
 		double* ver_pop = set_version_pop(_version_set, _channel_list[ch].version_pop_type);
@@ -26,7 +26,7 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].sum_of_video_quality[set] = 0;
 			_channel_list[ch].sum_of_pwq[set] = 0;
 			_channel_list[ch].sum_of_version_set_GHz[set] = 0;
-			_channel_list[ch].sum_of_transfer_data_size[set] = 0;
+			//_channel_list[ch].sum_of_transfer_data_size[set] = 0;
 		}
 		//위 까지 인기도 계산
 		set_VMAF(&(_channel_list[ch]), _version_set); // 비디오 퀄리티 값 계산
@@ -309,8 +309,8 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 
 		_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[1]; //기본적으로 가장 낮은 버전은 반드시 트랜스코딩 하므로
 
-		_channel->sum_of_transfer_data_size[set] += _version_set->data_size[1]; //가장 낮은버전은 무조건 들어감
-		_channel->sum_of_transfer_data_size[set] += _version_set->data_size[_version_set->version_num]; //원본
+		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[1]; //가장 낮은버전은 무조건 들어감
+		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[_version_set->version_num]; //원본
 
 		int prev_ver = 1; // set에 해당 버전이 없으면 그 아래 있는 버전을 스트리밍하므로
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -321,7 +321,7 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 				_channel->sum_of_video_quality[set] += _channel->video_quality[ver];
 				_channel->sum_of_pwq[set] += _channel->popularity[ver] * _channel->video_quality[ver];
 				_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[ver];
-				_channel->sum_of_transfer_data_size[set] += _version_set->data_size[ver];
+				//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[ver];
 
 				prev_ver = ver;
 			}

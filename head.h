@@ -95,10 +95,10 @@ public:
 	double* popularity;//[VERSION_NUM + 1]; // [0] 여기는 전체 채널의 pop, 즉 전체 버전 version의 pop 합.
 	double* video_GHz;//[VERSION_NUM + 1];
 	double* pwq;//[VERSION_NUM + 1]; // weighted video quality라고 쓰여있음. 하도 평소에 video pwq이라 불러서 코딩때도 이렇게 함.
-
+	
 	double* sum_of_video_quality;//[VERSION_SET_NUM + 1];
 	double* sum_of_pwq;//[VERSION_SET_NUM + 1];
-	double* sum_of_transfer_data_size;//[VERSION_SET_NUM + 1];
+	//double* sum_of_transfer_data_size;//[VERSION_SET_NUM + 1];
 	//이 set 지우지 말것. pwq 합 계산할때 이걸로 돌리는게 제일 편하다.
 	double* sum_of_version_set_GHz;
 
@@ -147,6 +147,7 @@ double rad2deg(double rad);
 
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void recalculate_set(bitrate_version_set* _version_set);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
