@@ -31,9 +31,9 @@ void server_initalization(server* _server_list) {
 
 	for (int ES = 0; ES <= ES_NUM; ES++) {
 		_server_list[ES].index = ES;
-		_server_list[ES].total_cost = 0;
+		/*_server_list[ES].total_cost = 0;
 		_server_list[ES].total_GHz = 0;
-		_server_list[ES].total_transfer_data_size = 0;
+		_server_list[ES].total_transfer_data_size = 0;*/
 
 		int type = 0;
 		if (ES > 0) {

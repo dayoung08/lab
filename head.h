@@ -79,9 +79,9 @@ public:
 	double cost_coefficient_for_data_size;
 
 	//아래는 채널 할당으로 인해 갱신되는 값.
-	int total_GHz;
+	/*int total_GHz;
 	double total_transfer_data_size;
-	double total_cost;
+	double total_cost;*/
 };
 
 class channel {
