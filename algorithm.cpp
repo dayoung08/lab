@@ -8,7 +8,6 @@ short selected_set[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
 short** selected_ES;
 
 double used_GHz[ES_NUM + 1];
-double remained_GHz[ES_NUM + 1]; // processing capacity[es] - used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
 double total_transfer_data_size[ES_NUM + 1];//실시간으로 전송하는 데이터 사이즈의 합 계산을 위해
 
 short ES_count[ES_NUM + 1];
@@ -97,77 +96,60 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	std::printf("=VSD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
 
 	// 2-1. CA-initialization phase
-	//set<pair<double, int>, greater<pair<double, int>>> highest_GHz_first; // set을 쓰면 자동 정렬이 되어 가장 남은 GHz가 많은 엣지 서버가 맨 위로 감.
 	set<pair<double, int>> highest_GHz_first;
-	//pair<double, int> highest_GHz_first_array[ES_NUM + 1]; // set으로는 GHz 변경에 따른 update가 좀 복잡해서 따로 array도 선언해서 update를 도움.
-	//double highest_GHz_first_array[ES_NUM + 1]; // set으로는 GHz 변경에 따른 update가 좀 복잡해서 따로 array도 선언해서 update를 도움.
-
-	//highest_GHz_first_array[0] = make_pair(0, 0);
-	//highest_GHz_first_array[0] = 0;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
 		highest_GHz_first.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
-		//highest_GHz_first_array[ES] = make_pair(_server_list[ES].processing_capacity, ES); //array
-		//highest_GHz_first_array[ES] = _server_list[ES].processing_capacity;
 	}
 
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
-		//int queue_cnt = ES_NUM + 1;
 		set <pair<double, int>>::iterator pos = highest_GHz_first.end();
 
 		int ES = -1;
 		double GHz = 0;
 
 		bool is_allocated_ingestion_server = false;
-		do {
-			//queue_cnt--;
+		while (true) {
 			pos--;
-
-			//ES = highest_GHz_first_array[queue_cnt].second; // 가장 남은 GHz가 많은 백엔드는 무엇인가?
-			//GHz = highest_GHz_first_array[queue_cnt].first; // 그 백엔드의 GHz는 얼마인가?
-			ES = (*pos).second; // 가장 남은 GHz가 많은 백엔드는 무엇인가?
-			GHz = (*pos).first; // 그 백엔드의 GHz는 얼마인가?
-
 			if (pos == highest_GHz_first.begin()) {
 				is_allocated_ingestion_server = true;
 				break;
 			}
-		} while ((!_channel_list[ch].available_server_list[ES]) &&
-			(GHz - _channel_list[ch].video_GHz[1] >= 0));
+
+			ES = (*pos).second; // 가장 남은 GHz가 많은 엣지는 무엇인가?
+			GHz = (*pos).first; // 그 엣지의 GHz는 얼마인가?
+
+			if ((_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[1] >= 0)) {
+				break;
+			}
+		}
 
 		if (!is_allocated_ingestion_server) {
 			selected_ES[ch][1] = ES;
 			ES_count[ES]++;
 
 			used_GHz[ES] += _channel_list[ch].video_GHz[1];
-			remained_GHz[ES] -= _channel_list[ch].video_GHz[1];
 			total_transfer_data_size[ES] += _version_set->data_size[1];
 
 			highest_GHz_first.erase(pos);
 			highest_GHz_first.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
-			//highest_GHz_first_array[queue_cnt] = make_pair(GHz - _channel_list[ch].video_GHz[1], ES);
-			//sort(highest_GHz_first_array, highest_GHz_first_array + (ES_NUM + 1));
 		}
 		else {
-			selected_ES[ch][1] = 0;
-			ES_count[0]++;
-
-			used_GHz[0] += _channel_list[ch].video_GHz[1];
-			remained_GHz[0] -= _channel_list[ch].video_GHz[1];
-			total_transfer_data_size[0] += _version_set->data_size[1];
-			/*if (used_GHz[0] >= _server_list[0].processing_capacity) {
-				//printf("문제 발생함, 할당한 채널 개수 %d\n", alloc_num);
-			}*/
+			if (used_GHz[0] + _channel_list[ch].video_GHz[1] <= _server_list[0].processing_capacity) {
+				selected_ES[ch][1] = 0;
+				ES_count[0]++;
+				used_GHz[0] += _channel_list[ch].video_GHz[1];
+				total_transfer_data_size[0] += _version_set->data_size[1];
+			}
 		}
 	}
 
-	set<pair<long float, pair<int, int>>, greater<pair<long float, pair<int, int>>> > list_CA_initialization;
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_CA_initialization;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		int set = selected_set[ch];
-		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
+		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
-				float slope = (_channel_list[ch].pwq[ver] / (_channel_list[ch].video_GHz[ver]));
+				double slope = (_channel_list[ch].pwq[ver] / (_channel_list[ch].video_GHz[ver]));
 				list_CA_initialization.insert(make_pair(slope, make_pair(ch, ver)));
-				//cnt++;
 			}
 		}
 	}
@@ -176,47 +158,43 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		int ver = (*list_CA_initialization.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 		list_CA_initialization.erase(list_CA_initialization.begin());//맨 앞 삭제함
 
-		//int queue_cnt = ES_NUM + 1;
 		set <pair<double, int>>::iterator pos = highest_GHz_first.end();
 		int ES = -1;
 		double GHz = 0;
 		bool is_allocated_ingestion_server = false;
 
-		do {
-			//queue_cnt--;
+		while (true){
 			pos--;
-
-			ES = (*pos).second; // 가장 남은 GHz가 많은 백엔드는 무엇인가?
-			GHz = (*pos).first; // 그 백엔드의 GHz는 얼마인가?
-
 			if (pos == highest_GHz_first.begin()) {
 				is_allocated_ingestion_server = true;
 				break;
 			}
-		} while ((!_channel_list[ch].available_server_list[ES]) &&
-			(GHz - _channel_list[ch].video_GHz[ver] >= 0));
 
-		//얍
+			ES = (*pos).second; // 가장 남은 GHz가 많은 엣지는 무엇인가?
+			GHz = (*pos).first; // 그 엣지의 GHz는 얼마인가?
+
+			if ((_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[ver] >= 0)) {
+				break;
+			}
+		}
+
 		if (!is_allocated_ingestion_server) {
 			selected_ES[ch][ver] = ES;
 			ES_count[ES]++;
 
 			used_GHz[ES] += _channel_list[ch].video_GHz[ver];
-			remained_GHz[ES] -= _channel_list[ch].video_GHz[ver];
 			total_transfer_data_size[ES] += _version_set->data_size[ver];
 
 			highest_GHz_first.erase(pos);
-			highest_GHz_first.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], 0));
-			//highest_GHz_first_array[queue_cnt] = make_pair(GHz - _channel_list[ch].video_GHz[ver], ES);
-			//sort(highest_GHz_first_array, highest_GHz_first_array + (ES_NUM + 1));
+			highest_GHz_first.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
 		}
 		else {
-			selected_ES[ch][ver] = 0;
-			ES_count[0]++;
-
-			used_GHz[0] += _channel_list[ch].video_GHz[ver];
-			remained_GHz[0] -= _channel_list[ch].video_GHz[ver];
-			total_transfer_data_size[0] += _version_set->data_size[ver];
+			if (used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
+				selected_ES[ch][ver] = 0;
+				ES_count[0]++;
+				used_GHz[0] += _channel_list[ch].video_GHz[ver];
+				total_transfer_data_size[0] += _version_set->data_size[ver];
+			}
 		}
 	}
 
@@ -230,6 +208,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
 	}
 	double total_cost = 0;
+	double remained_GHz[ES_NUM + 1]; // processing capacity[es] - used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
 	for (int ES = 0; ES <= ES_NUM; ES++) {
 		if (ES_count[ES] > 0) {
 			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
@@ -242,7 +221,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	// 2-2. CA-migration phase
 	// 아님. 완전 엎어야함. 
 	// migration이 아니고 할당된 version 중에서 빼야함.
-	set<pair<long float, pair<int, int>>, less<pair<long float, pair<int, int>>> > list_CA_exception;
+	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_CA_exception;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double cost = 0;
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {

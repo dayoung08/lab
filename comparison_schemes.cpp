@@ -5,14 +5,14 @@
 short selected_set_in_comparison_schemes[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
 short** selected_ES_in_comparison_schemes;//[CHANNEL_NUM + 1][VERSION_NUM]; // 각 채널에서 사용하는 비트레이트 set에 속하는 각 버전이 어떤 es에서 선택되었는가.
 //오리지널 버전은 트랜스코딩 안해서 배열 크기가 저렇다.
-double remained_GHz_in_comparison_schemes[ES_NUM + 1];
+double used_GHz_in_comparison_schemes[ES_NUM + 1];
 double total_transfer_data_size_in_comparison_schemes[ES_NUM + 1];//실시간으로 전송하는 데이터 사이즈의 합 계산을 위해
 short ES_count_in_comparison_schemes[ES_NUM + 1];
 
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
 	selected_ES_in_comparison_schemes = (short**)malloc(sizeof(short*) * (CHANNEL_NUM + 1));
 	for (int ES = 0; ES <= ES_NUM; ES++) {
-		remained_GHz_in_comparison_schemes[ES] = _server_list[ES].processing_capacity;
+		used_GHz_in_comparison_schemes[ES] = 0;
 		total_transfer_data_size_in_comparison_schemes[ES] = 0;
 	}
 
@@ -20,10 +20,6 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 		selected_ES_in_comparison_schemes[ch] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // 오리지널 버전은 트랜스코딩 안하니까
 		for (int ver = 1; ver < _version_set->version_num; ver++) {  // 오리지널 버전은 트랜스코딩 안하니까
 			selected_ES_in_comparison_schemes[ch][ver] = 0;
-		}
-		selected_set_in_comparison_schemes[ch] = 0;
-		for (int version = 2; version <= _version_set->version_num - 1; version++) {
-			selected_ES_in_comparison_schemes[ch][version] = 0;
 		}
 	}
 
@@ -95,12 +91,130 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 
 void method_RR_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
 	//처음에 version 1번 먼저 다 할당하고,
-	//GHz, cost 제한에 맞을때 까지, 인기 높은 채널은 모든 set을 트랜스코딩.
+	//GHz, cost 제한에 맞을 때까지, 인기 높은 채널은 모든 set을 트랜스코딩.
 
+	int ES = 1;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		//먼저 모든 채널을 set 1로 설정한다.
+		bool is_allocated = false;
+		int cnt = 1;
+		while (!is_allocated) {
+			double GHz = _server_list[ES].processing_capacity - used_GHz_in_comparison_schemes[ES];
+			double total_cost = 0;
+			for (int es = 1; es <= ES_NUM; es++) {
+				if (ES_count_in_comparison_schemes[es]) {
+					if(es == ES)
+						total_cost += calculate_ES_cost(&(_server_list[es]), (total_transfer_data_size_in_comparison_schemes[es] + _version_set->data_size[1]) / 1024);
+					else
+						total_cost += calculate_ES_cost(&(_server_list[es]), total_transfer_data_size_in_comparison_schemes[es] / 1024);
+				}
+			}
 
+			if ((!_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[1] >= 0) && total_cost <= cost_limit) {
+				used_GHz_in_comparison_schemes[ES] += _channel_list[ch].video_GHz[1];
+				total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[1];
+				
+				selected_ES_in_comparison_schemes[ch][1] = ES;
+				ES_count_in_comparison_schemes[ES]++;
+				
+				is_allocated = true;
+			}
+			else {
+				if (cnt == ES_NUM) {
+					//모든 엣지에 할당이 불가능한 상태임
+					used_GHz_in_comparison_schemes[0] += _channel_list[ch].video_GHz[1];
+					total_transfer_data_size_in_comparison_schemes[0] += _version_set->data_size[1];
+
+					selected_ES_in_comparison_schemes[ch][1] = 0;
+					ES_count_in_comparison_schemes[0]++;
+
+					break;
+				}
+				else {
+					if (ES == ES_NUM) {
+						ES = 1;
+					}
+					else {
+						ES++;
+					}
+					cnt++;
+				}
+			}
+			selected_set_in_comparison_schemes[ES] = 1;
 		}
+	}
+
+	set<pair<double, int>, greater<pair<double, int>> > channal_popularity;
+	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+		channal_popularity.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
+	}
+
+	while (!channal_popularity.empty()) {
+		//먼저 모든 채널을 set 1로 설정한다.
+		int ch = (*channal_popularity.begin()).second;
+		channal_popularity.erase(channal_popularity.begin());
+		//int set = _version_set->version_set_num;
+
+		for (int ver = 2; ver <= _version_set->version_num-1; ver++) {
+			bool is_allocated = false;
+			int cnt = 1;
+
+			//여기서부터 set에 속하는 것들을 1번 버전 빼고 2~N번버전까지 할당하자
+			while (!is_allocated) {
+				double GHz = _server_list[ES].processing_capacity - used_GHz_in_comparison_schemes[ES];
+				double total_cost = 0;
+				for (int es = 1; es <= ES_NUM; es++) {
+					if (ES_count_in_comparison_schemes[es]) {
+						if (es == ES)
+							total_cost += calculate_ES_cost(&(_server_list[es]), (total_transfer_data_size_in_comparison_schemes[es] + _version_set->data_size[ver]) / 1024);
+						else
+							total_cost += calculate_ES_cost(&(_server_list[es]), total_transfer_data_size_in_comparison_schemes[es] / 1024);
+					}
+				}
+
+				if ((!_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[ver] >= 0) && total_cost <= cost_limit) {
+					used_GHz_in_comparison_schemes[ES] += _channel_list[ch].video_GHz[ver];
+					total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[ver];
+					
+					selected_ES_in_comparison_schemes[ch][ver] = ES;
+					ES_count_in_comparison_schemes[ES]++;
+					is_allocated = true;
+				}
+				else {
+					if (cnt == ES_NUM) {
+						//모든 엣지에 할당이 불가능한 상태임
+						used_GHz_in_comparison_schemes[0] += _channel_list[ch].video_GHz[ver];
+						total_transfer_data_size_in_comparison_schemes[0] += _version_set->data_size[ver];
+
+						selected_ES_in_comparison_schemes[ch][ver] = 0;
+						ES_count_in_comparison_schemes[0]++;
+
+						for (int v = (ver - 1); v >= 2; v--) {
+							used_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] -= _channel_list[ch].video_GHz[v];
+							total_transfer_data_size_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] -= _version_set->data_size[v];
+							
+							selected_ES_in_comparison_schemes[ch][v] = 0;
+
+							used_GHz_in_comparison_schemes[0] += _channel_list[ch].video_GHz[v];
+							total_transfer_data_size_in_comparison_schemes[0] += _version_set->data_size[v];
+							ES_count_in_comparison_schemes[0]++;
+						}
+						//이미 할당된, 해당 채널의 다른 버전들의 할당을 전부 해제함.
+						break;
+					}
+					else {
+						if (ES == ES_NUM) {
+							ES = 1;
+						}
+						else {
+							ES++;
+						}
+						cnt++;
+					}
+				}
+			}
+		}
+		selected_set_in_comparison_schemes[ES] = _version_set->version_set_num;
 	}
 }
 //여기까지 수정
@@ -128,7 +242,7 @@ void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version
 				confirm_cnt++;
 			} while (!_channel_list[ch].available_server_list[ES]);
 
-			if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
+			if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
 				if (!is_full[ES]) {
 					is_full[ES] = true;
 				}
@@ -142,7 +256,7 @@ void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version
 					break;
 				}
 			}
-		} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+		} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 		if (flag) {
 			double total_cost = 0;
@@ -165,7 +279,7 @@ void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version
 			}
 
 			total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[1]; //kbps니까 GB 단위 변환이 필요하네...
-			remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 라운드 로빈 형태로 할당함.
+			used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 라운드 로빈 형태로 할당함.
 			selected_ES_in_comparison_schemes[ch][1] = ES;
 			ES_count_in_comparison_schemes[ES]++;
 		}
@@ -207,7 +321,7 @@ void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version
 					confirm_cnt++;
 				} while (!_channel_list[ch].available_server_list[ES]);
 
-				if ((remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver]) < 0) {
+				if ((used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver]) < 0) {
 					if (!is_full[ES]) {
 						is_full[ES] = true;
 					}
@@ -221,7 +335,7 @@ void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version
 						break;
 					}
 				}
-			} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver]) < 0);// 해당 노드가 꽉 찼는지 아닌지 확인
+			} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver]) < 0);// 해당 노드가 꽉 찼는지 아닌지 확인
 
 			if (flag) {
 				double total_cost = 0;
@@ -242,7 +356,7 @@ void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version
 				}
 
 				total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[ver]; //kbps니까 GB 단위 변환이 필요하네...
-				remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 나머지 버전을 라운드 로빈 형태로 할당함.
+				used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 나머지 버전을 라운드 로빈 형태로 할당함.
 				selected_ES_in_comparison_schemes[ch][ver] = ES;
 				ES_count_in_comparison_schemes[ES]++;
 			}
@@ -265,7 +379,7 @@ void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_
 		do {
 			ES = rand() % ES_NUM + 1; //랜덤으로 백엔드 노드 할당
 
-			if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
+			if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
 				if (!is_full[ES]) {
 					is_full[ES] = true;
 				}
@@ -279,7 +393,7 @@ void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_
 					break;
 				}
 			}
-		} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+		} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 		if (flag) {
 			double total_cost = 0;
@@ -301,7 +415,7 @@ void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_
 			}
 
 			total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[1]; //kbps니까 GB 단위 변환이 필요하네...
-			remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 라운드 로빈 형태로 할당함.
+			used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 라운드 로빈 형태로 할당함.
 			selected_ES_in_comparison_schemes[ch][1] = ES;
 			ES_count_in_comparison_schemes[ES]++;
 		}
@@ -318,7 +432,7 @@ void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_
 			do {
 				ES = rand() % ES_NUM + 1; //랜덤으로 백엔드 노드 할당
 
-				if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
+				if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
 					if (!is_full[ES]) {
 						is_full[ES] = true;
 					}
@@ -331,14 +445,14 @@ void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_
 						flag = false; //이제 할당 중지한다. 이것보다 더 낮은 인기도의 버전은 만약 꽉 안찬다 쳐도, 그들을 고려할 필요는 없다.
 						//현재 ver 이전거 ~ 2번까지 할당한 걸 삭제한다.
 						for (int v = (ver - 1); v >= 2; v--) {
-							remained_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
+							used_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
 							total_transfer_data_size_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] -= _version_set->data_size[v];
 							selected_ES_in_comparison_schemes[ch][v] = 0;
 						}
 						break;
 					}
 				}
-			} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+			} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 			if (flag) {
 				double total_cost = 0;
@@ -356,7 +470,7 @@ void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_
 				if (total_cost > cost_limit) {
 					//현재 ver 이전거 ~ 2번까지 할당한 걸 삭제한다.
 					for (int v = (ver - 1); v >= 2; v--) {
-						remained_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
+						used_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
 						total_transfer_data_size_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] -= _version_set->data_size[v];
 						selected_ES_in_comparison_schemes[ch][v] = 0;
 					}
@@ -366,7 +480,7 @@ void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_
 				}
 
 				total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[ver]; //kbps니까 GB 단위 변환이 필요하네...
-				remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 나머지 버전을 라운드 로빈 형태로 할당함.
+				used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 나머지 버전을 라운드 로빈 형태로 할당함.
 				selected_ES_in_comparison_schemes[ch][ver] = ES;
 				ES_count_in_comparison_schemes[ES]++;
 			}
@@ -388,7 +502,7 @@ void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version
 		do {
 			ES = rand() % ES_NUM + 1; //랜덤으로 백엔드 노드 할당
 
-			if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
+			if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
 				if (!is_full[ES]) {
 					is_full[ES] = true;
 				}
@@ -403,7 +517,7 @@ void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version
 					break;
 				}
 			}
-		} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+		} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 		if (flag) {
 			double total_cost = 0;
@@ -425,7 +539,7 @@ void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version
 			}
 
 			total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[1]; //kbps니까 GB 단위 변환이 필요하네...
-			remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 라운드 로빈 형태로 할당함.
+			used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 라운드 로빈 형태로 할당함.
 			selected_ES_in_comparison_schemes[ch][1] = ES;
 			ES_count_in_comparison_schemes[ES]++;
 		}
@@ -452,7 +566,7 @@ void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version
 			do {
 				ES = rand() % ES_NUM + 1; //랜덤으로 백엔드 노드 할당
 
-				if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
+				if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
 					if (!is_full[ES]) {
 						is_full[ES] = true;
 					}
@@ -466,7 +580,7 @@ void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version
 						break;
 					}
 				}
-			} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+			} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 			if (flag) {
 				double total_cost = 0;
@@ -487,7 +601,7 @@ void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version
 				}
 
 				total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[ver]; //kbps니까 GB 단위 변환이 필요하네...
-				remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 나머지 버전을 라운드 로빈 형태로 할당함.
+				used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 나머지 버전을 라운드 로빈 형태로 할당함.
 				selected_ES_in_comparison_schemes[ch][ver] = ES;
 				ES_count_in_comparison_schemes[ES]++;
 			}
@@ -522,7 +636,7 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 			}
 			ES = (*low_cost_first.begin()).second; // 가장 파워가 낮은 노드
 
-			if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
+			if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
 				low_cost_first.erase(*low_cost_first.begin());
 				if (!is_full[ES]) {
 					is_full[ES] = true;
@@ -537,7 +651,7 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 					break;
 				}
 			}
-		} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+		} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 		if (flag) {
 			double total_cost = 0;
@@ -560,7 +674,7 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 
 			low_cost_first.erase(*low_cost_first.begin()); //CPU 사용율에 따른 update를 하기 위해 삭제
 			total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[1];
-			remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 가장 전력이 낮은 노드 먼저 할당함.
+			used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 가장 전력이 낮은 노드 먼저 할당함.
 			low_cost_first.insert(make_pair(calculate_ES_cost(ES_ptr, total_transfer_data_size_in_comparison_schemes[ES] / 1024), ES));
 
 			selected_ES_in_comparison_schemes[ch][1] = ES;
@@ -582,7 +696,7 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 					break;
 				}
 				ES = (*low_cost_first.begin()).second; // 가장 파워가 낮은 노드
-				if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
+				if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
 					low_cost_first.erase(*low_cost_first.begin());
 					if (!is_full[ES]) {
 						is_full[ES] = true;
@@ -596,14 +710,14 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 						flag = false; //이제 할당 중지한다. 이것보다 더 낮은 인기도의 버전은 만약 꽉 안찬다 쳐도, 그들을 고려할 필요는 없다.
 						//현재 ver 이전거 ~ 2번까지 할당한 걸 삭제한다.
 						for (int v = (ver - 1); v >= 2; v--) {
-							remained_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
+							used_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
 							total_transfer_data_size_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] -= _version_set->data_size[v];
 							selected_ES_in_comparison_schemes[ch][v] = 0;
 						}
 						break;
 					}
 				}
-			} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+			} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 			if (flag) {
 				double total_cost = 0;
@@ -621,7 +735,7 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 				if (total_cost > cost_limit) {
 					//현재 ver 이전거 ~ 2번까지 할당한 걸 삭제한다.
 					for (int v = (ver - 1); v >= 2; v--) {
-						remained_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
+						used_GHz_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] += _channel_list[ch].video_GHz[v];
 						total_transfer_data_size_in_comparison_schemes[selected_ES_in_comparison_schemes[ch][v]] -= _version_set->data_size[v];
 						selected_ES_in_comparison_schemes[ch][v] = 0;
 					}
@@ -632,7 +746,7 @@ void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_
 
 				low_cost_first.erase(*low_cost_first.begin());//CPU 사용율에 따른 update를 하기 위해 삭제
 
-				remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 해당 버전을 가장 전력이 낮은 노드 먼저 할당함.
+				used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 해당 버전을 가장 전력이 낮은 노드 먼저 할당함.
 				total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[ver];
 				low_cost_first.insert(make_pair(calculate_ES_cost(ES_ptr, total_transfer_data_size_in_comparison_schemes[ES]) / 1024, ES));
 
@@ -670,7 +784,7 @@ void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version
 			}
 			ES = (*low_cost_first.begin()).second; // 가장 파워가 낮은 노드
 
-			if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
+			if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0)) {
 				low_cost_first.erase(*low_cost_first.begin());
 				if (!is_full[ES]) {
 					is_full[ES] = true;
@@ -685,7 +799,7 @@ void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version
 					break;
 				}
 			}
-		} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+		} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[1] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 		if (flag) {
 			double total_cost = 0;
@@ -708,7 +822,7 @@ void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version
 
 			low_cost_first.erase(*low_cost_first.begin()); //CPU 사용율에 따른 update를 하기 위해 삭제
 			total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[1];
-			remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 가장 전력이 낮은 노드 먼저 할당함.
+			used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[1]; // 1번 버전을 가장 전력이 낮은 노드 먼저 할당함.
 			low_cost_first.insert(make_pair(calculate_ES_cost(ES_ptr, total_transfer_data_size_in_comparison_schemes[ES] / 1024), ES));
 
 			selected_ES_in_comparison_schemes[ch][1] = ES;
@@ -740,7 +854,7 @@ void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version
 					break;
 				}
 				ES = (*low_cost_first.begin()).second; // 가장 파워가 낮은 노드
-				if (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
+				if (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0)) {
 					low_cost_first.erase(*low_cost_first.begin());
 					if (!is_full[ES]) {
 						is_full[ES] = true;
@@ -755,7 +869,7 @@ void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version
 						break;
 					}
 				}
-			} while (is_full[ES] || (remained_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
+			} while (is_full[ES] || (used_GHz_in_comparison_schemes[ES] - _channel_list[ch].video_GHz[ver] < 0));// 해당 노드가 꽉 찼는지 아닌지 확인
 
 			if (flag) {
 				double total_cost = 0;
@@ -777,7 +891,7 @@ void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version
 
 				low_cost_first.erase(*low_cost_first.begin());//CPU 사용율에 따른 update를 하기 위해 삭제
 				total_transfer_data_size_in_comparison_schemes[ES] += _version_set->data_size[ver];
-				remained_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 해당 버전을 가장 전력이 낮은 노드 먼저 할당함.
+				used_GHz_in_comparison_schemes[ES] -= _channel_list[ch].video_GHz[ver]; // 해당 버전을 가장 전력이 낮은 노드 먼저 할당함.
 				low_cost_first.insert(make_pair(calculate_ES_cost(ES_ptr, total_transfer_data_size_in_comparison_schemes[ES] / 1024), ES));
 
 				selected_ES_in_comparison_schemes[ch][ver] = ES;
