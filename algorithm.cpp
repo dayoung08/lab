@@ -221,6 +221,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	// 2-2. CA-migration phase
 	// 아님. 완전 엎어야함. 
 	// migration이 아니고 할당된 version 중에서 빼야함.
+	// 여기를 셋으로 바꿔봐야하나
 	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_CA_exception;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double cost = 0;
