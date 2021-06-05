@@ -209,16 +209,16 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	std::printf("=CA-init= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
 
 
-	// 2-2. CA-migration phase
-	// 아님. 완전 엎어야함. 
-	// migration이 아니고 할당된 version 중에서 빼야함.
+	// 2-2. CA-redistribution phase
+	// 아님. 완전 엎어야함. migration이 아니고 ES에 할당된 version 중에서 빼야함.
+	// 이 때 ES에서 뺄 때, ingesion server에 있는 버전보다 인기가 높을 경우, 
 	// 여기를 셋으로 바꿔봐야하나
 	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_CA_exception;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double cost = 0;
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if (selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server
-				double slope = _channel_list[ch].pwq[ver] / 
+				double slope = (_channel_list[ch].pwq[ver]- _channel_list[ch].pwq[1]) /
 					(calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024)
 					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (total_transfer_data_size[selected_ES[ch][ver]] - (_version_set->data_size[ver] - _version_set->data_size[1]))/ 1024));
 				list_CA_exception.insert(make_pair(slope, make_pair(ch, ver)));
