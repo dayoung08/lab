@@ -34,17 +34,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 	double GHz_limit = _server_list[0].processing_capacity;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
-		int alloc_ch_cnt = 0;
-		for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
-			if (_channel_list[ch].available_server_list[ES]) {
-				alloc_ch_cnt++;
-			}
-		}
-
 		GHz_limit += _server_list[ES].processing_capacity;
 	}
-
-	//여기까지 210530 수정. coverage를 따져서 processing capacity를 노멀라이즈 했음.
 
 	printf("lowest version만 트랜스코딩 했을 때 %lf GHz / GHz 총 합 %lf GHz\n\n", first_GHz, GHz_limit);
 	if (GHz_limit < first_GHz) {
@@ -148,7 +139,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		int set = selected_set[ch];
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
-				double slope = (_channel_list[ch].pwq[ver] / (_channel_list[ch].video_GHz[ver]));
+				double slope = (_channel_list[ch].pwq[ver] - _channel_list[ch].pwq[1] / (_channel_list[ch].video_GHz[ver] - _channel_list[ch].video_GHz[1]));
 				list_CA_initialization.insert(make_pair(slope, make_pair(ch, ver)));
 			}
 		}
@@ -227,7 +218,9 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		double cost = 0;
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if (selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server
-				double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
+				double slope = _channel_list[ch].pwq[ver] / 
+					(calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024)
+					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (total_transfer_data_size[selected_ES[ch][ver]] - (_version_set->data_size[ver] - _version_set->data_size[1]))/ 1024));
 				list_CA_exception.insert(make_pair(slope, make_pair(ch, ver)));
 			}
 		}
