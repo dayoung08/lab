@@ -10,7 +10,7 @@ short** selected_ES;
 double used_GHz[ES_NUM + 1];
 double total_transfer_data_size[ES_NUM + 1];//실시간으로 전송하는 데이터 사이즈의 합 계산을 위해
 
-short ES_count[ES_NUM + 1];
+short ES_total_count[ES_NUM + 1];
 
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
 	selected_ES = (short**)malloc(sizeof(short*) * (CHANNEL_NUM + 1));
@@ -21,7 +21,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 	}
 
-	memset(ES_count, 0, (sizeof(short) * (ES_NUM + 1)));
+	memset(ES_total_count, 0, (sizeof(short) * (ES_NUM + 1)));
 	double first_GHz = 0; //lowest version만 트랜스코딩할때
 
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
@@ -52,7 +52,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		selected_set[ch] = _version_set->version_set_num;
 		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
 	}
-	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_VSD;
+	set<pair<double, pair<int, int>>> list_VSD;
+	//_version_set->version_set_num(N^set)으로 초기화한 상태에서 set을 내림.
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		for (int set = 1; set <= _version_set->version_set_num - 1; set++) { //소스는 전부 1080p
 			double slope = (_channel_list[ch].sum_of_pwq[_version_set->version_set_num] - _channel_list[ch].sum_of_pwq[set]) / (_channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num] - _channel_list[ch].sum_of_version_set_GHz[set]);
@@ -87,13 +88,13 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	std::printf("=VSD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
 
 	// 2-1. CA-initialization phase
-	set<pair<double, int>> remained_GHz_of_ESs;
+	set<pair<double, int>> remained_GHz_of_ESs_set;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
-		remained_GHz_of_ESs.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
+		remained_GHz_of_ESs_set.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
 	}
 
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
-		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs.end();
+		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.end();
 
 		int ES = -1;
 		double GHz = 0;
@@ -101,7 +102,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		bool is_allocated_ingestion_server = false;
 		while (true) {
 			pos--;
-			if (pos == remained_GHz_of_ESs.begin()) {
+			if (pos == remained_GHz_of_ESs_set.begin()) {
 				is_allocated_ingestion_server = true;
 				break;
 			}
@@ -116,18 +117,18 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 		if (!is_allocated_ingestion_server) {
 			selected_ES[ch][1] = ES;
-			ES_count[ES]++;
+			ES_total_count[ES]++;
 
 			used_GHz[ES] += _channel_list[ch].video_GHz[1];
 			total_transfer_data_size[ES] += _version_set->data_size[1];
 
-			remained_GHz_of_ESs.erase(pos);
-			remained_GHz_of_ESs.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
+			remained_GHz_of_ESs_set.erase(pos);
+			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
 		}
 		else {
 			if (used_GHz[0] + _channel_list[ch].video_GHz[1] <= _server_list[0].processing_capacity) {
 				selected_ES[ch][1] = 0;
-				ES_count[0]++;
+				ES_total_count[0]++;
 				used_GHz[0] += _channel_list[ch].video_GHz[1];
 				total_transfer_data_size[0] += _version_set->data_size[1];
 			}
@@ -149,14 +150,14 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		int ver = (*list_CA_initialization.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 		list_CA_initialization.erase(list_CA_initialization.begin());//맨 앞 삭제함
 
-		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs.end();
+		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.end();
 		int ES = -1;
 		double GHz = 0;
 		bool is_allocated_ingestion_server = false;
 
 		while (true){
 			pos--;
-			if (pos == remained_GHz_of_ESs.begin()) {
+			if (pos == remained_GHz_of_ESs_set.begin()) {
 				is_allocated_ingestion_server = true;
 				break;
 			}
@@ -171,18 +172,18 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 		if (!is_allocated_ingestion_server) {
 			selected_ES[ch][ver] = ES;
-			ES_count[ES]++;
+			ES_total_count[ES]++;
 
 			used_GHz[ES] += _channel_list[ch].video_GHz[ver];
 			total_transfer_data_size[ES] += _version_set->data_size[ver];
 
-			remained_GHz_of_ESs.erase(pos);
-			remained_GHz_of_ESs.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
+			remained_GHz_of_ESs_set.erase(pos);
+			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
 		}
 		else {
 			if (used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
 				selected_ES[ch][ver] = 0;
-				ES_count[0]++;
+				ES_total_count[0]++;
 				used_GHz[0] += _channel_list[ch].video_GHz[ver];
 				total_transfer_data_size[0] += _version_set->data_size[ver];
 			}
@@ -190,7 +191,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 
 	//set 계산하기
-	recalculate_set(_version_set);
+	set_version_set(_version_set, selected_set, selected_ES);
 
 	total_GHz = 0;
 	total_pwq = 0;
@@ -201,7 +202,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	double total_cost = 0;
 	double remained_GHz[ES_NUM + 1]; // processing capacity[es] - used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
 	for (int ES = 0; ES <= ES_NUM; ES++) {
-		if (ES_count[ES] > 0) {
+		if (ES_total_count[ES] > 0) {
 			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
 			remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 		}
@@ -257,9 +258,9 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		double curr_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
 
 
-		ES_count[selected_ES[ch][ver]]--;
+		ES_total_count[selected_ES[ch][ver]]--;
 
-		if (!ES_count[selected_ES[ch][ver]]) {
+		if (!ES_total_count[selected_ES[ch][ver]]) {
 			used_GHz[selected_ES[ch][ver]] = 0;
 			total_cost -= prev_cost;
 		}
@@ -292,7 +293,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 
 	//set 계산하기
-	recalculate_set(_version_set);
+	set_version_set(_version_set, selected_set, selected_ES);
 
 	total_GHz = 0;
 	total_pwq = 0;
@@ -302,7 +303,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 	total_cost = 0;
 	for (int ES = 0; ES <= ES_NUM; ES++) {
-		if (ES_count[ES] > 0) {
+		if (ES_total_count[ES] > 0) {
 			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
 			remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 		}
@@ -310,7 +311,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	std::printf("=최종= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
 }
 
-void recalculate_set(bitrate_version_set* _version_set) {
+void set_version_set(bitrate_version_set* _version_set, short** _selected_ES) {
 	//set 계산하기
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		int set = 1;

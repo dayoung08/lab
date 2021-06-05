@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cstring>
 #include <set>
-#include <cmath>
 #include <ctime>
 #include <random> 
 
@@ -56,12 +55,8 @@ using namespace std;
 #define M_E 2.7182818284590452354 /* e */
 #define PI 3.1415926535897932384 /* pi */
 
-#define RR_HPF 1
-#define RR_AP 2
-#define RA_HPF 3
-#define RA_AP 4
-#define CA_HPF 5
-#define CA_AP 6
+#define lowest_number_of_allocated_version_HPF 0
+
 
 struct location {
 	double latitude;
@@ -98,7 +93,7 @@ public:
 	
 	double* sum_of_video_quality;//[VERSION_SET_NUM + 1];
 	double* sum_of_pwq;//[VERSION_SET_NUM + 1];
-	//double* sum_of_transfer_data_size;//[VERSION_SET_NUM + 1];
+	double* sum_of_transfer_data_size;//[VERSION_SET_NUM + 1];
 	//이 set 지우지 말것. pwq 합 계산할때 이걸로 돌리는게 제일 편하다.
 	double* sum_of_version_set_GHz;
 
@@ -145,16 +140,14 @@ double calculate_distance(channel* _channel, server* _server);
 double deg2rad(double deg);
 double rad2deg(double rad);
 
+/* bitrate_version_set.cpp */
+void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES);
+
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void recalculate_set(bitrate_version_set* _version_set);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
 void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set);
-void method_RR_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void method_RR_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void method_RD_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void method_RD_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void method_CA_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void method_CA_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void method_lowest_number_of_allocated_version_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+short get_ES_total_count(int ES, bitrate_version_set* _version_set);

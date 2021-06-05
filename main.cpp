@@ -29,12 +29,7 @@ int main() {
 	//ºñ±³½ºÅ´ ¾ÆÁ÷ ÄÚµù ´ú ÇÔ
 
 	printf("===== ºñ±³ ½ºÅ´ =====\n\n");
-	comparison_schemes(RR_AP, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(RR_HPF, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(RA_AP, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(RA_HPF, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(CA_AP, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(CA_HPF, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(lowest_number_of_allocated_version_HPF, server_list, channel_list, &version_set, cost_limit);
 
 	printf("===== FINISH =====\n");
 }

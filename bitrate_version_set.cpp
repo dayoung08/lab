@@ -135,3 +135,16 @@ bitrate_version_set::bitrate_version_set(int _index) {
 	number_for_bit_opration = pow(2, version_num - 3);
 	set_versions_number_for_bit_opration = version_num - 2;
 }
+
+void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES) {
+	//set 계산하기
+	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+		int set = 1;
+		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+			if (_selected_ES[ch][ver] != -1)
+				set += _version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1));
+			//다 계산하고 +1할것
+		}
+		_selected_set[ch] = set;
+	}
+}
