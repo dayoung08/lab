@@ -87,13 +87,13 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	std::printf("=VSD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
 
 	// 2-1. CA-initialization phase
-	set<pair<double, int>> highest_GHz_first;
+	set<pair<double, int>> remained_GHz_of_ESs;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
-		highest_GHz_first.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
+		remained_GHz_of_ESs.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
 	}
 
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
-		set <pair<double, int>>::iterator pos = highest_GHz_first.end();
+		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs.end();
 
 		int ES = -1;
 		double GHz = 0;
@@ -101,7 +101,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		bool is_allocated_ingestion_server = false;
 		while (true) {
 			pos--;
-			if (pos == highest_GHz_first.begin()) {
+			if (pos == remained_GHz_of_ESs.begin()) {
 				is_allocated_ingestion_server = true;
 				break;
 			}
@@ -121,8 +121,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			used_GHz[ES] += _channel_list[ch].video_GHz[1];
 			total_transfer_data_size[ES] += _version_set->data_size[1];
 
-			highest_GHz_first.erase(pos);
-			highest_GHz_first.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
+			remained_GHz_of_ESs.erase(pos);
+			remained_GHz_of_ESs.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
 		}
 		else {
 			if (used_GHz[0] + _channel_list[ch].video_GHz[1] <= _server_list[0].processing_capacity) {
@@ -149,14 +149,14 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		int ver = (*list_CA_initialization.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 		list_CA_initialization.erase(list_CA_initialization.begin());//맨 앞 삭제함
 
-		set <pair<double, int>>::iterator pos = highest_GHz_first.end();
+		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs.end();
 		int ES = -1;
 		double GHz = 0;
 		bool is_allocated_ingestion_server = false;
 
 		while (true){
 			pos--;
-			if (pos == highest_GHz_first.begin()) {
+			if (pos == remained_GHz_of_ESs.begin()) {
 				is_allocated_ingestion_server = true;
 				break;
 			}
@@ -176,8 +176,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			used_GHz[ES] += _channel_list[ch].video_GHz[ver];
 			total_transfer_data_size[ES] += _version_set->data_size[ver];
 
-			highest_GHz_first.erase(pos);
-			highest_GHz_first.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
+			remained_GHz_of_ESs.erase(pos);
+			remained_GHz_of_ESs.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
 		}
 		else {
 			if (used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
@@ -211,54 +211,82 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 	// 2-2. CA-redistribution phase
 	// 아님. 완전 엎어야함. migration이 아니고 ES에 할당된 version 중에서 빼야함.
-	// 이 때 ES에서 뺄 때, ingesion server에 있는 버전보다 인기가 높을 경우, 
-	// 여기를 셋으로 바꿔봐야하나
-	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_CA_exception;
+	// 이 때 ES에서 뺄 때, ingesion server에 있는 버전보다 pwq가 높을 경우, 
+	// (즉 ingestion server에 할당된 버전 중, pwq가 제일 낮은 버전과 비교한다.)
+	// (ingestion server에 할당된 버전이 빼려는 버전보다 더 pwq가 낮을 경우, 해당 버전은 ingestion server에 들어가고 원래 거기 있던 버전은 빠짐.)
+	// ES에서 뺀 것은 다시 ingestion server에 보내고, ingesion server에서 비교 버전을 완전히 뺀다.
+	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_CA_redistribution;
+	// slope (pwq/cost) 값 / channel-version
+	
+	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > pwq_of_version_in_ingestion_server;
+	// pwq 값 / channel-version
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double cost = 0;
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if (selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server
 				//double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
-				
 				double reduced_cost = (calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024)
 					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (total_transfer_data_size[selected_ES[ch][ver]] - _version_set->data_size[ver]) / 1024));
 				double slope = _channel_list[ch].pwq[ver] / reduced_cost;
-				list_CA_exception.insert(make_pair(slope, make_pair(ch, ver)));
+
+				list_CA_redistribution.insert(make_pair(slope, make_pair(ch, ver)));
+			}
+
+			else if (selected_ES[ch][ver] == 0) { // 0은 ingestion server에 할당된 값
+				pwq_of_version_in_ingestion_server.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
 			}
 		}
 	}
 
-	while (list_CA_exception.size()) {
+
+	while (list_CA_redistribution.size()) {
 		if (total_cost < cost_limit) {
 			break;
 		}
 
-		int ch = (*list_CA_exception.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
-		int ver = (*list_CA_exception.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
-		list_CA_exception.erase(list_CA_exception.begin());//맨 앞 삭제함
+		int ch = (*list_CA_redistribution.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
+		int ver = (*list_CA_redistribution.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
+		list_CA_redistribution.erase(list_CA_redistribution.begin());//맨 앞 삭제함
 
-		if (used_GHz[selected_ES[ch][ver]] < 0) {
+		/*if (used_GHz[selected_ES[ch][ver]] < 0) {
 			cout << "error";
+		}*/
+
+		double prev_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
+		total_transfer_data_size[selected_ES[ch][ver]] -= _version_set->data_size[ver];
+		double curr_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
+
+
+		ES_count[selected_ES[ch][ver]]--;
+
+		if (!ES_count[selected_ES[ch][ver]]) {
+			used_GHz[selected_ES[ch][ver]] = 0;
+			total_cost -= prev_cost;
+		}
+		else {
+			used_GHz[selected_ES[ch][ver]] -= _channel_list[ch].video_GHz[ver];
+			total_cost -= (prev_cost - curr_cost);
 		}
 
-		if (selected_ES[ch][ver] > 0) {
-			double prev_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
-			total_transfer_data_size[selected_ES[ch][ver]] -= _version_set->data_size[ver];
-			double curr_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
+		//여기까지는 cost 때문에 ES에서 version 빼는 것.
+		//이제 이 뺀 version을 ingestion server에 할당 할 수 있을지를 봐야한다.
+		//정확히는, ingestion server의 가장 낮은 pwq를 가진 version과 pwq를 비교한다.
 
-
-			ES_count[selected_ES[ch][ver]]--;
+		int ch_in_ingestion_server = (*pwq_of_version_in_ingestion_server.begin()).second.first;
+		int ver_in_ingestion_server = (*pwq_of_version_in_ingestion_server.begin()).second.second;
+		double pwq_in_ingestion_server = (*pwq_of_version_in_ingestion_server.begin()).first;
+		double video_GHz_in_ingestion_server = _channel_list[ch_in_ingestion_server].video_GHz[ver_in_ingestion_server];
+		if ((pwq_in_ingestion_server < _channel_list[ch].pwq[ver]) &&
+			((used_GHz[0] - video_GHz_in_ingestion_server + _channel_list[ch].video_GHz[ver]) <= _server_list[0].processing_capacity)) {
+			used_GHz[0] -= video_GHz_in_ingestion_server;
 			used_GHz[0] += _channel_list[ch].video_GHz[ver];
 
-			if (!ES_count[selected_ES[ch][ver]]) {
-				used_GHz[selected_ES[ch][ver]] = 0;
-				total_cost -= prev_cost;
-			}
-			else {
-				used_GHz[selected_ES[ch][ver]] -= _channel_list[ch].video_GHz[ver];
-				total_cost -= (prev_cost - curr_cost);
-			}
-
+			pwq_of_version_in_ingestion_server.erase(pwq_of_version_in_ingestion_server.begin());
+			pwq_of_version_in_ingestion_server.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
+			//여기까지
+			selected_ES[ch][ver] = 0;
+		}
+		else {
 			selected_ES[ch][ver] = -1;
 		}
 	}
