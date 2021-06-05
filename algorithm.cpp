@@ -139,7 +139,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		int set = selected_set[ch];
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
-				double slope = (_channel_list[ch].pwq[ver] - _channel_list[ch].pwq[1] / (_channel_list[ch].video_GHz[ver] - _channel_list[ch].video_GHz[1]));
+				double slope = _channel_list[ch].pwq[ver] / _channel_list[ch].video_GHz[ver];
 				list_CA_initialization.insert(make_pair(slope, make_pair(ch, ver)));
 			}
 		}
@@ -218,9 +218,11 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		double cost = 0;
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if (selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server
-				double slope = (_channel_list[ch].pwq[ver]- _channel_list[ch].pwq[1]) /
-					(calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024)
-					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (total_transfer_data_size[selected_ES[ch][ver]] - (_version_set->data_size[ver] - _version_set->data_size[1]))/ 1024));
+				//double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
+				
+				double reduced_cost = (calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024)
+					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (total_transfer_data_size[selected_ES[ch][ver]] - _version_set->data_size[ver]) / 1024));
+				double slope = _channel_list[ch].pwq[ver] / reduced_cost;
 				list_CA_exception.insert(make_pair(slope, make_pair(ch, ver)));
 			}
 		}
