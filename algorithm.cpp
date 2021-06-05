@@ -215,10 +215,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	// (즉 ingestion server에 할당된 버전 중, pwq가 제일 낮은 버전과 비교한다.)
 	// (ingestion server에 할당된 버전이 빼려는 버전보다 더 pwq가 낮을 경우, 해당 버전은 ingestion server에 들어가고 원래 거기 있던 버전은 빠짐.)
 	// ES에서 뺀 것은 다시 ingestion server에 보내고, ingesion server에서 비교 버전을 완전히 뺀다.
-	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > list_CA_redistribution;
+	set<pair<double, pair<int, int>>> list_CA_redistribution;
 	// slope (pwq/cost) 값 / channel-version
 	
-	set<pair<double, pair<int, int>>, less<pair<double, pair<int, int>>> > pwq_of_version_in_ingestion_server;
+	set<pair<double, pair<int, int>>> pwq_of_version_in_ingestion_server;
 	// pwq 값 / channel-version
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double cost = 0;
