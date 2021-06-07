@@ -81,7 +81,7 @@ void method_lowest_number_of_allocated_version_HPF(server* _server_list, channel
 		//먼저 모든 채널의 1번 버전을 할당한다.
 		int ch = (*version_popularities_set.begin()).second.first;
 		version_popularities_set.erase(version_popularities_set.begin());
-		//가장 인기만은 ch를 고름.
+		//가장 인기많은 ch를 고름.
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 1번 버전의 갯수에 따라 오름차순 정렬. 
 		set<pair<int, int>> number_of_allocated_versions_of_ES;
@@ -140,14 +140,13 @@ void method_lowest_number_of_allocated_version_HPF(server* _server_list, channel
 
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
-		//먼저 모든 채널의 1번 버전을 할당한다.
 		int ch = (*version_popularities_set.begin()).second.first;
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());
-		//가장 인기만은 ch를 고름.
+		//가장 인기많은 ch를 고름.
 
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 1번 버전의 갯수에 따라 오름차순 정렬. 
+		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 ver번 버전의 갯수에 따라 오름차순 정렬. 
 		set<pair<int, int>> number_of_allocated_versions_of_ES;
 		for (int ES = 1; ES <= ES_NUM; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
