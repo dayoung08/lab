@@ -216,34 +216,36 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	// (즉 ingestion server에 할당된 버전 중, pwq가 제일 낮은 버전과 비교한다.)
 	// (ingestion server에 할당된 버전이 빼려는 버전보다 더 pwq가 낮을 경우, 해당 버전은 ingestion server에 들어가고 원래 거기 있던 버전은 빠짐.)
 	// ES에서 뺀 것은 다시 ingestion server에 보내고, ingesion server에서 비교 버전을 완전히 뺀다.
-	set<pair<double, pair<int, int>>> list_CA_redistribution;
+	set<pair<double, pair<int, int>>> list_CA_reallocation;
 	// slope (pwq/cost) 값 / channel-version
 	
 	set<pair<double, pair<int, int>>> pwq_of_version_in_ingestion_server;
 	// pwq 값 / channel-version
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double cost = 0;
-		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
 			if (selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server
 				//double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
 				double reduced_cost = (calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024)
 					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (total_transfer_data_size[selected_ES[ch][ver]] - _version_set->data_size[ver]) / 1024));
 				double slope = _channel_list[ch].pwq[ver] / reduced_cost;
 
-				list_CA_redistribution.insert(make_pair(slope, make_pair(ch, ver)));
+				list_CA_reallocation.insert(make_pair(slope, make_pair(ch, ver)));
 			}
 
 			else if (selected_ES[ch][ver] == 0) { // 0은 ingestion server에 할당된 값
-				pwq_of_version_in_ingestion_server.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
+				if (ver > 1) {
+					pwq_of_version_in_ingestion_server.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
+				}
 			}
 		}
 	}
 
 
-	while (list_CA_redistribution.size()) {
-		int ch = (*list_CA_redistribution.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
-		int ver = (*list_CA_redistribution.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
-		list_CA_redistribution.erase(list_CA_redistribution.begin());//맨 앞 삭제함
+	while (list_CA_reallocation.size()) {
+		int ch = (*list_CA_reallocation.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
+		int ver = (*list_CA_reallocation.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
+		list_CA_reallocation.erase(list_CA_reallocation.begin());//맨 앞 삭제함
 
 		/*if (used_GHz[selected_ES[ch][ver]] < 0) {
 			cout << "error";
@@ -284,7 +286,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			selected_ES[ch][ver] = 0;
 		}
 		else {
-			selected_ES[ch][ver] = -1;
+			if(ver > 1)
+				selected_ES[ch][ver] = -1;
 		}
 
 		if (total_cost <= cost_limit) {
@@ -300,6 +303,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		total_GHz += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
 		total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
+
+		if (selected_set[ch] == 0) {
+			cout << "error\n";
+		}
 	}
 	total_cost = 0;
 	for (int ES = 0; ES <= ES_NUM; ES++) {
