@@ -55,7 +55,7 @@ using namespace std;
 #define M_E 2.7182818284590452354 /* e */
 #define PI 3.1415926535897932384 /* pi */
 
-#define GHz_worst_fit_HPF 0
+#define GHz_WF_HPF 0
 
 
 struct location {

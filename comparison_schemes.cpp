@@ -31,7 +31,7 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 		}
 	}
 
-	if (method_index == GHz_worst_fit_HPF) {
+	if (method_index == GHz_WF_HPF) {
 		GHz_worst_fit_HPF(_server_list, _channel_list, _version_set, cost_limit);
 	}
 
@@ -40,8 +40,8 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 }
 
 void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set) {
-	if (method_index == GHz_worst_fit_HPF) {
-		printf("<<lowest_number_of_allocated_version_HPF>>\n");
+	if (method_index == GHz_WF_HPF) {
+		printf("<<GHz_worst_fit_HPF>>\n");
 	}
 	
 	double total_GHz = 0;
@@ -87,7 +87,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= ES_NUM; ES++) {
 			if(_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(used_GHz_in_comparison_schemes[ES], ES));
+				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - used_GHz_in_comparison_schemes[ES], ES));
 		}
 
 		while (!lowest_used_GHz_of_ES.empty()) {
@@ -150,7 +150,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		set<pair<int, int>> number_of_allocated_versions_of_ES;
 		for (int ES = 1; ES <= ES_NUM; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				number_of_allocated_versions_of_ES.insert(make_pair(used_GHz_in_comparison_schemes[ES], ES));
+				number_of_allocated_versions_of_ES.insert(make_pair(_server_list[ES].processing_capacity - used_GHz_in_comparison_schemes[ES], ES));
 		}
 
 		while (!number_of_allocated_versions_of_ES.empty()) {
