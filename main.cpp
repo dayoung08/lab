@@ -29,7 +29,7 @@ int main() {
 	//ºñ±³½ºÅ´ ¾ÆÁ÷ ÄÚµù ´ú ÇÔ
 
 	printf("===== ºñ±³ ½ºÅ´ =====\n\n");
-	comparison_schemes(lowest_number_of_allocated_version_HPF, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(GHz_worst_fit_HPF, server_list, channel_list, &version_set, cost_limit);
 
 	printf("===== FINISH =====\n");
 }

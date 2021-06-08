@@ -55,7 +55,7 @@ using namespace std;
 #define M_E 2.7182818284590452354 /* e */
 #define PI 3.1415926535897932384 /* pi */
 
-#define lowest_number_of_allocated_version_HPF 0
+#define GHz_worst_fit_HPF 0
 
 
 struct location {
@@ -149,5 +149,5 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
 void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set);
-void method_lowest_number_of_allocated_version_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
 short get_ES_total_count(int ES, bitrate_version_set* _version_set);

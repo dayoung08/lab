@@ -31,8 +31,8 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 		}
 	}
 
-	if (method_index == lowest_number_of_allocated_version_HPF) {
-		method_lowest_number_of_allocated_version_HPF(_server_list, _channel_list, _version_set, cost_limit);
+	if (method_index == GHz_worst_fit_HPF) {
+		GHz_worst_fit_HPF(_server_list, _channel_list, _version_set, cost_limit);
 	}
 
 	set_version_set(_version_set, selected_set_in_comparison_schemes, selected_ES_in_comparison_schemes);
@@ -40,7 +40,7 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 }
 
 void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set) {
-	if (method_index == lowest_number_of_allocated_version_HPF) {
+	if (method_index == GHz_worst_fit_HPF) {
 		printf("<<lowest_number_of_allocated_version_HPF>>\n");
 	}
 	
@@ -65,8 +65,8 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
 }
 
-void method_lowest_number_of_allocated_version_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
-	//엣지 선택 - 각 ES server의 cover를 확인하고, 할당된 태스크에서 그 version의 갯수가 적은 순 대로 할당한다. 
+void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit) {
+	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
@@ -83,16 +83,16 @@ void method_lowest_number_of_allocated_version_HPF(server* _server_list, channel
 		version_popularities_set.erase(version_popularities_set.begin());
 		//가장 인기많은 ch를 고름.
 
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 1번 버전의 갯수에 따라 오름차순 정렬. 
-		set<pair<int, int>> number_of_allocated_versions_of_ES;
+		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
+		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= ES_NUM; ES++) {
 			if(_channel_list[ch].available_server_list[ES])
-				number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ES][1], ES));
+				lowest_used_GHz_of_ES.insert(make_pair(used_GHz_in_comparison_schemes[ES], ES));
 		}
 
-		while (!number_of_allocated_versions_of_ES.empty()) {
-			int ES = (*number_of_allocated_versions_of_ES.begin()).second;
-			number_of_allocated_versions_of_ES.erase(number_of_allocated_versions_of_ES.begin());
+		while (!lowest_used_GHz_of_ES.empty()) {
+			int ES = (*lowest_used_GHz_of_ES.begin()).second;
+			lowest_used_GHz_of_ES.erase(lowest_used_GHz_of_ES.begin());
 
 			double GHz = _server_list[ES].processing_capacity - used_GHz_in_comparison_schemes[ES];
 			double total_cost = 0;
@@ -150,7 +150,7 @@ void method_lowest_number_of_allocated_version_HPF(server* _server_list, channel
 		set<pair<int, int>> number_of_allocated_versions_of_ES;
 		for (int ES = 1; ES <= ES_NUM; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ES][ver], ES));
+				number_of_allocated_versions_of_ES.insert(make_pair(used_GHz_in_comparison_schemes[ES], ES));
 		}
 
 		while (!number_of_allocated_versions_of_ES.empty()) {

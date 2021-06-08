@@ -241,10 +241,6 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 
 	while (list_CA_redistribution.size()) {
-		if (total_cost < cost_limit) {
-			break;
-		}
-
 		int ch = (*list_CA_redistribution.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
 		int ver = (*list_CA_redistribution.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 		list_CA_redistribution.erase(list_CA_redistribution.begin());//맨 앞 삭제함
@@ -289,6 +285,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 		else {
 			selected_ES[ch][ver] = -1;
+		}
+
+		if (total_cost <= cost_limit) {
+			break;
 		}
 	}
 
