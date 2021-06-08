@@ -180,13 +180,11 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			remained_GHz_of_ESs_set.erase(pos);
 			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
 		}
-		else {
-			if (used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
-				selected_ES[ch][ver] = 0;
-				ES_total_count[0]++;
-				used_GHz[0] += _channel_list[ch].video_GHz[ver];
-				total_transfer_data_size[0] += _version_set->data_size[ver];
-			}
+		else if (used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
+			selected_ES[ch][ver] = 0;
+			ES_total_count[0]++;
+			used_GHz[0] += _channel_list[ch].video_GHz[ver];
+			total_transfer_data_size[0] += _version_set->data_size[ver];
 		}
 	}
 
@@ -285,8 +283,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			//여기까지
 			selected_ES[ch][ver] = 0;
 		}
-		else {
-			if(ver > 1)
+		else if(ver > 1){
 				selected_ES[ch][ver] = -1;
 		}
 
