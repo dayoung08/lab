@@ -101,7 +101,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 			remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz_in_comparison_schemes[ES];
 		//}
 	}
-	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
+	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n\n", total_GHz, total_pwq, total_cost);
 }
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES){
@@ -390,7 +390,7 @@ void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitra
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - VSD
 
-	VSD_phase(_server_list, _channel_list, _version_set, _selected_set);
+	VSD_phase(_server_list, _channel_list, _version_set, _selected_set, false);
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
@@ -454,7 +454,6 @@ void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitra
 	}
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
-	set_version_set(_version_set, _selected_set, _selected_ES);
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		int set = _selected_set[ch];
@@ -816,7 +815,7 @@ void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitr
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
 	//버전 선택 - VSD
 
-	VSD_phase(_server_list, _channel_list, _version_set, _selected_set);
+	VSD_phase(_server_list, _channel_list, _version_set, _selected_set, false);
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
@@ -882,7 +881,6 @@ void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitr
 	}
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
-	set_version_set(_version_set, _selected_set, _selected_ES);
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		int set = _selected_set[ch];
@@ -987,7 +985,7 @@ void CH_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_s
 		_selected_set[ch] = 1;
 	}
 
-	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES);
+	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, false);
 }
 
 
@@ -1046,7 +1044,7 @@ void CH_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_
 		_selected_set[ch] += _version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1));
 	}
 
-	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES);
+	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, false);
 }
 
 

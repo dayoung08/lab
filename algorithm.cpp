@@ -27,11 +27,11 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		//total_transfer_data_size[ES] = 0;
 	}
 
-	VSD_phase(_server_list, _channel_list, _version_set, selected_set);
-	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES);
+	VSD_phase(_server_list, _channel_list, _version_set, selected_set, true);
+	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, true);
 }
 
-void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set){
+void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _flag){
 	double first_GHz = 0; //lowest version만 트랜스코딩할때
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		first_GHz += _channel_list[ch].sum_of_version_set_GHz[1];
@@ -41,7 +41,9 @@ void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 		GHz_limit += _server_list[ES].processing_capacity;
 	}
 
-	printf("lowest version만 트랜스코딩 했을 때 %lf GHz / GHz 총 합 %lf GHz\n\n", first_GHz, GHz_limit);
+	if (_flag)
+		printf("lowest version만 트랜스코딩 했을 때 %lf GHz / GHz 총 합 %lf GHz\n\n", first_GHz, GHz_limit);
+
 	if (GHz_limit < first_GHz) {
 		printf("GHz가 모자란 상황/Channel 수를 줄이거나, 엣지 수를 늘릴 것\n");
 		exit(0);
@@ -88,12 +90,13 @@ void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 		total_pwq += _channel_list[ch].sum_of_pwq[_selected_set[ch]];
 	}
 
-	std::printf("=VSD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
+	if (_flag)
+		std::printf("=VSD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
 }
 
 
 // 2-1. CA-initialization phase
-void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES) {
+void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, bool _flag) {
 	set<pair<double, int>> remained_GHz_of_ESs_set;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
 		remained_GHz_of_ESs_set.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
@@ -211,7 +214,9 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 		//}
 	}
-	std::printf("=CA-init= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
+
+	if(_flag)
+		std::printf("=CA-init= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
 
 
 	// 2-2. CA-redistribution phase
@@ -314,5 +319,7 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 		//}
 	}
-	std::printf("=최종= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
+
+	if (_flag)
+		std::printf("=최종= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
 }

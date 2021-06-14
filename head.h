@@ -149,8 +149,8 @@ void set_version_set(bitrate_version_set* _version_set, short* _selected_set, sh
 
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit);
-void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set);
-void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit, short* _selected_set, short** _selected_ES);
+void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _flag);
+void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit, short* _selected_set, short** _selected_ES, bool _flag);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
