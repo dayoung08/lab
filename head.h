@@ -55,8 +55,14 @@ using namespace std;
 #define M_E 2.7182818284590452354 /* e */
 #define PI 3.1415926535897932384 /* pi */
 
-#define GHz_WF_HPF 0
-
+#define GHz_WF_AP 1
+#define GHz_WF_HPF 2
+#define GHz_WF_VSD 3
+#define cost_WF_AP 4
+#define cost_WF_HPF 5
+#define cost_WF_VSD 6
+#define CH_AP 7
+#define CH_HPF 8
 
 struct location {
 	double latitude;
@@ -142,10 +148,20 @@ double rad2deg(double _rad);
 void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES);
 
 /* algorithm.cpp */
-void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
+void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit);
+void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set);
+void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit, short* _selected_set, short** _selected_ES);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set);
-void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int cost_limit);
-short get_ES_total_count(int ES, bitrate_version_set* _version_set);
+void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set);
+
+void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+void CH_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+void CH_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES);
+//short get_ES_total_count(int ES, bitrate_version_set* _version_set);

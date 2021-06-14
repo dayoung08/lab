@@ -139,6 +139,7 @@ bitrate_version_set::bitrate_version_set(int _index) {
 void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES) {
 	//set 계산하기
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+		_selected_set[ch] = 0;
 		int set = 1;
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if (_selected_ES[ch][ver] != -1)
