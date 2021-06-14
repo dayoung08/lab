@@ -8,7 +8,7 @@ short selected_set[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
 short** selected_ES;
 
 double used_GHz[ES_NUM + 1];
-double total_transfer_data_size[ES_NUM + 1];//실시간으로 전송하는 데이터 사이즈의 합 계산을 위해
+//double total_transfer_data_size[ES_NUM + 1];//실시간으로 전송하는 데이터 사이즈의 합 계산을 위해
 
 short ES_total_count[ES_NUM + 1];
 
@@ -29,7 +29,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 	for (int ES = 0; ES <= ES_NUM; ES++) {
 		used_GHz[ES] = 0;
-		total_transfer_data_size[ES] = 0;
+		//total_transfer_data_size[ES] = 0;
 	}
 
 	double GHz_limit = _server_list[0].processing_capacity;
@@ -120,7 +120,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			ES_total_count[ES]++;
 
 			used_GHz[ES] += _channel_list[ch].video_GHz[1];
-			total_transfer_data_size[ES] += _version_set->data_size[1];
+			//total_transfer_data_size[ES] += _version_set->data_size[1];
 
 			remained_GHz_of_ESs_set.erase(pos);
 			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
@@ -130,7 +130,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 				selected_ES[ch][1] = 0;
 				ES_total_count[0]++;
 				used_GHz[0] += _channel_list[ch].video_GHz[1];
-				total_transfer_data_size[0] += _version_set->data_size[1];
+				//total_transfer_data_size[0] += _version_set->data_size[1];
 			}
 		}
 	}
@@ -155,7 +155,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		double GHz = 0;
 		bool is_allocated_ingestion_server = false;
 
-		while (true){
+		while (true) {
 			pos--;
 			if (pos == remained_GHz_of_ESs_set.begin()) {
 				is_allocated_ingestion_server = true;
@@ -175,7 +175,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			ES_total_count[ES]++;
 
 			used_GHz[ES] += _channel_list[ch].video_GHz[ver];
-			total_transfer_data_size[ES] += _version_set->data_size[ver];
+			//total_transfer_data_size[ES] += _version_set->data_size[ver];
 
 			remained_GHz_of_ESs_set.erase(pos);
 			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
@@ -184,7 +184,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			selected_ES[ch][ver] = 0;
 			ES_total_count[0]++;
 			used_GHz[0] += _channel_list[ch].video_GHz[ver];
-			total_transfer_data_size[0] += _version_set->data_size[ver];
+			//total_transfer_data_size[0] += _version_set->data_size[ver];
 		}
 	}
 
@@ -201,7 +201,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	double remained_GHz[ES_NUM + 1]; // processing capacity[es] - used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
 	for (int ES = 0; ES <= ES_NUM; ES++) {
 		if (ES_total_count[ES] > 0) {
-			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
+			total_cost += calculate_ES_cost(&(_server_list[ES]), used_GHz[ES]);
 			remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 		}
 	}
@@ -216,7 +216,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	// ES에서 뺀 것은 다시 ingestion server에 보내고, ingesion server에서 비교 버전을 완전히 뺀다.
 	set<pair<double, pair<int, int>>> list_CA_reallocation;
 	// slope (pwq/cost) 값 / channel-version
-	
+
 	set<pair<double, pair<int, int>>> pwq_of_version_in_ingestion_server;
 	// pwq 값 / channel-version
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
@@ -224,8 +224,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
 			if (selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server
 				//double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
-				double reduced_cost = (calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024)
-					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (total_transfer_data_size[selected_ES[ch][ver]] - _version_set->data_size[ver]) / 1024));
+				double reduced_cost = (calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), used_GHz[selected_ES[ch][ver]])
+					- calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), (used_GHz[selected_ES[ch][ver]] - _channel_list[ch].video_GHz[ver])));
 				double slope = _channel_list[ch].pwq[ver] / reduced_cost;
 
 				list_CA_reallocation.insert(make_pair(slope, make_pair(ch, ver)));
@@ -249,11 +249,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			cout << "error";
 		}*/
 
-		double prev_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
-		total_transfer_data_size[selected_ES[ch][ver]] -= _version_set->data_size[ver];
-		double curr_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), total_transfer_data_size[selected_ES[ch][ver]] / 1024);
-
-
+		double prev_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), used_GHz[selected_ES[ch][ver]]);
 		ES_total_count[selected_ES[ch][ver]]--;
 
 		if (!ES_total_count[selected_ES[ch][ver]]) {
@@ -262,6 +258,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 		else {
 			used_GHz[selected_ES[ch][ver]] -= _channel_list[ch].video_GHz[ver];
+			double curr_cost = calculate_ES_cost(&(_server_list[selected_ES[ch][ver]]), used_GHz[selected_ES[ch][ver]]);
 			total_cost -= (prev_cost - curr_cost);
 		}
 
@@ -283,8 +280,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			//여기까지
 			selected_ES[ch][ver] = 0;
 		}
-		else if(ver > 1){
-				selected_ES[ch][ver] = -1;
+		else if (ver > 1) {
+			selected_ES[ch][ver] = -1;
 		}
 
 		if (total_cost <= cost_limit) {
@@ -308,7 +305,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	total_cost = 0;
 	for (int ES = 0; ES <= ES_NUM; ES++) {
 		if (ES_total_count[ES] > 0) {
-			total_cost += calculate_ES_cost(&(_server_list[ES]), total_transfer_data_size[ES] / 1024);
+			total_cost += calculate_ES_cost(&(_server_list[ES]), used_GHz[ES]);
 			remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 		}
 	}

@@ -3,20 +3,11 @@
 //https://www.techrepublic.com/article/aws-snowball-edge-vs-azure-stack-what-on-premises-public-cloud-means-for-your-data-center/
 //엣지 서비스의 대표적인 2곳 (사실 다른 곳들은 제대로 지원을 안한다 아직)
 
-//1. Snowball Edge
-//_total_transfer_data_size 가격 https://aws.amazon.com/ko/snowball/pricing/ 
-//GHz 가격 // instance
-//스펙 https://docs.aws.amazon.com/ko_kr/snowball/latest/developer-guide/device-differences.html -> 코어수 다 있음
-//일 대여료.
-//1) 데일리 요금 2) 데이터 송신 (수신은 돈 안든다)	//0.05 USD/GB * 25TB * 1,024 = 1,280 USD
-// 0.0005 USD/MB 
+// 아래는 Snowball Edge(1, 2), MS Azure Stack Edge(3, 4, 5) 의 금액을 초당으로 변경한 것.
+// 1, 2는 일간 금액으므로 나누기 24 * 3600함. 80, 150
+// 3, 4, 5는 각각 월간 금액이므로 나누기 30 * 24 * 3600함. 717, 2358, 1368
+double full_charge[ES_TYPE_NUM + 1] = { 0, 0.000926, 0.00174, 0.000277, 0.00091, 0.000528 }; // 하루 기준으로 몇 달러인가
 
-//2. MS Azure Stack Edge 
-// https://azure.microsoft.com/ko-kr/pricing/details/azure-stack/edge/
-// 여기서 개념 -> 사양 검토 -> 디바이스 사양, CPU 종류로만 따지면 3가지 디바이스가 있음.
-// _total_transfer_data_size 가격 : 없음 아 이게 정상이지 -_-;;;
-// GHz 가격 : 월 디바이스에서의 무제한 계산이므로 0으로 봐도 될 듯.
-// 월 대여료
 
 void server_initalization(server* _server_list) {
 	//0번은 ingression server
@@ -44,16 +35,14 @@ void server_initalization(server* _server_list) {
 }
 
 //비용 관련
-double calculate_ES_cost(server* _server, double _total_transfer_data_size) {
+double calculate_ES_cost(server* _server, double _GHz) { //초당 cost
 	int bn_type = (_server->index - 1) % ES_TYPE_NUM + 1;
 	//https://support.google.com/youtube/answer/2853702?hl=ko 이거 보면 DASH에서는 보통 세그먼트가 2초인듯. 깔끔하게 1초로 하자. 왜냐하면 1초여야 계산이 편하다(언젠가 1초인 세상이 올 것이다 ^^....)
 
 	// 일단 기기 대여까지 해주는 서비스만 고려함....................
 	// 3, 4, 5는 각각 월간 금액이므로 나누기 30함. 717, 2358, 1368
-	double basic_charge[ES_TYPE_NUM + 1] = { 0, 80, 150, 23.9, 78.6, 45.6 }; // 하루 기준으로 몇 달러인가
-	double transmission_charge[ES_TYPE_NUM + 1] = { 0, 0.04, 0.04, 0, 0 }; // GB당 몇 달러인가
-
-	double cost = (basic_charge[bn_type] + _total_transfer_data_size * transmission_charge[bn_type] * 3600 * 24) * PERIOD;
+	double percent = _GHz / _server->processing_capacity;
+	double cost = (full_charge[bn_type] * percent) * (PERIOD * 24 * 3600);
 	return cost;
 }
 
@@ -140,11 +129,11 @@ double calculate_distance(channel* _channel, server* _server) {
 	}
 }
 // degree to radian
-double deg2rad(double deg) {
-	return (deg * PI / 180.0);
+double deg2rad(double _deg) {
+	return (_deg * PI / 180.0);
 }
 
 // radian to degree
-double rad2deg(double rad) {
-	return (rad * 180.0 / (double)PI);
+double rad2deg(double _rad) {
+	return (_rad * 180.0 / (double)PI);
 }
