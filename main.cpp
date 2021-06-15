@@ -29,12 +29,12 @@ int main() {
 	//ºñ±³½ºÅ´ ¾ÆÁ÷ ÄÚµù ´ú ÇÔ
 
 	printf("===== ºñ±³ ½ºÅ´ =====\n\n");
-	/*comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(GHz_WF_VSD, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(cost_WF_AP, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(cost_WF_HPF, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(cost_WF_VSD, server_list, channel_list, &version_set, cost_limit);*/
+	comparison_schemes(cost_WF_VSD, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(CA_AP, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(CA_HPF, server_list, channel_list, &version_set, cost_limit);
 
