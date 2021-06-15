@@ -1035,7 +1035,7 @@ void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());//맨 앞 삭제함
-		double expected_total_GHz = total_GHz - _channel_list[ch].sum_of_version_set_GHz[ver];
+		double expected_total_GHz = total_GHz - _channel_list[ch].video_GHz[ver];
 		total_GHz = expected_total_GHz;
 		if (expected_total_GHz < GHz_limit) {
 			break;
