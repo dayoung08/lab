@@ -45,11 +45,11 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 	if (method_index == cost_WF_VSD) {
 		cost_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
-	if (method_index == CH_AP) {
-		CH_phase_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
+	if (method_index == CA_AP) {
+		CA_phase_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
-	if (method_index == CH_HPF) {
-		CH_phase_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
+	if (method_index == CA_HPF) {
+		CA_phase_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
 
 	set_version_set(_version_set, selected_set, selected_ES);
@@ -75,11 +75,11 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	if (method_index == cost_WF_VSD) {
 		printf("<<cost_worst_fit_VSD>>\n");
 	}
-	if (method_index == CH_AP) {
-		printf("<<CH_AP>>\n");
+	if (method_index == CA_AP) {
+		printf("<<CA_AP>>\n");
 	}
-	if (method_index == CH_HPF) {
-		printf("<<CH_HPF>>\n");
+	if (method_index == CA_HPF) {
+		printf("<<CA_HPF>>\n");
 	}
 	
 	double total_GHz = 0;
@@ -950,7 +950,7 @@ void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitr
 	}
 }
 
-void CH_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - CH phase
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 	
@@ -988,7 +988,7 @@ void CH_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_s
 }
 
 
-void CH_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - CH phase
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 

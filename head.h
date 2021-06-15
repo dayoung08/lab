@@ -61,8 +61,8 @@ using namespace std;
 #define cost_WF_AP 4
 #define cost_WF_HPF 5
 #define cost_WF_VSD 6
-#define CH_AP 7
-#define CH_HPF 8
+#define CA_AP 7
+#define CA_HPF 8
 
 struct location {
 	double latitude;
@@ -162,6 +162,6 @@ void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitra
 void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
 void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
 void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void CH_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void CH_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
+void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
+void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
 //short get_ES_total_count(int ES, bitrate_version_set* _version_set);
