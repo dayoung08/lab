@@ -6,20 +6,20 @@
 // 아래는 Snowball Edge(1, 2), MS Azure Stack Edge(3, 4, 5) 의 금액을 초당으로 변경한 것.
 // 1, 2는 일간 금액으므로 나누기 24 * 3600함. 80, 150
 // 3, 4, 5는 각각 월간 금액이므로 나누기 30 * 24 * 3600함. 717, 2358, 1368
-double full_charge[ES_TYPE_NUM + 1] = { 0, 0.000926, 0.00174, 0.000277, 0.00091, 0.000528 }; // 하루 기준으로 몇 달러인가
+double full_charge[ES_TYPE_NUM + 1] = { 0, 0.000926, 0.00174, 0.000277, 0.00091, 0.000528 };
+
+//0번은 CTS
+//Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
+//위의 것이 10대 있다고 가정하자.
+double edge_server_max_GHz[ES_TYPE_NUM + 1] = { 1814.4, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
+//1. Snowball Edge Storage Optimized(EC2 컴퓨팅 기능 포함) - Intel Xeon D 프로세서, 16코어, 1.8Ghz
+//2. Snowball Edge Compute Optimized - AMD Naples, 32코어, 3.4Ghz
+//3. Azure Stack Edge Pro - 2 X Intel Xeon 실버 4214 CPU, 2.20 GHz, 24 개 물리적 코어(CPU 당 12 개)
+//4. Azure Stack Edge Pro R - 2 X Intel Xeon 실버 4114 CPU, 2.20GHz, 20개의 물리적 코어(CPU 당 10 개)
+//5. Azure Stack Edge Mini R - Intel Xeon-D 1577, 1.3GHz, 16코어
 
 
 void server_initalization(server* _server_list) {
-	//0번은 ingression server
-	//Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
-	//위의 것이 10대 있다고 가정하자.
-	double edge_server_max_GHz[ES_TYPE_NUM + 1] = { 1814.4, 28.8, 108.8, 52.8, 44, 20.8}; // 소숫점 내림 총 합 3517
-	//1. Snowball Edge Storage Optimized(EC2 컴퓨팅 기능 포함) - Intel Xeon D 프로세서, 16코어, 1.8Ghz
-	//2. Snowball Edge Compute Optimized - AMD Naples, 32코어, 3.4Ghz
-	//3. Azure Stack Edge Pro - 2 X Intel Xeon 실버 4214 CPU, 2.20 GHz, 24 개 물리적 코어(CPU 당 12 개)
-	//4. Azure Stack Edge Pro R - 2 X Intel Xeon 실버 4114 CPU, 2.20GHz, 20개의 물리적 코어(CPU 당 10 개)
-	//5. Azure Stack Edge Mini R - Intel Xeon-D 1577, 1.3GHz, 16코어
-
 	for (int ES = 0; ES <= ES_NUM; ES++) {
 		_server_list[ES].index = ES;
 		/*_server_list[ES].total_cost = 0;
@@ -42,8 +42,17 @@ double calculate_ES_cost(server* _server, double _GHz) { //초당 cost
 	// 일단 기기 대여까지 해주는 서비스만 고려함....................
 	// 3, 4, 5는 각각 월간 금액이므로 나누기 30함. 717, 2358, 1368
 	double percent = _GHz / _server->processing_capacity;
-	double cost = (full_charge[bn_type] * percent) * (PERIOD * 24 * 3600);
+	//double cost = (full_charge[bn_type] * percent) * (PERIOD * 24 * 3600);
+	double cost = full_charge[bn_type] * percent;
 	return cost;
+}
+
+double get_full_charge() {
+	double full_total_charge = 0;
+	for (int ES = 1; ES <= ES_NUM; ES++) {
+		full_total_charge += full_charge[ES];
+	}
+	return full_total_charge;
 }
 
 //아래는 전부 커버리지 관련
@@ -83,7 +92,7 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// set coverage for each edge server
 	// range: 450m~750m
 	srand(SEED);
-	_server_list[0].coverage = INF; // ingestion server.
+	_server_list[0].coverage = INF; // CTS.
 	for (int ES = 1; ES <= ES_NUM; ES++) {
 		_server_list[ES].coverage = rand() % 301 + 450;
 	}
@@ -91,7 +100,7 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// assign
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		channel* ch_ptr = &(_channel_list[ch]);
-		_channel_list[ch].available_server_list[0] = true; // ingestion server은 (index 0) 무조건 coverage에 들어감.
+		_channel_list[ch].available_server_list[0] = true; // CTS은 (index 0) 무조건 coverage에 들어감.
 		for (int ES = 1; ES <= ES_NUM; ES++) { // 기존 코드에도 서버 숫자였다
 			server* ES_ptr = &(_server_list[ES]);
 			double dist = calculate_distance(ch_ptr, ES_ptr);

@@ -3,7 +3,7 @@
 //전반적으로 확인 할 필요가 있음 20210515
 //비교 스킴들이 구현되었다.
 
-void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit) {
+void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit) {
 	short selected_set[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
 	short** selected_ES;//[CHANNEL_NUM + 1][VERSION_NUM]; // 각 채널에서 사용하는 비트레이트 set에 속하는 각 버전이 어떤 es에서 선택되었는가.
 	//오리지널 버전은 트랜스코딩 안해서 배열 크기가 저렇다.
@@ -103,7 +103,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n\n", total_GHz, total_pwq, total_cost);
 }
 
-void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 
@@ -253,7 +253,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 	}
 }
 
-void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
@@ -385,7 +385,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 }
 
 
-void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - VSD
 
@@ -521,7 +521,7 @@ void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitra
 	}
 }
 
-void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 
@@ -675,7 +675,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 	}
 }
 
-void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
@@ -810,7 +810,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 	}
 }
 
-void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
 	//버전 선택 - VSD
 
@@ -950,7 +950,7 @@ void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitr
 	}
 }
 
-void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - CH phase
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 	
@@ -988,7 +988,7 @@ void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_s
 }
 
 
-void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - CH phase
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 

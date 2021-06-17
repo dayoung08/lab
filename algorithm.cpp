@@ -6,7 +6,7 @@
 //double total_transfer_data_size[ES_NUM + 1];//실시간으로 전송하는 데이터 사이즈의 합 계산을 위해
 //short _ES_count[ES_NUM + 1];
 
-void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit) {
+void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit) {
 	short selected_set[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
 	//short selected_ES[CHANNEL_NUM + 1];// 각 채널이 어떤 es에서 할당되었는가.
 	//오리지널 버전은 트랜스코딩 안해서 배열 크기가 저렇다.
@@ -98,7 +98,7 @@ void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 
 
 // 2-1. CA-initialization phase
-void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, int _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, bool _flag) {
+void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, bool _flag) {
 
 	set<pair<double, int>> remained_GHz_of_ESs_set;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
@@ -111,11 +111,11 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		int ES = -1;
 		double GHz = 0;
 
-		bool is_allocated_ingestion_server = false;
+		bool is_allocated_CTS = false;
 		while (true) {
 			pos--;
 			if (pos == remained_GHz_of_ESs_set.begin()) {
-				is_allocated_ingestion_server = true;
+				is_allocated_CTS = true;
 				break;
 			}
 
@@ -127,7 +127,7 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			}
 		}
 
-		if (!is_allocated_ingestion_server) {
+		if (!is_allocated_CTS) {
 			_selected_ES[ch][1] = ES;
 			_ES_count[ES]++;
 
@@ -165,12 +165,12 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.end();
 		int ES = -1;
 		double GHz = 0;
-		bool is_allocated_ingestion_server = false;
+		bool is_allocated_CTS = false;
 
 		while (true) {
 			pos--;
 			if (pos == remained_GHz_of_ESs_set.begin()) {
-				is_allocated_ingestion_server = true;
+				is_allocated_CTS = true;
 				break;
 			}
 
@@ -182,7 +182,7 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			}
 		}
 
-		if (!is_allocated_ingestion_server) {
+		if (!is_allocated_CTS) {
 			_selected_ES[ch][ver] = ES;
 			_ES_count[ES]++;
 
@@ -225,26 +225,26 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		// 2-2. CA-redistribution phase
 		// 아님. 완전 엎어야함. migration이 아니고 ES에 할당된 version 중에서 빼야함.
 		// 이 때 ES에서 뺄 때, ingesion server에 있는 버전보다 pwq가 높을 경우, 
-		// (즉 ingestion server에 할당된 버전 중, pwq가 제일 낮은 버전과 비교한다.)
-		// (ingestion server에 할당된 버전이 빼려는 버전보다 더 pwq가 낮을 경우, 해당 버전은 ingestion server에 들어가고 원래 거기 있던 버전은 빠짐.)
-		// ES에서 뺀 것은 다시 ingestion server에 보내고, ingesion server에서 비교 버전을 완전히 뺀다.
+		// (즉 CTS에 할당된 버전 중, pwq가 제일 낮은 버전과 비교한다.)
+		// (CTS에 할당된 버전이 빼려는 버전보다 더 pwq가 낮을 경우, 해당 버전은 CTS에 들어가고 원래 거기 있던 버전은 빠짐.)
+		// ES에서 뺀 것은 다시 CTS에 보내고, ingesion server에서 비교 버전을 완전히 뺀다.
 		set<pair<double, pair<int, int>>> list_CA_reallocation;
 		// slope (pwq/cost) 값 / channel-version
 
-		set<pair<double, pair<int, int>>> pwq_of_version_in_ingestion_server;
+		set<pair<double, pair<int, int>>> pwq_of_version_in_CTS;
 		// pwq 값 / channel-version
 		for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 			double cost = 0;
 			for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
-				if (_selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server;
+				if (_selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 CTS;
 					double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[_selected_ES[ch][ver]]), _channel_list[ch].video_GHz[ver]);
 
 					list_CA_reallocation.insert(make_pair(slope, make_pair(ch, ver)));
 				}
 
-				else if (_selected_ES[ch][ver] == 0) { // 0은 ingestion server에 할당된 값
+				else if (_selected_ES[ch][ver] == 0) { // 0은 CTS에 할당된 값
 					if (ver > 1) {
-						pwq_of_version_in_ingestion_server.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
+						pwq_of_version_in_CTS.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
 					}
 				}
 			}
@@ -274,20 +274,20 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			//}
 
 			//여기까지는 cost 때문에 ES에서 version 빼는 것.
-			//이제 이 뺀 version을 ingestion server에 할당 할 수 있을지를 봐야한다.
-			//정확히는, ingestion server의 가장 낮은 pwq를 가진 version과 pwq를 비교한다.
+			//이제 이 뺀 version을 CTS에 할당 할 수 있을지를 봐야한다.
+			//정확히는, CTS의 가장 낮은 pwq를 가진 version과 pwq를 비교한다.
 
-			int ch_in_ingestion_server = (*pwq_of_version_in_ingestion_server.begin()).second.first;
-			int ver_in_ingestion_server = (*pwq_of_version_in_ingestion_server.begin()).second.second;
-			double pwq_in_ingestion_server = (*pwq_of_version_in_ingestion_server.begin()).first;
-			double video_GHz_in_ingestion_server = _channel_list[ch_in_ingestion_server].video_GHz[ver_in_ingestion_server];
-			if ((pwq_in_ingestion_server < _channel_list[ch].pwq[ver]) &&
-				((_used_GHz[0] - video_GHz_in_ingestion_server + _channel_list[ch].video_GHz[ver]) <= _server_list[0].processing_capacity)) {
-				_used_GHz[0] -= video_GHz_in_ingestion_server;
+			int ch_in_CTS = (*pwq_of_version_in_CTS.begin()).second.first;
+			int ver_in_CTS = (*pwq_of_version_in_CTS.begin()).second.second;
+			double pwq_in_CTS = (*pwq_of_version_in_CTS.begin()).first;
+			double video_GHz_in_CTS = _channel_list[ch_in_CTS].video_GHz[ver_in_CTS];
+			if ((pwq_in_CTS < _channel_list[ch].pwq[ver]) &&
+				((_used_GHz[0] - video_GHz_in_CTS + _channel_list[ch].video_GHz[ver]) <= _server_list[0].processing_capacity)) {
+				_used_GHz[0] -= video_GHz_in_CTS;
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
 
-				pwq_of_version_in_ingestion_server.erase(pwq_of_version_in_ingestion_server.begin());
-				pwq_of_version_in_ingestion_server.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
+				pwq_of_version_in_CTS.erase(pwq_of_version_in_CTS.begin());
+				pwq_of_version_in_CTS.insert(make_pair(_channel_list[ch].pwq[ver], make_pair(ch, ver)));
 				//여기까지
 				_selected_ES[ch][ver] = 0;
 			}

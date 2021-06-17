@@ -2,9 +2,8 @@
 int main() {
 	srand(SEED);
 
-	//모든 버전을 트랜스코딩하고 전송할 경우의 가격이 어떻게 되려나 ^_^;;;
-	//우선 가격 제한이 전혀 없을 경우로 해서 돌려보자.
-	int cost_limit = 2000000; // 
+	double ratio = 0.5;
+	double cost_limit = get_full_charge() * 0.5;
 	int pop_type = MVP;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
