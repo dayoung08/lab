@@ -50,7 +50,8 @@ double calculate_ES_cost(server* _server, double _GHz) { //√ ¥Á cost
 double get_full_charge() {
 	double full_total_charge = 0;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
-		full_total_charge += full_charge[ES];
+		int bn_type = (ES - 1) % ES_TYPE_NUM + 1;
+		full_total_charge += full_charge[bn_type];
 	}
 	return full_total_charge;
 }
