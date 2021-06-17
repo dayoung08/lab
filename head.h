@@ -57,12 +57,12 @@ using namespace std;
 
 #define GHz_WF_AP 1
 #define GHz_WF_HPF 2
-#define GHz_WF_VSD 3
+#define GHz_WF_TD 3
 #define cost_WF_AP 4
 #define cost_WF_HPF 5
-#define cost_WF_VSD 6
-#define CA_AP 7
-#define CA_HPF 8
+#define cost_WF_TD 6
+#define TA_CR_AP 7
+#define TA_CR_HPF 8
 
 struct location {
 	double latitude;
@@ -150,8 +150,8 @@ void set_version_set(bitrate_version_set* _version_set, short* _selected_set, sh
 
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit);
-void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _flag);
-void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, bool _flag);
+void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _flag);
+void TA_CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, bool _flag);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit);
@@ -159,10 +159,10 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
 void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
+void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
 void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
 void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
+void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
+void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
+void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
 //short get_ES_total_count(int ES, bitrate_version_set* _version_set);

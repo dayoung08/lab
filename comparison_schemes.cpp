@@ -33,8 +33,8 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 	if (method_index == GHz_WF_HPF) {
 		GHz_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
-	if (method_index == GHz_WF_VSD) {
-		GHz_worst_fit_VSD_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
+	if (method_index == GHz_WF_TD) {
+		GHz_worst_fit_TD_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
 	if (method_index == cost_WF_AP) {
 		cost_worst_fit_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
@@ -42,14 +42,14 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 	if (method_index == cost_WF_HPF) {
 		cost_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
-	if (method_index == cost_WF_VSD) {
+	if (method_index == cost_WF_TD) {
 		cost_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
-	if (method_index == CA_AP) {
-		CA_phase_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
+	if (method_index == TA_CR_AP) {
+		TA_CR_phase_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
-	if (method_index == CA_HPF) {
-		CA_phase_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
+	if (method_index == TA_CR_HPF) {
+		TA_CR_phase_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count);
 	}
 
 	set_version_set(_version_set, selected_set, selected_ES);
@@ -63,8 +63,8 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	if (method_index == GHz_WF_HPF) {
 		printf("<<GHz_worst_fit_HPF>>\n");
 	}
-	if (method_index == GHz_WF_VSD) {
-		printf("<<GHz_worst_fit_VSD>>\n");
+	if (method_index == GHz_WF_TD) {
+		printf("<<GHz_worst_fit_TD>>\n");
 	}
 	if (method_index == cost_WF_AP) {
 		printf("<<cost_worst_fit_AP>>\n");
@@ -72,14 +72,14 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	if (method_index == cost_WF_HPF) {
 		printf("<<cost_worst_fit_HPF>>\n");
 	}
-	if (method_index == cost_WF_VSD) {
-		printf("<<cost_worst_fit_VSD>>\n");
+	if (method_index == cost_WF_TD) {
+		printf("<<cost_worst_fit_TD>>\n");
 	}
-	if (method_index == CA_AP) {
-		printf("<<CA_AP>>\n");
+	if (method_index == TA_CR_AP) {
+		printf("<<TA-CR_AP>>\n");
 	}
-	if (method_index == CA_HPF) {
-		printf("<<CA_HPF>>\n");
+	if (method_index == TA_CR_HPF) {
+		printf("<<TA-CR_HPF>>\n");
 	}
 	
 	double total_GHz = 0;
@@ -100,7 +100,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 			remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 		//}
 	}
-	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n\n", total_GHz, total_pwq, total_cost);
+	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
 }
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
@@ -385,11 +385,11 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 }
 
 
-void GHz_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
-	//버전 선택 - VSD
+	//버전 선택 - TD
 
-	VSD_phase(_server_list, _channel_list, _version_set, _selected_set, false);
+	TD_phase(_server_list, _channel_list, _version_set, _selected_set, false);
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
@@ -810,11 +810,11 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 	}
 }
 
-void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
-	//버전 선택 - VSD
+	//버전 선택 - TD
 
-	VSD_phase(_server_list, _channel_list, _version_set, _selected_set, false);
+	TD_phase(_server_list, _channel_list, _version_set, _selected_set, false);
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
@@ -950,7 +950,7 @@ void cost_worst_fit_VSD_phase(server* _server_list, channel* _channel_list, bitr
 	}
 }
 
-void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - CH phase
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 	
@@ -984,11 +984,11 @@ void CA_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_s
 		_selected_set[ch] = 1;
 	}
 
-	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, false);
+	TA_CR_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, false);
 }
 
 
-void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
+void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count) {
 	//엣지 선택 - CH phase
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
@@ -1043,7 +1043,7 @@ void CA_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_
 		_selected_set[ch] += _version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1));
 	}
 
-	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, false);
+	TA_CR_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, false);
 }
 
 

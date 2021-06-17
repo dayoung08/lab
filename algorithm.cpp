@@ -29,11 +29,11 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		//total_transfer_data_size[ES] = 0;
 	}
 
-	VSD_phase(_server_list, _channel_list, _version_set, selected_set, true);
-	CA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, _used_GHz, _ES_count, true);
+	TD_phase(_server_list, _channel_list, _version_set, selected_set, true);
+	TA_CR_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, _used_GHz, _ES_count, true);
 }
 
-void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _flag){
+void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _flag){
 	double first_GHz = 0; //lowest version만 트랜스코딩할때
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		first_GHz += _channel_list[ch].sum_of_version_set_GHz[1];
@@ -52,27 +52,27 @@ void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 	}
 
 	//나중에 각 페이즈마다 함수 생성할 것. 그래야 보는 게 편하다.
-	//1. VSD phase
+	//1. TD phase
 	double total_GHz = 0;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		//selected_ES[ch] = 0;
 		_selected_set[ch] = _version_set->version_set_num;
 		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
 	}
-	set<pair<double, pair<int, int>>> list_VSD;
+	set<pair<double, pair<int, int>>> list_TD;
 	//_version_set->version_set_num(N^set)으로 초기화한 상태에서 set을 내림.
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		for (int set = 1; set <= _version_set->version_set_num - 1; set++) { //소스는 전부 1080p
 			double slope = (_channel_list[ch].sum_of_pwq[_version_set->version_set_num] - _channel_list[ch].sum_of_pwq[set]) / (_channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num] - _channel_list[ch].sum_of_version_set_GHz[set]);
-			list_VSD.insert(make_pair(slope, make_pair(ch, set)));
+			list_TD.insert(make_pair(slope, make_pair(ch, set)));
 		}
 	}
 
-	while (list_VSD.size()) {
-		int ch = (*list_VSD.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
-		int set = (*list_VSD.begin()).second.second; //slope가 가장 큰 것은 어떤 세트인가?
+	while (list_TD.size()) {
+		int ch = (*list_TD.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
+		int set = (*list_TD.begin()).second.second; //slope가 가장 큰 것은 어떤 세트인가?
 
-		list_VSD.erase(list_VSD.begin());//맨 앞 삭제함
+		list_TD.erase(list_TD.begin());//맨 앞 삭제함
 		//int prev_엣지_node = selected_BN[channel];
 		int prev_set = _selected_set[ch];
 		if (_channel_list[ch].sum_of_version_set_GHz[set] < _channel_list[ch].sum_of_version_set_GHz[prev_set]) {
@@ -93,13 +93,12 @@ void VSD_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 	}
 
 	if (_flag)
-		std::printf("=VSD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
+		std::printf("=TD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
 }
 
 
-// 2-1. CA-initialization phase
-void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, bool _flag) {
-
+void TA_CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, bool _flag) {
+	// 2-1. TA phase
 	set<pair<double, int>> remained_GHz_of_ESs_set;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
 		remained_GHz_of_ESs_set.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
@@ -147,20 +146,20 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		}
 	}
 
-	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_CA_initialization;
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TA;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		int set = _selected_set[ch];
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
 				double slope = _channel_list[ch].pwq[ver] / _channel_list[ch].video_GHz[ver];
-				list_CA_initialization.insert(make_pair(slope, make_pair(ch, ver)));
+				list_TA.insert(make_pair(slope, make_pair(ch, ver)));
 			}
 		}
 	}
-	while (list_CA_initialization.size()) {
-		int ch = (*list_CA_initialization.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
-		int ver = (*list_CA_initialization.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
-		list_CA_initialization.erase(list_CA_initialization.begin());//맨 앞 삭제함
+	while (list_TA.size()) {
+		int ch = (*list_TA.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
+		int ver = (*list_TA.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
+		list_TA.erase(list_TA.begin());//맨 앞 삭제함
 
 		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.end();
 		int ES = -1;
@@ -219,10 +218,10 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	}
 
 	if(_flag)
-		std::printf("=CA-init= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
+		std::printf("=CA-init= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
+	// 2-2. CR phase
 	if (total_cost > _cost_limit) {
-		// 2-2. CA-redistribution phase
 		// 아님. 완전 엎어야함. migration이 아니고 ES에 할당된 version 중에서 빼야함.
 		// 이 때 ES에서 뺄 때, ingesion server에 있는 버전보다 pwq가 높을 경우, 
 		// (즉 CTS에 할당된 버전 중, pwq가 제일 낮은 버전과 비교한다.)
@@ -322,5 +321,5 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	}
 
 	if (_flag)
-		std::printf("=최종= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf\n", total_GHz, total_pwq, total_cost);
+		std::printf("=최종= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 }

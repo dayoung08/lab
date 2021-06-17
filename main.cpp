@@ -30,12 +30,12 @@ int main() {
 	printf("===== ºñ±³ ½ºÅ´ =====\n\n");
 	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(GHz_WF_VSD, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(GHz_WF_TD, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(cost_WF_AP, server_list, channel_list, &version_set, cost_limit);
 	comparison_schemes(cost_WF_HPF, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(cost_WF_VSD, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(CA_AP, server_list, channel_list, &version_set, cost_limit);
-	comparison_schemes(CA_HPF, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(cost_WF_TD, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(TA_CR_AP, server_list, channel_list, &version_set, cost_limit);
+	comparison_schemes(TA_CR_HPF, server_list, channel_list, &version_set, cost_limit);
 
 	printf("===== FINISH =====\n");
 }
