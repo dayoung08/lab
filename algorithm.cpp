@@ -237,9 +237,7 @@ void CA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			double cost = 0;
 			for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
 				if (_selected_ES[ch][ver] > 0) { //-1은 할당 안 됨, 0은 ingestion server;
-					double reduced_cost = (calculate_ES_cost(&(_server_list[_selected_ES[ch][ver]]), _used_GHz[_selected_ES[ch][ver]])
-						- calculate_ES_cost(&(_server_list[_selected_ES[ch][ver]]), (_used_GHz[_selected_ES[ch][ver]] - _channel_list[ch].video_GHz[ver])));
-					double slope = _channel_list[ch].pwq[ver] / reduced_cost;
+					double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[_selected_ES[ch][ver]]), _channel_list[ch].video_GHz[ver]);
 
 					list_CA_reallocation.insert(make_pair(slope, make_pair(ch, ver)));
 				}
