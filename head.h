@@ -12,7 +12,9 @@ using namespace std;
 #define SEED 1234
 #define INF 987654321
 
-#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
+//#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
+#define CPU_USAGE_MODEL 0
+#define LEASING_MODEL 1
 
 //아래는 교수님이 주신 파일 기반. 코드 보니까 클라이언트 수 x 유저 수를 채널로 해도 될 것 같다. 필요 시 coord.c 파일 수정해서 파일들 다시 뽑으면 될 듯.
 //#define NUM_OF_CLIENT	816
@@ -138,7 +140,7 @@ double* set_version_pop(bitrate_version_set* _bitrate_version_set, int _version_
 
 /* server.cpp */
 void server_initalization(server* _server_list);
-double calculate_ES_cost(server* _server, double _GHz);
+double calculate_ES_cost(server* _server, double _used_GHz, int _model);
 double get_full_charge();
 void set_coverage_infomation(channel* _channel_list, server* _server_list);
 double calculate_distance(channel* _channel, server* _server);
@@ -149,20 +151,22 @@ double rad2deg(double _rad);
 void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES);
 
 /* algorithm.cpp */
-void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit);
-void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _flag);
-void TA_CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, bool _flag);
+void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
+void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_limit, short* _selected_set);
+void TA_usage_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void TA_leasing_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void CR_leasing_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
 
 /* comparison_schemes*/
-void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit);
-void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, double* _used_GHz, short* _ES_count);
+void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
+void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, double* _used_GHz, short* _ES_count, int _model);
 
-void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
-void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count);
+void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
 //short get_ES_total_count(int ES, bitrate_version_set* _version_set);

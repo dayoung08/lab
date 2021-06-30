@@ -35,17 +35,28 @@ void server_initalization(server* _server_list) {
 }
 
 //비용 관련
-double calculate_ES_cost(server* _server, double _GHz) { //초당 cost
+double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초당 cost
 	int bn_type = (_server->index - 1) % ES_TYPE_NUM + 1;
 	//https://support.google.com/youtube/answer/2853702?hl=ko 이거 보면 DASH에서는 보통 세그먼트가 2초인듯. 깔끔하게 1초로 하자. 왜냐하면 1초여야 계산이 편하다(언젠가 1초인 세상이 올 것이다 ^^....)
 
-	// 일단 기기 대여까지 해주는 서비스만 고려함....................
-	// 3, 4, 5는 각각 월간 금액이므로 나누기 30함. 717, 2358, 1368
-	double percent = _GHz / _server->processing_capacity;
-	//double cost = (full_charge[bn_type] * percent) * (PERIOD * 24 * 3600);
-	double cost = full_charge[bn_type] * percent;
+	double cost = 0;
+	if (_model == CPU_USAGE_MODEL) {
+		// 일단 기기 대여까지 해주는 서비스만 고려함....................
+		// 3, 4, 5는 각각 월간 금액이므로 나누기 30함. 717, 2358, 1368
+		double percent = _used_GHz / _server->processing_capacity;
+		//double cost = (full_charge[bn_type] * percent) * (PERIOD * 24 * 3600);
+		cost = full_charge[bn_type] * percent;
+	}
+	else if (_model == LEASING_MODEL) {
+		if (_used_GHz)
+			cost = full_charge[bn_type];
+		else
+			cost = 0;
+	}
 	return cost;
 }
+
+
 
 double get_full_charge() {
 	double full_total_charge = 0;
