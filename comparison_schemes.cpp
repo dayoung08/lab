@@ -993,6 +993,14 @@ void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_versio
 	}
 
 	TA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+
+	double total_cost = 0;
+	//double remained_GHz[ES_NUM + 1]; // processing capacity[es] - _used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
+	for (int ES = 0; ES <= ES_NUM; ES++) {
+		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+		//remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
+	}
+	CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);;
 }
 
 
@@ -1052,6 +1060,13 @@ void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_versi
 	}
 
 	TA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	double total_cost = 0;
+	//double remained_GHz[ES_NUM + 1]; // processing capacity[es] - _used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
+	for (int ES = 0; ES <= ES_NUM; ES++) {
+		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+		//remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
+	}
+	CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);;
 }
 
 
