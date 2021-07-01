@@ -1000,7 +1000,12 @@ void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_versio
 		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 		//remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 	}
-	CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);;
+	if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+		CR_usage_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	}
+	if (_model == LEASING_MODEL) {
+		CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	}
 }
 
 
@@ -1066,7 +1071,12 @@ void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_versi
 		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 		//remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 	}
-	CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);;
+	if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+		CR_usage_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	}
+	if (_model == LEASING_MODEL) {
+		CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	}
 }
 
 
