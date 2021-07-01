@@ -992,7 +992,7 @@ void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_versio
 		_selected_set[ch] = 1;
 	}
 
-	TA_usage_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	TA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
 }
 
 
@@ -1051,7 +1051,7 @@ void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_versi
 		_selected_set[ch] += _version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1));
 	}
 
-	TA_usage_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	TA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
 }
 
 
