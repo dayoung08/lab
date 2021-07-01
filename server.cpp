@@ -70,6 +70,8 @@ double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초당
 		cost = full_charge[bn_type] * step;
 	}
 	return cost;
+
+	//log 형이랑 exponential 형 모델도 넣자 
 }
 
 

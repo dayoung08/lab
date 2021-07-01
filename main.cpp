@@ -5,9 +5,9 @@ int main() {
 	double ratio = 0.5;
 	double cost_limit = get_full_charge() * ratio;
 	int pop_type = MVP;
-	//int cost_model = LEASING_MODEL;
+	int cost_model = LEASING_MODEL;
 	//int cost_model = CPU_USAGE_MODEL;
-	int cost_model = STEP_MODEL;
+	//int cost_model = STEP_MODEL;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
 	printf("===== START =====\n");
