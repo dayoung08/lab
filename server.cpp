@@ -53,6 +53,22 @@ double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //ÃÊ´ç
 		else
 			cost = 0;
 	}
+	else if (_model == STEP_MODEL) {
+		double percent = _used_GHz / _server->processing_capacity;
+		double step = 0;
+		
+		if (percent) {
+			if (percent == 100) {
+				step = 1;
+			}
+			else
+				step = ceil(percent * 10) / 10;
+		}
+		else
+			step = 0.1;
+
+		cost = full_charge[bn_type] * step;
+	}
 	return cost;
 }
 

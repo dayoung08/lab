@@ -71,7 +71,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 	std::printf("=TA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
-	if (_model == CPU_USAGE_MODEL) {
+	if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
 		CR_usage_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, _used_GHz, _ES_count, _model);
 	}
 	if (_model == LEASING_MODEL) {
@@ -145,6 +145,8 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double slope = _channel_list[ch].pwq[1] / _channel_list[ch].video_GHz[1];
 		//double slope = _channel_list[ch].pwq[1] / calculate_ES_cost(&(_server_list[_selected_ES[ch][1]]), _channel_list[ch].video_GHz[1], _model);
+		
+		//이거 pwq/GHz나 pwq/cost나 linear 모델에선 똑같고, leasing model에선 애초에 cost는 틀린거고 계산도 안됨
 		list_TA.insert(make_pair(slope, make_pair(ch, 1)));
 	}
 
@@ -210,6 +212,8 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
 				double slope = _channel_list[ch].pwq[ver] / _channel_list[ch].video_GHz[ver];
 				//double slope = _channel_list[ch].pwq[ver] / calculate_ES_cost(&(_server_list[_selected_ES[ch][ver]]), _channel_list[ch].video_GHz[ver], _model);
+				
+				//이거 pwq/GHz나 pwq/cost나 linear 모델에선 똑같고, leasing model에선 애초에 cost는 틀린거고 계산도 안됨
 				list_TA.insert(make_pair(slope, make_pair(ch, ver)));
 			}
 		}
