@@ -143,7 +143,7 @@ double* set_version_pop(bitrate_version_set* _bitrate_version_set, int _version_
 /* server.cpp */
 void server_initalization(server* _server_list);
 double calculate_ES_cost(server* _server, double _used_GHz, int _model);
-double get_full_charge();
+double get_full_charge(int _cost_model);
 void set_coverage_infomation(channel* _channel_list, server* _server_list);
 double calculate_distance(channel* _channel, server* _server);
 double deg2rad(double _deg);

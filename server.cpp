@@ -6,18 +6,19 @@
 // 아래는 Snowball Edge(1, 2), MS Azure Stack Edge(3, 4, 5) 의 금액을 초당으로 변경한 것.
 // 1, 2는 일간 금액으므로 나누기 24 * 3600함. 80, 150
 // 3, 4, 5는 각각 월간 금액이므로 나누기 30 * 24 * 3600함. 717, 2358, 1368
-double full_charge[ES_TYPE_NUM + 1] = { 0, 0.000926, 0.00174, 0.000277, 0.00091, 0.000528 };
+double full_charge_per_second[ES_TYPE_NUM + 1] = { 0, 0.000926, 0.00174, 0.000277, 0.00091, 0.000528 };
+double monthly_charge[ES_TYPE_NUM + 1] = { 0, 2400, 4500, 717, 2358, 1368 };
 
+double edge_server_max_GHz[ES_TYPE_NUM + 1] = { 1814.4, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
 //0번은 CTS
 //Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
 //위의 것이 10대 있다고 가정하자.
-double edge_server_max_GHz[ES_TYPE_NUM + 1] = { 1814.4, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
+
 //1. Snowball Edge Storage Optimized(EC2 컴퓨팅 기능 포함) - Intel Xeon D 프로세서, 16코어, 1.8Ghz
 //2. Snowball Edge Compute Optimized - AMD Naples, 32코어, 3.4Ghz
 //3. Azure Stack Edge Pro - 2 X Intel Xeon 실버 4214 CPU, 2.20 GHz, 24 개 물리적 코어(CPU 당 12 개)
 //4. Azure Stack Edge Pro R - 2 X Intel Xeon 실버 4114 CPU, 2.20GHz, 20개의 물리적 코어(CPU 당 10 개)
 //5. Azure Stack Edge Mini R - Intel Xeon-D 1577, 1.3GHz, 16코어
-
 
 void server_initalization(server* _server_list) {
 	for (int ES = 0; ES <= ES_NUM; ES++) {
@@ -45,13 +46,7 @@ double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초당
 		// 3, 4, 5는 각각 월간 금액이므로 나누기 30함. 717, 2358, 1368
 		double percent = _used_GHz / _server->processing_capacity;
 		//double cost = (full_charge[bn_type] * percent) * (PERIOD * 24 * 3600);
-		cost = full_charge[bn_type] * percent;
-	}
-	else if (_model == LEASING_MODEL) {
-		if (_used_GHz)
-			cost = full_charge[bn_type];
-		else
-			cost = 0;
+		cost = full_charge_per_second[bn_type] * percent;
 	}
 	else if (_model == STEP_MODEL) {
 		double percent = _used_GHz / _server->processing_capacity;
@@ -67,8 +62,15 @@ double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초당
 		else
 			step = 0.1;
 
-		cost = full_charge[bn_type] * step;
+		cost = full_charge_per_second[bn_type] * step;
 	}
+	else if (_model == LEASING_MODEL) {
+		if (_used_GHz)
+			cost = monthly_charge[bn_type];
+		else
+			cost = 0;
+	}
+
 	return cost;
 
 	//log 형이랑 exponential 형 모델도 넣자 
@@ -76,11 +78,16 @@ double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초당
 
 
 
-double get_full_charge() {
+double get_full_charge(int _cost_model) {
 	double full_total_charge = 0;
 	for (int ES = 1; ES <= ES_NUM; ES++) {
 		int bn_type = (ES - 1) % ES_TYPE_NUM + 1;
-		full_total_charge += full_charge[bn_type];
+		if (_cost_model == CPU_USAGE_MODEL || _cost_model == STEP_MODEL) {
+			full_total_charge += full_charge_per_second[bn_type];
+		}
+		else if (_cost_model == LEASING_MODEL) {
+			full_total_charge += monthly_charge[bn_type];
+		}
 	}
 	return full_total_charge;
 }
