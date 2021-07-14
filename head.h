@@ -14,20 +14,20 @@ using namespace std;
 
 //#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
 #define CPU_USAGE_MODEL 0
-#define LEASING_MODEL 1
-#define STEP_MODEL 2
-
+#define ONOFF_MODEL 1
 
 //아래는 교수님이 주신 파일 기반. 코드 보니까 클라이언트 수 x 유저 수를 채널로 해도 될 것 같다. 필요 시 coord.c 파일 수정해서 파일들 다시 뽑으면 될 듯.
 //#define NUM_OF_CLIENT	816
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-#define ES_NUM 1000
+#define NUM_OF_ES 200
 
-#define AWS_NUM 2
-#define MS_AZURE_NUM 3
-#define ES_TYPE_NUM (AWS_NUM+MS_AZURE_NUM)
+#define NUM_OF_MACHINES_FOR_LINEAR_MODEL 5
+#define NUM_OF_LINEAR_COST_MODEL 5
+
+#define NUM_OF_MACHINES_FOR_ONOFF_MODEL 5
+#define NUM_OF_ONOFF_COST_MODEL 5
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
 #define CHANNEL_NUM 6000
 
@@ -81,6 +81,9 @@ public:
 
 	int coverage; // 커버리지
 
+	int machine_type; // 엣지 기기의 종류 
+	int cost_model_type; // 비용 함수의 종류
+
 	//아래는 채널 할당으로 인해 갱신되는 값.
 	/*int total_GHz;
 	double total_transfer_data_size;
@@ -106,7 +109,7 @@ public:
 	double* sum_of_version_set_GHz;
 
 	double get_channel_popularity();
-	bool available_server_list[ES_NUM]; // true: user i is in server j's coverage
+	bool available_server_list[NUM_OF_ES]; // true: user i is in server j's coverage
 
 	//아래는 알고리즘의 결과로 결정될 파라미터
 	int allocated_server_index; //이게 중요함. 교수님이 주신 파일에서 int assign[NUM_OF_CLIENT * NUM_OF_USER]; // assigned server index -> 이것과 같은 역할임.
@@ -141,9 +144,9 @@ double* set_gamma_pop(int length, double k, double theta);
 double* set_version_pop(bitrate_version_set* _bitrate_version_set, int _version_pop_type);
 
 /* server.cpp */
-void server_initalization(server* _server_list);
+void server_initalization(server* _server_list, int _model);
 double calculate_ES_cost(server* _server, double _used_GHz, int _model);
-double get_full_charge(int _cost_model);
+double get_full_charge(server* _server_list, int _cost_model);
 void set_coverage_infomation(channel* _channel_list, server* _server_list);
 double calculate_distance(channel* _channel, server* _server);
 double deg2rad(double _deg);
@@ -157,7 +160,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_limit, short* _selected_set);
 void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
 void CR_usage_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
-void CR_leasing_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void CR_onoff_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);

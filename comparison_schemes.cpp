@@ -8,11 +8,11 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 	short** selected_ES;//[CHANNEL_NUM + 1][VERSION_NUM]; // 각 채널에서 사용하는 비트레이트 set에 속하는 각 버전이 어떤 es에서 선택되었는가.
 	//오리지널 버전은 트랜스코딩 안해서 배열 크기가 저렇다.
 
-	double used_GHz[ES_NUM + 1];
-	short ES_count[ES_NUM + 1];
+	double used_GHz[NUM_OF_ES + 1];
+	short ES_count[NUM_OF_ES + 1];
 	//short** ES_version_count_in_comparison_schemes;
 	//ES_version_count_in_comparison_schemes = (short**)malloc(sizeof(short*) * (ES_NUM + 1));
-	for (int ES = 0; ES <= ES_NUM; ES++) {
+	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 		used_GHz[ES] = 0;
 		ES_count[ES] = 0;
 		/*ES_version_count_in_comparison_schemes[ES] = (short*)malloc(sizeof(short) * (_version_set->version_num));
@@ -90,9 +90,9 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	}
 
 	double total_cost = 0; 
-	double remained_GHz[ES_NUM + 1]; // processing capacity[es] - used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
+	double remained_GHz[NUM_OF_ES + 1]; // processing capacity[es] - used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
 
-	for (int ES = 0; ES <= ES_NUM; ES++) {
+	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 		//short ES_total_count = get_ES_total_count(ES, _version_set);
 
 		//if (ES_total_count > 0) {
@@ -125,7 +125,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
 				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
 		}
@@ -136,7 +136,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
 				else {
@@ -183,7 +183,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 			is_allocated_for_versions[ch][ver] = false;
 			//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 			set<pair<double, int>> lowest_used_GHz_of_ES;
-			for (int ES = 1; ES <= ES_NUM; ES++) {
+			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 				if (_channel_list[ch].available_server_list[ES])
 					lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
 			}
@@ -194,7 +194,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 				double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				double total_cost = 0;
-				for (int es = 1; es <= ES_NUM; es++) {
+				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES)
 						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
 					else {
@@ -273,7 +273,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if(_channel_list[ch].available_server_list[ES])
 				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
 		}
@@ -284,7 +284,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
 				else{
@@ -336,7 +336,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 ver번 버전의 갯수에 따라 오름차순 정렬. 
 		set<pair<int, int>> lowest_used_GHz_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
 				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
 		}
@@ -347,7 +347,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
 				else {
@@ -390,7 +390,7 @@ void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrat
 	//버전 선택 - TD
 
 	double GHz_limit = _server_list[0].processing_capacity;
-	for (int ES = 1; ES <= ES_NUM; ES++) {
+	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		GHz_limit += _server_list[ES].processing_capacity;
 	}
 	TD_phase(_server_list, _channel_list, _version_set, GHz_limit, _selected_set);
@@ -411,7 +411,7 @@ void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrat
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
 				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
 		}
@@ -422,7 +422,7 @@ void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrat
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
 				else {
@@ -477,7 +477,7 @@ void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrat
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 ver번 버전의 갯수에 따라 오름차순 정렬. 
 		set<pair<int, int>> lowest_used_GHz_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
 				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
 		}
@@ -488,7 +488,7 @@ void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrat
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
 				else {
@@ -547,7 +547,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_cost_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
 				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
@@ -560,7 +560,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
 				else {
@@ -607,7 +607,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			is_allocated_for_versions[ch][ver] = false;
 			//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 			set<pair<double, int>> lowest_cost_of_ES;
-			for (int ES = 1; ES <= ES_NUM; ES++) {
+			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 				if (_channel_list[ch].available_server_list[ES]) {
 					double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model);
 					lowest_cost_of_ES.insert(make_pair(cost, ES));
@@ -620,7 +620,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 				double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				double total_cost = 0;
-				for (int es = 1; es <= ES_NUM; es++) {
+				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES)
 						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
 					else {
@@ -699,7 +699,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_cost_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
 				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
@@ -712,7 +712,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
 				else {
@@ -764,7 +764,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 ver번 버전의 갯수에 따라 오름차순 정렬. 
 		set<pair<int, int>> lowest_cost_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
 				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
@@ -777,7 +777,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
 				else {
@@ -819,7 +819,7 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 	//버전 선택 - TD
 
 	double GHz_limit = _server_list[0].processing_capacity;
-	for (int ES = 1; ES <= ES_NUM; ES++) {
+	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		GHz_limit += _server_list[ES].processing_capacity;
 	}
 	TD_phase(_server_list, _channel_list, _version_set, GHz_limit, _selected_set);
@@ -840,7 +840,7 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_cost_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
 				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
@@ -853,7 +853,7 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
 				else {
@@ -908,7 +908,7 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 ver번 버전의 갯수에 따라 오름차순 정렬. 
 		set<pair<int, int>> lowest_cost_of_ES;
-		for (int ES = 1; ES <= ES_NUM; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
 				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
@@ -921,7 +921,7 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 
 			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
-			for (int es = 1; es <= ES_NUM; es++) {
+			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES)
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
 				else {
@@ -963,7 +963,7 @@ void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_versio
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 	
 	double GHz_limit = _server_list[0].processing_capacity;
-	for (int ES = 1; ES <= ES_NUM; ES++) {
+	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		GHz_limit += _server_list[ES].processing_capacity;
 	}
 	
@@ -996,15 +996,16 @@ void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_versio
 
 	double total_cost = 0;
 	//double remained_GHz[ES_NUM + 1]; // processing capacity[es] - _used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
-	for (int ES = 0; ES <= ES_NUM; ES++) {
+	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 		//remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 	}
-	if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+	//if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+	if (_model == CPU_USAGE_MODEL){
 		CR_usage_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
 	}
-	if (_model == LEASING_MODEL) {
-		CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	if (_model == ONOFF_MODEL) {
+		CR_onoff_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
 	}
 }
 
@@ -1014,7 +1015,7 @@ void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_versi
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
 	double GHz_limit = _server_list[0].processing_capacity;
-	for (int ES = 1; ES <= ES_NUM; ES++) {
+	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		GHz_limit += _server_list[ES].processing_capacity;
 	}
 
@@ -1067,15 +1068,16 @@ void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_versi
 	TA_phase(_server_list, _channel_list, _version_set, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
 	double total_cost = 0;
 	//double remained_GHz[ES_NUM + 1]; // processing capacity[es] - _used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
-	for (int ES = 0; ES <= ES_NUM; ES++) {
+	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 		//remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 	}
-	if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+	//if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+	if (_model == CPU_USAGE_MODEL){
 		CR_usage_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
 	}
-	if (_model == LEASING_MODEL) {
-		CR_leasing_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
+	if (_model == ONOFF_MODEL) {
+		CR_onoff_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, _selected_set, _selected_ES, _used_GHz, _ES_count, _model);
 	}
 }
 
