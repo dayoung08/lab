@@ -17,7 +17,7 @@ double hourly_charge_for_linear_model[NUM_OF_LINEAR_COST_MODEL + 1] = { 0, 0.020
 //5. Google Cloud Anthos, 온프레미스(On-premise) 환경에서 Anthos 사용 - 1 vCPU, 0.03288 USD
 
 int ES_number_of_vCPUs_for_linear_model[NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1] = { 0, 768, 1024, 256, 224, 256 };
-double ES_GHz_for_linear_model[NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1] = { 1814.4, 864, 1254.4, 256, 324.8, 313.6};
+double ES_GHz_for_linear_model[NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6};
 //1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html -> vcpu : 768개
 //2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html -> vcpu: 1024개
 //3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html -> vcpu: 256개
@@ -28,7 +28,7 @@ double ES_GHz_for_linear_model[NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1] = { 1814.4,
 // onoff model : onoff하는 디바이스에 따라 가격이 결정되는 구조.
 // Snowball Edge(1, 2), MS Azure Stack Edge(3, 4, 5) 의 월간 금액, 스노우볼 엣지는 일간 금액이므로 x 30일 함. (단위 및 조건을 맞추기 위해)
 double monthly_charge_for_onoff_model[NUM_OF_MACHINES_FOR_ONOFF_MODEL + 1] = { 0, 2400, 4500, 717, 2358, 1368 };
-double ES_GHz_for_onoff_model[NUM_OF_MACHINES_FOR_ONOFF_MODEL + 1] = { 1814.4, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
+double ES_GHz_for_onoff_model[NUM_OF_MACHINES_FOR_ONOFF_MODEL + 1] = { 0, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
 
 //1. Snowball Edge Storage Optimized(EC2 컴퓨팅 기능 포함) - Intel Xeon D 프로세서, 16코어, 1.8Ghz
 //2. Snowball Edge Compute Optimized - AMD Naples, 32코어, 3.4Ghz

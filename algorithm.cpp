@@ -1,6 +1,7 @@
 #include "head.h"
 
 //알고리즘 여기서부터 이제 짜야함
+double used_GHz[NUM_OF_ES + 1];
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model) {
 	short selected_set[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
 	short** selected_ES;
@@ -13,11 +14,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 	}
 
-	double _used_GHz[NUM_OF_ES + 1];
 	short _ES_count[NUM_OF_ES + 1];
 	memset(_ES_count, 0, (sizeof(short) * (NUM_OF_ES + 1)));
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-		_used_GHz[ES] = 0;
+		used_GHz[ES] = 0;
 	}
 
 	double first_GHz = 0; //lowest version만 트랜스코딩할때
@@ -43,7 +43,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 	std::printf("=TD= total_GHz : %lf GHz, total_pwq : %lf\n", total_GHz, total_pwq);
 
-	TA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, _used_GHz, _ES_count, _model);
+	TA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, _ES_count, _model);
 
 	total_GHz = 0;
 	total_pwq = 0;
@@ -54,17 +54,17 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	double total_cost = 0;
 	double remained_GHz[NUM_OF_ES + 1]; // processing capacity[es] - _used_GHz[es] 하면 remained_GHz[es] 하면 나옴. 모든 노드의 남은 GHz 계산을 위해.
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
+		total_cost += calculate_ES_cost(&(_server_list[ES]), used_GHz[ES], _model);
+		remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 	}
 	std::printf("=TA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
 	//if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
 	if (_model == CPU_USAGE_MODEL){
-		CR_usage_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, _used_GHz, _ES_count, _model);
+		CR_usage_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, _ES_count, _model);
 	}
 	if (_model == ONOFF_MODEL) {
-		CR_onoff_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, _used_GHz, _ES_count, _model);
+		CR_onoff_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, _ES_count, _model);
 	}
 	total_GHz = 0;
 	total_pwq = 0;
@@ -79,8 +79,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 	total_cost = 0;
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-		total_cost += calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
+		total_cost += calculate_ES_cost(&(_server_list[ES]), used_GHz[ES], _model);
+		remained_GHz[ES] = _server_list[ES].processing_capacity - used_GHz[ES];
 	}
 
 	std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
@@ -165,7 +165,7 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			}
 		}
 
-		if (!is_allocated_CTS) {
+		if (is_allocated_CTS) {
 			_selected_ES[ch][1] = ES;
 			_ES_count[ES]++;
 			_used_GHz[ES] += _channel_list[ch].video_GHz[1];
@@ -221,7 +221,7 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			}
 		}
 
-		if (!is_allocated_CTS) {
+		if (is_allocated_CTS) {
 			_selected_ES[ch][ver] = ES;
 			_ES_count[ES]++;
 			_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
