@@ -152,15 +152,15 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		bool is_allocated_CTS = false;
 		while (true) {
 			pos--;
-			if (pos == remained_GHz_of_ESs_set.begin()) {
-				is_allocated_CTS = true;
-				break;
-			}
 
 			ES = (*pos).second; // 가장 남은 GHz가 많은 엣지는 무엇인가?
 			GHz = (*pos).first; // 그 엣지의 GHz는 얼마인가?
 
 			if ((_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[1] >= 0)) {
+				is_allocated_CTS = true;
+				break;
+			}
+			if (pos == remained_GHz_of_ESs_set.begin()) {
 				break;
 			}
 		}
@@ -205,18 +205,17 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		double prev_cost = 0;
 		double curr_cost = 0;
 		bool is_allocated_CTS = false;
-
 		while (true) {
 			pos--;
-			if (pos == remained_GHz_of_ESs_set.begin()) {
-				is_allocated_CTS = true;
-				break;
-			}
 
 			ES = (*pos).second; // 가장 남은 GHz가 많은 엣지는 무엇인가?
 			GHz = (*pos).first; // 그 엣지의 GHz는 얼마인가?
 
-			if ((_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[ver] >= 0)) {
+			if ((_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[1] >= 0)) {
+				is_allocated_CTS = true;
+				break;
+			}
+			if (pos == remained_GHz_of_ESs_set.begin()) {
 				break;
 			}
 		}

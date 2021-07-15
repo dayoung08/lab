@@ -21,7 +21,7 @@ using namespace std;
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-#define NUM_OF_ES 120 // linear model이면 200
+#define NUM_OF_ES 250 // linear model이면 200
 
 #define NUM_OF_MACHINES_FOR_LINEAR_MODEL 5
 #define NUM_OF_LINEAR_COST_MODEL 5
