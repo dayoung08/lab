@@ -21,7 +21,7 @@ using namespace std;
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-#define NUM_OF_ES 250 // linear model이면 200
+#define NUM_OF_ES 150 // linear model이면 200
 
 #define NUM_OF_MACHINES_FOR_LINEAR_MODEL 5
 #define NUM_OF_LINEAR_COST_MODEL 5
@@ -159,8 +159,7 @@ void set_version_set(bitrate_version_set* _version_set, short* _selected_set, sh
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
 void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_limit, short* _selected_set);
 void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
-void CR_usage_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
-void CR_onoff_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
