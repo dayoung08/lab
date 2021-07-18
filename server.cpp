@@ -99,18 +99,25 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// server read
 	fopen_s(&fp, "servercoord.txt", "r");
 
+	pair<double, double> coverage[126];
 	for (int ES = 1; ES <= 125; ES++) {
 		double latitude, longitude;
 
 		fscanf(fp, "%lf\t%lf\n", &latitude, &longitude);
 		
-		for (int cnt = 0; cnt < (NUM_OF_ES / 125); cnt++) {
-			_server_list[ES + 125 * cnt].server_location.latitude = latitude;
-			_server_list[ES + 125 * cnt].server_location.longitude = longitude;
-			//cout << ES + 125 * cnt << endl;
-		}
+		coverage[ES].first = latitude;
+		coverage[ES].second = longitude;
 	}
 	fclose(fp);
+
+	//210717 버그 수정
+	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+		double latitude = coverage[(ES - 1) % 125 + 1].first;
+		double longitude = coverage[(ES - 1) % 125 + 1].second;
+
+		_server_list[ES].server_location.latitude = latitude;
+		_server_list[ES].server_location.longitude = longitude;
+	}
 
 	// user read
 	fopen_s(&fp, "usercoord.txt", "r");

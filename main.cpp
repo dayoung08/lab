@@ -4,8 +4,8 @@ int main() {
 
 	double ratio = 0.5;
 	int pop_type = MVP;
-	int model = CPU_USAGE_MODEL;
-	//int model = ONOFF_MODEL;
+	//int model = CPU_USAGE_MODEL;
+	int model = ONOFF_MODEL;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
 	server server_list[NUM_OF_ES + 1];
