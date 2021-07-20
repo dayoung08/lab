@@ -21,7 +21,8 @@ using namespace std;
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-#define NUM_OF_ES 1000 // linear model이면 100, leasing이면 1000으로 생각중
+//#define NUM_OF_ES 100 // linear model이면 100, leasing이면 1000으로 생각중
+#define NUM_OF_ES 100 // linear model이면 100, leasing이면 1000으로 생각중
 
 #define NUM_OF_MACHINES_FOR_LINEAR_MODEL 5
 #define NUM_OF_LINEAR_COST_MODEL 5
@@ -29,7 +30,7 @@ using namespace std;
 #define NUM_OF_MACHINES_FOR_ONOFF_MODEL 5
 #define NUM_OF_ONOFF_COST_MODEL 5
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
-#define CHANNEL_NUM 6000
+#define CHANNEL_NUM 6000 //6000이 기준
 
 //#define VERSION_NUM 7
 //#define VERSION_SET_NUM 32 // 오리지널 버전 제외하고, 마지막 버전은 반드시 저장. 2^(7-2) set 1이 오리지널과 마지막 버전만 들어있는 것.
@@ -76,7 +77,7 @@ struct location {
 class server {
 public:
 	int index;
-	int processing_capacity;
+	double processing_capacity;
 	location server_location; // int capacity; // server's capacity
 
 	int coverage; // 커버리지

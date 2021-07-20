@@ -46,7 +46,7 @@ void server_initalization(server* _server_list, int _model) {
 		_server_list[ES].index = ES;
 
 		if (_model == CPU_USAGE_MODEL) {
-			_server_list[ES].machine_type = rand() % NUM_OF_LINEAR_COST_MODEL + 1;
+			_server_list[ES].machine_type = rand() % NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1;
 			_server_list[ES].cost_model_type = rand() % NUM_OF_LINEAR_COST_MODEL + 1;
 			_server_list[ES].processing_capacity = ES_GHz_for_linear_model[_server_list[ES].machine_type];
 		}

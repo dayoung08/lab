@@ -60,7 +60,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	std::printf("=TA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
 	CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
-	
+
 	total_GHz = 0;
 	total_pwq = 0;
 	int cnt = 0;
@@ -118,16 +118,17 @@ void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model) {
 	// 2-1. TA phase
-	set<pair<double, int>> remained_GHz_of_ESs_set;
+	set<pair<double, int>> lowest_cost_of_ES;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-		remained_GHz_of_ESs_set.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
+		lowest_cost_of_ES.insert(make_pair(0, ES)); //set
 	}
+	//210721 이 부분만 이전에는 사용 GHz가 낮은걸로 했는데, cost로 변경함. 그리고 더 좋은 결과가 나옴.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TA;
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
 		double slope = _channel_list[ch].pwq[1] / _channel_list[ch].video_GHz[1];
 		//double slope = _channel_list[ch].pwq[1] / calculate_ES_cost(&(_server_list[_selected_ES[ch][1]]), _channel_list[ch].video_GHz[1], _model);
-		
+
 		//이거 pwq/GHz나 pwq/cost나 linear 모델에선 똑같고, onoff model에선 애초에 cost는 틀린거고 계산도 안됨
 		list_TA.insert(make_pair(slope, make_pair(ch, 1)));
 	}
@@ -137,27 +138,25 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		int ch = (*list_TA.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
 		list_TA.erase(list_TA.begin());//맨 앞 삭제함
 
-		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.end();
+		set <pair<double, int>>::iterator pos = lowest_cost_of_ES.begin();
 
 		int ES = -1;
 		double GHz = 0;
-		double prev_cost = 0;
-		double curr_cost = 0;
 
 		bool is_allocated_ES = false;
 		while (true) {
-			pos--;
+			if (pos == lowest_cost_of_ES.end()) {
+				break;
+			}
 
 			ES = (*pos).second; // 가장 남은 GHz가 많은 엣지는 무엇인가?
-			GHz = (*pos).first; // 그 엣지의 GHz는 얼마인가?
 
-			if ((_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[1] >= 0)) {
+			if ((_channel_list[ch].available_server_list[ES]) && (_used_GHz[ES] + _channel_list[ch].video_GHz[1] <= _server_list[ES].processing_capacity)) {
 				is_allocated_ES = true;
 				break;
 			}
-			if (pos == remained_GHz_of_ESs_set.begin()) {
-				break;
-			}
+
+			pos++;
 		}
 
 		if (is_allocated_ES) {
@@ -165,8 +164,9 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			_ES_count[ES]++;
 			_used_GHz[ES] += _channel_list[ch].video_GHz[1];
 
-			remained_GHz_of_ESs_set.erase(pos);
-			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
+			lowest_cost_of_ES.erase(pos);
+			double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
+			lowest_cost_of_ES.insert(make_pair(cost, ES));
 		}
 		else {
 			if (_used_GHz[0] + _channel_list[ch].video_GHz[1] <= _server_list[0].processing_capacity) {
@@ -183,7 +183,7 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
 				double slope = _channel_list[ch].pwq[ver] / _channel_list[ch].video_GHz[ver];
-				
+
 				//이거 pwq/GHz나 pwq/cost나 linear 모델에선 똑같고, onoff model에선 애초에 cost는 틀린거고 계산도 안됨
 				list_TA.insert(make_pair(slope, make_pair(ch, ver)));
 			}
@@ -194,26 +194,27 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		int ver = (*list_TA.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 		list_TA.erase(list_TA.begin());//맨 앞 삭제함
 
-		set <pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.end();
+		set <pair<double, int>>::iterator pos = lowest_cost_of_ES.begin();
 		int ES = -1;
 		double GHz = 0;
 		double prev_cost = 0;
 		double curr_cost = 0;
 		bool is_allocated_ES = false;
 		while (true) {
-			pos--;
+			if (pos == lowest_cost_of_ES.end()) {
+				break;
+			}
 
 			ES = (*pos).second; // 가장 남은 GHz가 많은 엣지는 무엇인가?
 			GHz = (*pos).first; // 그 엣지의 GHz는 얼마인가?
 
-			if ((_channel_list[ch].available_server_list[ES]) && (GHz - _channel_list[ch].video_GHz[ver] >= 0)) {
+			if ((_channel_list[ch].available_server_list[ES]) && (_used_GHz[ES] + _channel_list[ch].video_GHz[ver] <= _server_list[ES].processing_capacity)) {
 				//210715 버그 드디어 찾음
 				is_allocated_ES = true;
 				break;
 			}
-			if (pos == remained_GHz_of_ESs_set.begin()) {
-				break;
-			}
+
+			pos++;
 		}
 
 		if (is_allocated_ES) {
@@ -221,8 +222,9 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			_ES_count[ES]++;
 			_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
 
-			remained_GHz_of_ESs_set.erase(pos);
-			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
+			lowest_cost_of_ES.erase(pos);
+			double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
+			lowest_cost_of_ES.insert(make_pair(cost, ES));
 		}
 		else if (_used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
 			_selected_ES[ch][ver] = 0;
@@ -290,7 +292,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 				}
 			}
 		}
-		
+
 		// 이 때 ES에서 뺄 때, ingesion server에 있는 버전보다 pwq가 높을 경우,
 		// (즉 CTS에 할당된 버전 중, pwq가 제일 낮은 버전과 비교한다.)
 		// (CTS에 할당된 버전이 빼려는 버전보다 더 pwq가 낮을 경우, 해당 버전은 CTS에 들어가고 원래 거기 있던 버전은 빠짐.)
@@ -354,7 +356,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		while (versions_in_CTS.size()) {
 			int ch_in_CTS = (*versions_in_CTS.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
 			int ver_in_CTS = (*versions_in_CTS.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
-			
+
 			versions_in_CTS.erase(versions_in_CTS.begin());// list_CR의 맨 앞 삭제함
 
 			_ES_count[0]--;

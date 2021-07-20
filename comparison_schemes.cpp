@@ -40,7 +40,7 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 		cost_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
 	}
 	if (method_index == cost_WF_TD) {
-		cost_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		cost_worst_fit_TD_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
 	}
 	if (method_index == TA_CR_AP) {
 		TA_CR_phase_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
@@ -684,8 +684,9 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 	}
 }
 
+
 void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model) {
-	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
+	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
@@ -702,7 +703,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		version_popularities_set.erase(version_popularities_set.begin());
 		//가장 인기많은 ch를 고름.
 
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
+		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용 비용에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -710,6 +711,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
+
 
 		while (!lowest_cost_of_ES.empty()) {
 			int ES = (*lowest_cost_of_ES.begin()).second;
@@ -722,7 +724,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
 				else {
 					//if (get_ES_total_count(es, _version_set))
-						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
 				}
 			}
 
@@ -767,11 +769,11 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		version_popularities_set.erase(version_popularities_set.begin());
 		//가장 인기많은 ch를 고름.
 
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 ver번 버전의 갯수에 따라 오름차순 정렬. 
-		set<pair<int, int>> lowest_cost_of_ES;
+		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES의 cost에 따라 오름차순 정렬. 
+		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
+				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -787,7 +789,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
 				else {
 					//if (get_ES_total_count(es, _version_set))
-						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
 				}
 			}
 
@@ -819,8 +821,9 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 	}
 }
 
+
 void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model) {
-	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
+	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - TD
 
 	double GHz_limit = _server_list[0].processing_capacity;
@@ -843,7 +846,7 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 		version_popularities_set.erase(version_popularities_set.begin());
 		//가장 인기많은 ch를 고름.
 
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
+		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 비용에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -911,11 +914,11 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 		version_popularities_set.erase(version_popularities_set.begin());
 		//가장 인기많은 ch를 고름.
 
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 ver번 버전의 갯수에 따라 오름차순 정렬. 
-		set<pair<int, int>> lowest_cost_of_ES;
+		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 비용에 따라 오름차순 정렬. 
+		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[1], _model);
+				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -962,6 +965,7 @@ void cost_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitra
 		}
 	}
 }
+
 
 void TA_CR_phase_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model) {
 	//엣지 선택 - TA+CR phase
