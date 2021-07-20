@@ -2,8 +2,8 @@
 int main() {
 	srand(SEED);
 
-	double ratio = 0.6;
-	int pop_type = MVP;
+	double ratio = 0.4;
+	int pop_type = HVP;
 	int model = CPU_USAGE_MODEL;
 	//int model = ONOFF_MODEL;
 	//이 위의 인자들을 실험 환경에 따라 변경

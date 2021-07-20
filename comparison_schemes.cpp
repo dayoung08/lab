@@ -1030,6 +1030,7 @@ void TA_CR_phase_HPF(server* _server_list, channel* _channel_list, bitrate_versi
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 	//_version_set->version_set_num(N^set)으로 초기화한 상태에서 set을 내림.
 	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+		_selected_set[ch] = 1;
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
