@@ -3,7 +3,7 @@ int main() {
 	srand(SEED);
 
 	double ratio = 0.4;
-	int pop_type = LVP;
+	int pop_type = MVP;
 	int model = CPU_USAGE_MODEL;
 	//int model = ONOFF_MODEL;
 	//이 위의 인자들을 실험 환경에 따라 변경
@@ -31,12 +31,12 @@ int main() {
 	//비교스킴 아직 코딩 덜 함
 
 	printf("===== 비교 스킴 =====\n\n");
-	/*comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
+	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_TD, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(cost_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(cost_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
-	comparison_schemes(cost_WF_TD, server_list, channel_list, &version_set, cost_limit, model);*/
+	comparison_schemes(cost_WF_TD, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(TA_CR_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(TA_CR_HPF, server_list, channel_list, &version_set, cost_limit, model);
 
