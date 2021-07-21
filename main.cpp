@@ -41,4 +41,6 @@ int main() {
 	comparison_schemes(TA_CR_HPF, server_list, channel_list, &version_set, cost_limit, model);
 
 	printf("===== FINISH =====\n");
+
+	
 }

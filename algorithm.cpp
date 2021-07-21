@@ -118,11 +118,15 @@ void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model) {
 	// 2. TA phase
-	set<pair<double, int>> lowest_cost_of_ES;
+	/*set<pair<double, int>> lowest_cost_of_ES;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		lowest_cost_of_ES.insert(make_pair(0, ES)); //set
-	}
+	}*/
 	//210721 이 부분만 이전에는 사용 GHz가 낮은걸로 했는데, cost로 변경함. 그리고 더 좋은 결과가 나옴.
+	set<pair<double, int>> remained_GHz_of_ESs_set;
+	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+		remained_GHz_of_ESs_set.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
+	}
 
 	double** slopes_of_list_TA;
 	slopes_of_list_TA = (double**)malloc(sizeof(double*) * (CHANNEL_NUM + 1));
@@ -146,14 +150,16 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		int ch = (*list_TA.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
 		list_TA.erase(list_TA.begin());//맨 앞 삭제함
 
-		set <pair<double, int>>::iterator pos = lowest_cost_of_ES.begin();
+		//set <pair<double, int>>::iterator pos = lowest_cost_of_ES.begin();
+		set<pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.begin();
 
 		int ES = -1;
 		double GHz = 0;
 
 		bool is_allocated_ES = false;
 		while (true) {
-			if (pos == lowest_cost_of_ES.end()) {
+			//if (pos == lowest_cost_of_ES.end()) {
+			if (pos == remained_GHz_of_ESs_set.end()) {
 				break;
 			}
 
@@ -172,9 +178,11 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			_ES_count[ES]++;
 			_used_GHz[ES] += _channel_list[ch].video_GHz[1];
 
-			lowest_cost_of_ES.erase(pos);
-			double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-			lowest_cost_of_ES.insert(make_pair(cost, ES));
+			//lowest_cost_of_ES.erase(pos);
+			//double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+			//lowest_cost_of_ES.insert(make_pair(cost, ES));
+			remained_GHz_of_ESs_set.erase(pos);
+			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[1], ES));
 		}
 		else {
 			if (_used_GHz[0] + _channel_list[ch].video_GHz[1] <= _server_list[0].processing_capacity) {
@@ -205,12 +213,14 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		int ver = (*list_TA.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 		list_TA.erase(list_TA.begin());//맨 앞 삭제함
 
-		set <pair<double, int>>::iterator pos = lowest_cost_of_ES.begin();
+		//set <pair<double, int>>::iterator pos = lowest_cost_of_ES.begin();
+		set<pair<double, int>>::iterator pos = remained_GHz_of_ESs_set.begin();
 		int ES = -1;
 		double GHz = 0;
 		bool is_allocated_ES = false;
 		while (true) {
-			if (pos == lowest_cost_of_ES.end()) {
+			//if (pos == lowest_cost_of_ES.end()) {
+			if (pos == remained_GHz_of_ESs_set.end()) {
 				break;
 			}
 
@@ -231,9 +241,11 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			_ES_count[ES]++;
 			_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
 
-			lowest_cost_of_ES.erase(pos);
-			double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-			lowest_cost_of_ES.insert(make_pair(cost, ES));
+			//lowest_cost_of_ES.erase(pos);
+			//double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+			//lowest_cost_of_ES.insert(make_pair(cost, ES));
+			remained_GHz_of_ESs_set.erase(pos);
+			remained_GHz_of_ESs_set.insert(make_pair(GHz - _channel_list[ch].video_GHz[ver], ES));
 		}
 		else if (_used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
 			_selected_ES[ch][ver] = 0;
