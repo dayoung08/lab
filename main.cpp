@@ -4,8 +4,8 @@ int main() {
 
 	double ratio = 0.4;
 	int pop_type = MVP;
-	//int model = CPU_USAGE_MODEL;
-	int model = ONOFF_MODEL;
+	int model = CPU_USAGE_MODEL;
+	//int model = ONOFF_MODEL;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
 	server server_list[NUM_OF_ES + 1];
@@ -32,12 +32,12 @@ int main() {
 
 	printf("===== 비교 스킴 =====\n\n");
 
-	/*comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
+	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	if (model == CPU_USAGE_MODEL) {
 		comparison_schemes(cost_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 		comparison_schemes(cost_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
-	}*/
+	}
 	if (model == ONOFF_MODEL) {
 		comparison_schemes(LPF_AP, server_list, channel_list, &version_set, cost_limit, model);
 		comparison_schemes(LPF_HPF, server_list, channel_list, &version_set, cost_limit, model);
