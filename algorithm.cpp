@@ -24,7 +24,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	double first_GHz = 0; //lowest version만 트랜스코딩할때
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		first_GHz += _channel_list[ch].sum_of_version_set_GHz[1];
-		first_pwq += _channel_list[ch].pwq[1];
+		first_pwq += _channel_list[ch].sum_of_pwq[1];
 	}
 	double GHz_limit = _server_list[0].processing_capacity;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
