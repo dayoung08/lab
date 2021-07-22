@@ -1,8 +1,8 @@
 #include "head.h"
 
 void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type) {
-	double* channel_pop = set_gamma_pop(CHANNEL_NUM, K_gamma, THETA_gamma);
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	double* channel_pop = set_gamma_pop(NUM_OF_CHANNEL, K_gamma, THETA_gamma);
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		_channel_list[ch].index = ch;
 		_channel_list[ch].video_quality = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 		_channel_list[ch].popularity = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
@@ -112,7 +112,7 @@ void set_metric_score(channel* _channel_list, bitrate_version_set* _version_set,
 		mean[1] = 45; // 253
 	}
 
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		//normal_distribution<double> normal_distribution_for_metric[7]; //이거 어떻게 동적 배열로 바꿀지 생각하자
 		/*normal_distribution<double> normal_distribution_for_metric_ver1;
 		normal_distribution<double> normal_distribution_for_metric_ver2;
@@ -187,7 +187,7 @@ void set_metric_score(channel* _channel_list, bitrate_version_set* _version_set,
 		}
 	}
 	if (metric_type == MOS) { // An ANFIS-based Hybrid Video Quality Prediction Model for Video Streaming over Wireless Networks
-		for (int channel = 1; channel <= CHANNEL_NUM; channel++) {
+		for (int channel = 1; channel <= NUM_OF_CHANNEL; channel++) {
 			for (int ver = 1; ver <= _version_set->version_num; ver++) {
 				double crt = _channel_list[channel].video_quality[ver];
 				if (crt > 37) {

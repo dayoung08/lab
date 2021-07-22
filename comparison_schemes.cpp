@@ -4,7 +4,7 @@
 //비교 스킴들이 구현되었다.
 
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model) {
-	short selected_set[CHANNEL_NUM + 1]; // 각 채널에서 사용하는 비트레이트 set
+	short selected_set[NUM_OF_CHANNEL + 1]; // 각 채널에서 사용하는 비트레이트 set
 	memset(selected_set, 0, (sizeof(short) * (NUM_OF_ES + 1)));
 
 	short** selected_ES;//[CHANNEL_NUM + 1][VERSION_NUM]; // 각 채널에서 사용하는 비트레이트 set에 속하는 각 버전이 어떤 es에서 선택되었는가.
@@ -17,8 +17,8 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 	}
 	memset(ES_count, 0, (sizeof(short) * (NUM_OF_ES + 1)));
 
-	selected_ES = (short**)malloc(sizeof(short*) * (CHANNEL_NUM + 1));
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	selected_ES = (short**)malloc(sizeof(short*) * (NUM_OF_CHANNEL + 1));
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		selected_ES[ch] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // 오리지널 버전은 트랜스코딩 안하니까
 		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {  // 오리지널 버전은 트랜스코딩 안하니까
 			selected_ES[ch][ver] = -1;
@@ -76,12 +76,12 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 		printf("<<random_AP>>\n");
 	}
 	if (method_index == RD_HPF) {
-		printf("<<randomt_AP>>\n");;
+		printf("<<random_HPF>>\n");
 	}
 	
 	double total_GHz = 0;
 	double total_pwq = 0;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_selected_set[ch]];
 		total_pwq += _channel_list[ch].sum_of_pwq[_selected_set[ch]];
 	}
@@ -101,9 +101,9 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 
-	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (CHANNEL_NUM + 1));
+	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		is_allocated_for_versions[ch] = (bool*)malloc(sizeof(bool) * (_version_set->version_num));
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 
@@ -162,13 +162,13 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 		}
 	}
 	int alloc_cnt = 0;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 		if (is_allocated_for_versions[ch][1]) {
 			alloc_cnt++;
 		}
 	}
-	if (alloc_cnt == CHANNEL_NUM) {
+	if (alloc_cnt == NUM_OF_CHANNEL) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
@@ -257,7 +257,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 	
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
@@ -317,7 +317,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
 	version_popularities_set.clear();
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
@@ -395,7 +395,7 @@ void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrat
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
@@ -455,7 +455,7 @@ void GHz_worst_fit_TD_phase(server* _server_list, channel* _channel_list, bitrat
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
 	version_popularities_set.clear();
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		int set = _selected_set[ch];
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
@@ -526,9 +526,9 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 
-	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (CHANNEL_NUM + 1));
+	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		is_allocated_for_versions[ch] = (bool*)malloc(sizeof(bool) * (_version_set->version_num));
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 
@@ -594,13 +594,13 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 	}
 
 	int alloc_cnt = 0;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 		if (is_allocated_for_versions[ch][1]) {
 			alloc_cnt++;
 		}
 	}
-	if (alloc_cnt == CHANNEL_NUM) {
+	if (alloc_cnt == NUM_OF_CHANNEL) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
@@ -692,7 +692,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
@@ -755,7 +755,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
 	version_popularities_set.clear();
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
@@ -826,9 +826,9 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 가장 낮은 leasing 금액을 가진 ES에 우선적으로 할당한다.
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 
-	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (CHANNEL_NUM + 1));
+	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		is_allocated_for_versions[ch] = (bool*)malloc(sizeof(bool) * (_version_set->version_num));
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 
@@ -895,13 +895,13 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 	}
 
 	int alloc_cnt = 0;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 		if (is_allocated_for_versions[ch][1]) {
 			alloc_cnt++;
 		}
 	}
-	if (alloc_cnt == CHANNEL_NUM) {
+	if (alloc_cnt == NUM_OF_CHANNEL) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
@@ -994,7 +994,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
@@ -1058,7 +1058,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
 	version_popularities_set.clear();
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
@@ -1131,9 +1131,9 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 	//엣지 선택 - coverage가 맞는 ES server를 랜덤으로 선정한다.
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 
-	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (CHANNEL_NUM + 1));
+	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		is_allocated_for_versions[ch] = (bool*)malloc(sizeof(bool) * (_version_set->version_num));
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 
@@ -1197,13 +1197,13 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 	}
 
 	int alloc_cnt = 0;
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
 		if (is_allocated_for_versions[ch][1]) {
 			alloc_cnt++;
 		}
 	}
-	if (alloc_cnt == CHANNEL_NUM) {
+	if (alloc_cnt == NUM_OF_CHANNEL) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());//가장 인기많은 ch를 고름.
@@ -1294,7 +1294,7 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
@@ -1356,7 +1356,7 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
 	version_popularities_set.clear();
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}

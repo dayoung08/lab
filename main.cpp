@@ -2,14 +2,14 @@
 int main() {
 	srand(SEED);
 
-	double ratio = 0.4;
+	double ratio = 0.2;
 	int pop_type = MVP;
 	int model = CPU_USAGE_MODEL;
 	//int model = ONOFF_MODEL;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
 	server server_list[NUM_OF_ES + 1];
-	channel channel_list[CHANNEL_NUM + 1];
+	channel channel_list[NUM_OF_CHANNEL + 1];
 	bitrate_version_set version_set(0);
 	channel_initialization(channel_list, &version_set, pop_type);
 	server_initalization(server_list, model);
@@ -19,7 +19,7 @@ int main() {
 	printf("===== START =====\n");
 	printf("비용 한도 : %lf\n", cost_limit);
 	printf("감마 분포 - k 값 : %lf, 세타 값 : %lf\n\n", K_gamma, THETA_gamma);
-	printf("엣지 수 : %d, 채널 수 : %d\n\n", NUM_OF_ES, CHANNEL_NUM);
+	printf("엣지 수 : %d, 채널 수 : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
 
 	clock_t start, end, spent_time;
 	start = clock();

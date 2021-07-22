@@ -16,8 +16,8 @@ double hourly_charge_for_linear_model[NUM_OF_LINEAR_COST_MODEL + 1] = { 0, 0.020
 //4. Google Cloud Anthos, 퍼블릭 클라우드에서 Anthos 사용 - 1 vCPU, 0.01096 USD
 //5. Google Cloud Anthos, 온프레미스(On-premise) 환경에서 Anthos 사용 - 1 vCPU, 0.03288 USD
 
-int ES_number_of_vCPUs_for_linear_model[NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1] = { 0, 768, 1024, 256, 224, 256 };
-double ES_GHz_for_linear_model[NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6};
+int ES_number_of_vCPUs_for_linear_model[NUM_OF_MACHINE_FOR_LINEAR_MODEL + 1] = { 0, 768, 1024, 256, 224, 256 };
+double ES_GHz_for_linear_model[NUM_OF_MACHINE_FOR_LINEAR_MODEL + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6};
 //1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html -> vcpu : 768개
 //2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html -> vcpu: 1024개
 //3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html -> vcpu: 256개
@@ -27,8 +27,8 @@ double ES_GHz_for_linear_model[NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1] = { 0, 864,
 
 // onoff model : onoff하는 디바이스에 따라 가격이 결정되는 구조.
 // Snowball Edge(1, 2), MS Azure Stack Edge(3, 4, 5) 의 월간 금액, 스노우볼 엣지는 일간 금액이므로 x 30일 함. (단위 및 조건을 맞추기 위해)
-double monthly_charge_for_onoff_model[NUM_OF_MACHINES_FOR_ONOFF_MODEL + 1] = { 0, 2400, 4500, 717, 2358, 1368 };
-double ES_GHz_for_onoff_model[NUM_OF_MACHINES_FOR_ONOFF_MODEL + 1] = { 0, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
+double monthly_charge_for_onoff_model[NUM_OF_MACHINE_FOR_ONOFF_MODEL + 1] = { 0, 2400, 4500, 717, 2358, 1368 };
+double ES_GHz_for_onoff_model[NUM_OF_MACHINE_FOR_ONOFF_MODEL + 1] = { 0, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
 
 //1. Snowball Edge Storage Optimized(EC2 컴퓨팅 기능 포함) - Intel Xeon D 프로세서, 16코어, 1.8Ghz
 //2. Snowball Edge Compute Optimized - AMD Naples, 32코어, 3.4Ghz
@@ -46,12 +46,12 @@ void server_initalization(server* _server_list, int _model) {
 		_server_list[ES].index = ES;
 
 		if (_model == CPU_USAGE_MODEL) {
-			_server_list[ES].machine_type = rand() % NUM_OF_MACHINES_FOR_LINEAR_MODEL + 1;
+			_server_list[ES].machine_type = rand() % NUM_OF_MACHINE_FOR_LINEAR_MODEL + 1;
 			_server_list[ES].cost_model_type = rand() % NUM_OF_LINEAR_COST_MODEL + 1;
 			_server_list[ES].processing_capacity = ES_GHz_for_linear_model[_server_list[ES].machine_type];
 		}
 		else if (_model == ONOFF_MODEL) {
-			_server_list[ES].machine_type = rand() % NUM_OF_MACHINES_FOR_ONOFF_MODEL + 1;
+			_server_list[ES].machine_type = rand() % NUM_OF_MACHINE_FOR_ONOFF_MODEL + 1;
 			_server_list[ES].cost_model_type = rand() % NUM_OF_ONOFF_COST_MODEL + 1;
 			_server_list[ES].processing_capacity = ES_GHz_for_onoff_model[_server_list[ES].machine_type];
 		}
@@ -122,7 +122,7 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// user read
 	fopen_s(&fp, "usercoord.txt", "r");
 
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		double latitude, longitude;
 
 		fscanf(fp, "%lf\t%lf\n", &latitude, &longitude);
@@ -141,7 +141,7 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	}
 
 	// assign
-	for (int ch = 1; ch <= CHANNEL_NUM; ch++) {
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel* ch_ptr = &(_channel_list[ch]);
 		_channel_list[ch].available_server_list[0] = true; // CTS은 (index 0) 무조건 coverage에 들어감.
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) { // 기존 코드에도 서버 숫자였다
