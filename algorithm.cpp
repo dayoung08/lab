@@ -131,21 +131,13 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		remained_GHz_of_ESs_set.insert(make_pair(_server_list[ES].processing_capacity, ES)); //set
 	}
 
-	double** slopes_of_list_TA;
-	slopes_of_list_TA = (double**)malloc(sizeof(double*) * (NUM_OF_CHANNEL + 1));
-	for (int row = 1; row <= NUM_OF_CHANNEL; row++) {
-		slopes_of_list_TA[row] = (double*)malloc(sizeof(double) * (_version_set->version_num));  // 오리지널 버전은 트랜스코딩 안하니까
-		for (int col = 1; col <= _version_set->version_num - 1; col++) {  // 오리지널 버전은 트랜스코딩 안하니까
-			slopes_of_list_TA[row][col] = -1;
-		}
-	}
+
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TA;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		double slope = _channel_list[ch].pwq[1] / _channel_list[ch].video_GHz[1];
 
 		//이거 pwq/GHz나 pwq/cost나 linear 모델에선 똑같고, onoff model에선 애초에 cost는 틀린거고 계산도 안됨
 		list_TA.insert(make_pair(slope, make_pair(ch, 1)));
-		slopes_of_list_TA[ch][1] = slope;
 	}
 
 	double total_cost = 0;
@@ -207,7 +199,6 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 				//이거 pwq/GHz나 pwq/cost나 linear 모델에선 똑같고, onoff model에선 애초에 cost는 틀린거고 계산도 안됨
 				list_TA.insert(make_pair(slope, make_pair(ch, ver)));
-				slopes_of_list_TA[ch][ver] = slope;
 			}
 		}
 	}
