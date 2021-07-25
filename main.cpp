@@ -3,11 +3,11 @@ int main() {
 	srand(SEED);
 
 	double ratio = 0.4;
-	int pop_type = MVP;
-	//int metric = VMAF;
-	int metric_type = SSIM;
-	int model = CPU_USAGE_MODEL;
-	//int model = ONOFF_MODEL;
+	int pop_type = HVP;
+	int metric_type = VMAF;
+	//int metric_type = MOS;
+	//int model = CPU_USAGE_MODEL;
+	int model = ONOFF_MODEL;
 	int bitrate_set = 0;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
@@ -35,18 +35,18 @@ int main() {
 
 	printf("===== 비교 스킴 =====\n\n");
 
-	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
+	/*comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	if (model == CPU_USAGE_MODEL) {
 		comparison_schemes(cost_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 		comparison_schemes(cost_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
-	}
+	}*/
 	if (model == ONOFF_MODEL) {
 		comparison_schemes(LPF_AP, server_list, channel_list, &version_set, cost_limit, model);
 		comparison_schemes(LPF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	}
-	comparison_schemes(RD_AP, server_list, channel_list, &version_set, cost_limit, model);
-	comparison_schemes(RD_HPF, server_list, channel_list, &version_set, cost_limit, model);
+	//comparison_schemes(RD_AP, server_list, channel_list, &version_set, cost_limit, model);
+	//comparison_schemes(RD_HPF, server_list, channel_list, &version_set, cost_limit, model);
 
 	printf("===== FINISH =====\n");
 

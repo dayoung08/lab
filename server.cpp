@@ -91,6 +91,10 @@ double get_full_charge(server* _server_list, int _cost_model) {
 	return full_total_charge;
 }
 
+double get_monthly_charge_for_onoff_model(server* _server) {
+	return monthly_charge_for_onoff_model[_server->machine_type];
+}
+
 //아래는 전부 커버리지 관련
 void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 교수님이 주신 코드임.
 	FILE* fp;
