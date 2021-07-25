@@ -42,7 +42,18 @@ void set_video_metric(channel* _channel, bitrate_version_set* _version_set, int 
 	//CBR 기준임
 	mt19937 random_generation(SEED);
 
-	int SD = rand() % 13 + 2; // 각 비디오의 표준 편차는 2~14의 값을 가짐
+	int SD = 0;
+	if (_metric_type == VMAF) {
+		SD = rand() % 13 + 2; // 각 비디오의 표준 편차는 2~14의 값을 가짐
+	}
+	else if (_metric_type == PSNR || _metric_type == MOS) {
+		SD = rand() % 14 + 41; //  4.1~5.4
+		SD /= 10;
+	} // https://doi.org/10.3390/s21061949
+	else if (_metric_type == SSIM) {
+		SD = rand() % 23 + 4; // 0.004~0.026 vmaf 값 기반으로 scailing함. 도저히 없어서...
+		SD /= 1000;
+	}
 	bool is_finished = false;
 	while (!is_finished) {
 		for (int ver = 1; ver <= _version_set->version_num; ver++) {

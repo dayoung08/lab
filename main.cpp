@@ -5,7 +5,7 @@ int main() {
 	double ratio = 0.4;
 	int pop_type = MVP;
 	//int metric = VMAF;
-	int metric_type = MOS;
+	int metric_type = SSIM;
 	int model = CPU_USAGE_MODEL;
 	//int model = ONOFF_MODEL;
 	int bitrate_set = 0;
