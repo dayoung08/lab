@@ -4,13 +4,16 @@ int main() {
 
 	double ratio = 0.4;
 	int pop_type = MVP;
-	int model = CPU_USAGE_MODEL;
-	//int model = ONOFF_MODEL;
+	int metric = VMAF;
+	//int metric = MOS;
+	//int model = CPU_USAGE_MODEL;
+	int model = ONOFF_MODEL;
+	int bitrate_set = 0;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
 	server server_list[NUM_OF_ES + 1];
 	channel channel_list[NUM_OF_CHANNEL + 1];
-	bitrate_version_set version_set(2);
+	bitrate_version_set version_set(bitrate_set, metric); // default 0, VMAF;
 	channel_initialization(channel_list, &version_set, pop_type);
 	server_initalization(server_list, model);
 	set_coverage_infomation(channel_list, server_list);

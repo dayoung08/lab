@@ -22,8 +22,8 @@ using namespace std;
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-#define NUM_OF_ES 100 // linear model이면 100, leasing이면 1000으로 생각중
-//#define NUM_OF_ES 1000 // linear model이면 100, leasing이면 1000으로 생각중
+//#define NUM_OF_ES 100 // linear model이면 100, leasing이면 1000으로 생각중
+#define NUM_OF_ES 1000 // linear model이면 100, leasing이면 1000으로 생각중
 
 #define NUM_OF_MACHINE_FOR_LINEAR_MODEL 5
 #define NUM_OF_LINEAR_COST_MODEL 5
@@ -135,13 +135,13 @@ public: //그냥 전부 public 가자
 	int number_for_bit_opration;
 	int set_versions_number_for_bit_opration;
 
-	bitrate_version_set(int _index); //initiation.cpp에 구현 있음
+	bitrate_version_set(int _index, int _metric_type); //initiation.cpp에 구현 있음
 };
 
 /* channel.cpp */
 void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type);
 //void set_metric_score(channel* _channel_list, bitrate_version_set* _version_set, int metric_type);
-void set_VMAF(channel* _channel, bitrate_version_set* _version_set);
+void set_video_metric(channel* _channel, bitrate_version_set* _version_set);
 void set_GHz(channel* _channel, bitrate_version_set* _version_set);
 void set_PWQ(channel* _channel, bitrate_version_set* _version_set);
 double* set_gamma_pop(int length, double k, double theta);

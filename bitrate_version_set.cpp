@@ -1,6 +1,6 @@
 #include "head.h"
 
-bitrate_version_set::bitrate_version_set(int _index) {
+bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 	index = _index;
 	if (index == 0) { //Zecoder
 		version_num = 7;
@@ -41,12 +41,31 @@ bitrate_version_set::bitrate_version_set(int _index) {
 		bitrate[2] = 400;
 		bitrate[1] = 200;
 
-		mean[6] = 95; //2000 
-		mean[5] = 92.5; //1500
-		mean[4] = 90; //1000
-		mean[3] = 72; //600
-		mean[2] = 60; //400
-		mean[1] = 40; //200
+		if (_metric_type == VMAF) {
+			mean[6] = 95; //2000 
+			mean[5] = 92.5; //1500
+			mean[4] = 90; //1000
+			mean[3] = 72; //600
+			mean[2] = 60; //400
+			mean[1] = 40; //200
+		}
+		else if (_metric_type == PSNR || _metric_type == MOS) { // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임
+			mean[6] = 41.5; //2000 
+			mean[5] = 40; //1500
+			mean[4] = 38.5; //1000
+			mean[3] = 35; //600
+			mean[2] = 33.5; //400
+			mean[1] = 32; //200
+		}
+		else if (_metric_type == SSIM) { //SSIM->MOS 변환
+			//Light-weight Video Coding Based on Perceptual Video Quality for Live Streaming https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8603274 
+			mean[6] = 0.97; //2000 
+			mean[5] = 0.96; //1500
+			mean[4] = 0.95; //1000
+			mean[3] = 0.93; //600
+			mean[2] = 0.91; //400
+			mean[1] = 0.87; //200
+		}
 	}
 	else if (index == 1) { // Youtube https://support.google.com/youtube/answer/2853702?hl=ko 기준. 비트레이트는 mean 사용.
 		resolution[11] = 38402160; // 3840x2160

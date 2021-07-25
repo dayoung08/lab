@@ -31,13 +31,13 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].sum_of_transfer_data_size[set] = 0;
 		}
 		//위 까지 인기도 계산
-		set_VMAF(&(_channel_list[ch]), _version_set); // 비디오 퀄리티 값 계산
+		set_video_metric(&(_channel_list[ch]), _version_set); // 비디오 퀄리티 값 계산
 		set_GHz(&(_channel_list[ch]), _version_set); // processing-rate 계산
 		set_PWQ(&(_channel_list[ch]), _version_set); // PWQ 계산
 	}
 }
 
-void set_VMAF(channel* _channel, bitrate_version_set* _version_set) {
+void set_video_metric(channel* _channel, bitrate_version_set* _version_set) {
 	//Qin, MMsys, Quality-aware Stategies for Optimizing ABR Video Streaming QoE and Reducing Data Usage, https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임.
 	//CBR 기준임
 	mt19937 random_generation(SEED);
