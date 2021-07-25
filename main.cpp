@@ -2,7 +2,7 @@
 int main() {
 	srand(SEED);
 
-	double ratio = 0.2;
+	double ratio = 0.4;
 	int pop_type = MVP;
 	int model = CPU_USAGE_MODEL;
 	//int model = ONOFF_MODEL;
@@ -10,7 +10,7 @@ int main() {
 
 	server server_list[NUM_OF_ES + 1];
 	channel channel_list[NUM_OF_CHANNEL + 1];
-	bitrate_version_set version_set(0);
+	bitrate_version_set version_set(2);
 	channel_initialization(channel_list, &version_set, pop_type);
 	server_initalization(server_list, model);
 	set_coverage_infomation(channel_list, server_list);

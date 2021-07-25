@@ -30,7 +30,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		GHz_limit += _server_list[ES].processing_capacity;
 	}
-	printf("lowest version만 트랜스코딩 했을 때 pwq 총 합 %lf GHz\n", first_pwq);
+	printf("lowest version만 트랜스코딩 했을 때 pwq 총 합 %lf\n", first_pwq);
 	printf("lowest version만 트랜스코딩 했을 때 %lf GHz / GHz 총 합 %lf GHz\n\n", first_GHz, GHz_limit);
 	if (GHz_limit < first_GHz) {
 		printf("GHz가 모자란 상황/Channel 수를 줄이거나, 엣지 수를 늘릴 것\n");

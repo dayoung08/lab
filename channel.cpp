@@ -37,205 +37,24 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 	}
 }
 
-void set_metric_score(channel* _channel_list, bitrate_version_set* _version_set, int metric_type) {
-	//VMAF는 Qin, MMsys, Quality-aware Stategies for Optimizing ABR Video Streaming QoE and Reducing Data Usage, https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임.
-	//CBR 기준임
-	mt19937 random_generation(SEED);
-	double* mean = (double*)malloc(sizeof(double) * (_version_set->version_num + 1)); // bitrate set에 따라 VMAF mean이 달라짐. 
-	if (_version_set->index == 0) { // zencoder 조합
-		if (metric_type == VMAF) {
-			mean[6] = 95; //2000 
-			mean[5] = 92.5; //1500
-			mean[4] = 90; //1000
-			mean[3] = 72; //600
-			mean[2] = 60; //400
-			mean[1] = 40; //200
-		}
-		else if (metric_type == PSNR || metric_type == MOS) { // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임
-			mean[6] = 41.5; //2000 
-			mean[5] = 40; //1500
-			mean[4] = 38.5; //1000
-			mean[3] = 35; //600
-			mean[2] = 33.5; //400
-			mean[1] = 32; //200
-		}
-		else if (metric_type == SSIM) { //SSIM->MOS 변환
-			//Light-weight Video Coding Based on Perceptual Video Quality for Live Streaming https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8603274 
-			mean[6] = 0.97; //2000 
-			mean[5] = 0.96; //1500
-			mean[4] = 0.95; //1000
-			mean[3] = 0.93; //600
-			mean[2] = 0.91; //400
-			mean[1] = 0.87; //200
-		}
-	}
-	//zencoder 빼고는 다 vmaf만 쓰므로 처리하지 않았음.
-	else if (_version_set->index == 1) { // youtube
-		mean[10] = 99.9; //23500
-		mean[9] = 99.5; //13500
-		mean[8] = 98.6; //9500
-		mean[7] = 98.4; //6750
-		mean[6] = 98.2; //4500;
-		mean[5] = 98; //4125;
-		mean[4] = 96; //2750;
-		mean[3] = 91.3; //1250;
-		mean[2] = 77; //700;
-		mean[1] = 65; //500;
-	}
-	else if (_version_set->index == 2) { //netflix
-		mean[9] = 98.1; //4300
-		mean[8] = 97; //3000
-		mean[7] = 95.5; //2350
-		mean[6] = 93.8; // 1750
-		mean[5] = 90.2; //1050
-		mean[4] = 80; //750
-		mean[3] = 67.5; //560
-		mean[2] = 57.5; //375
-		mean[1] = 43; // 235
-	}
-	else if (_version_set->index == 3) {// IBM Watson Media
-		mean[6] = 98.3; //6000
-		mean[5] = 96; // 2750
-		mean[4] = 91.5; // 1350
-		mean[3] = 91.5; // 1350
-		mean[2] = 90; //1000
-		mean[1] = 60; //400
-	}
-	else if (_version_set->index == 4) { // 논문 https://doi.org/10.1145/3123266.3123426
-		mean[8] = 98.3; //6000
-		mean[7] = 97.8; //4000
-		mean[6] = 97; // 3000
-		mean[5] = 95.5; //2400
-		mean[4] = 92.5; //1500
-		mean[3] = 82; //807
-		mean[2] = 65; //505
-		mean[1] = 45; // 253
-	}
-
-	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-		//normal_distribution<double> normal_distribution_for_metric[7]; //이거 어떻게 동적 배열로 바꿀지 생각하자
-		/*normal_distribution<double> normal_distribution_for_metric_ver1;
-		normal_distribution<double> normal_distribution_for_metric_ver2;
-		normal_distribution<double> normal_distribution_for_metric_ver3;
-		normal_distribution<double> normal_distribution_for_metric_ver4;
-		normal_distribution<double> normal_distribution_for_metric_ver5;
-		normal_distribution<double> normal_distribution_for_metric_ver6;*/
-		//ver 7은 vmaf 100임
-		double SD;
-		if (metric_type == VMAF) {
-			SD = rand() % 13 + 2; // 각 비디오의 표준 편차는 2~14의 값을 가짐
-		}
-		else if (metric_type == PSNR || metric_type == MOS) {
-			SD = rand() % 14 + 41; //  4.1~5.4
-			SD /= 10;
-		} // https://doi.org/10.3390/s21061949
-		else if (metric_type == SSIM) {
-			SD = rand() % 23 + 4; // 0.004~0.026 vmaf 값 기반으로 scailing함. 도저히 없어서...
-			SD /= 1000;
-		}
-		_channel_list[1];
-
-		for (int ver = 1; ver <= _version_set->version_num; ver++) {
-			normal_distribution<double> normal_distribution_for_metric(mean[ver], SD);
-			if (ver == 1) {
-				_channel_list[ch].video_quality[1] = normal_distribution_for_metric(random_generation);
-				if (metric_type == VMAF) {
-					while (_channel_list[ch].video_quality[1] > 100 || _channel_list[ch].video_quality[1] < 0) {
-						_channel_list[ch].video_quality[1] = normal_distribution_for_metric(random_generation);
-					}
-				}
-				else if (metric_type == PSNR || metric_type == MOS) {
-					while (_channel_list[ch].video_quality[1] > 50 || _channel_list[ch].video_quality[1] < 0) {
-						_channel_list[ch].video_quality[1] = normal_distribution_for_metric(random_generation);
-					}
-				}
-				else if (metric_type == SSIM) {
-					while (_channel_list[ch].video_quality[1] > 1 || _channel_list[ch].video_quality[1] < 0) {
-						_channel_list[ch].video_quality[1] = normal_distribution_for_metric(random_generation);
-					}
-				}
-			}
-			else if (ver >= 2 && ver <= _version_set->version_num - 1) {
-				_channel_list[ch].video_quality[ver] = normal_distribution_for_metric(random_generation);
-				if (metric_type == VMAF) {
-					while (_channel_list[ch].video_quality[ver] <= _channel_list[ch].video_quality[ver - 1] || _channel_list[ch].video_quality[ver] > 100 || _channel_list[ch].video_quality[ver] < 0) {
-						_channel_list[ch].video_quality[ver] = normal_distribution_for_metric(random_generation);
-					}
-				}
-				else if (metric_type == PSNR || metric_type == MOS) {
-					while (_channel_list[ch].video_quality[ver] <= _channel_list[ch].video_quality[ver - 1] || _channel_list[ch].video_quality[ver] > 50 || _channel_list[ch].video_quality[ver] < 0) {
-						_channel_list[ch].video_quality[ver] = normal_distribution_for_metric(random_generation);
-					}
-				}
-				else if (metric_type == SSIM) {
-					while (_channel_list[ch].video_quality[ver] <= _channel_list[ch].video_quality[ver - 1] || _channel_list[ch].video_quality[ver] > 1 || _channel_list[ch].video_quality[ver] < 0) {
-						_channel_list[ch].video_quality[ver] = normal_distribution_for_metric(random_generation);
-					}
-				}
-			}
-			else if (ver == _version_set->version_num) {
-				if (metric_type == VMAF) {
-					_channel_list[ch].video_quality[_version_set->version_num] = 100;
-				}
-				else if (metric_type == PSNR || metric_type == MOS) { // https://stackoverflow.com/questions/39615894/handling-infinite-value-of-psnr-when-calculating-psnr-value-of-video
-					_channel_list[ch].video_quality[_version_set->version_num] = 43; // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임
-				}
-				else if (metric_type == SSIM) {
-					_channel_list[ch].video_quality[_version_set->version_num] = 1;
-				}
-			}
-		}
-	}
-	if (metric_type == MOS) { // An ANFIS-based Hybrid Video Quality Prediction Model for Video Streaming over Wireless Networks
-		for (int channel = 1; channel <= NUM_OF_CHANNEL; channel++) {
-			for (int ver = 1; ver <= _version_set->version_num; ver++) {
-				double crt = _channel_list[channel].video_quality[ver];
-				if (crt > 37) {
-					_channel_list[channel].video_quality[ver] = 5.0;
-				}
-				else if (crt > 31) {
-					_channel_list[channel].video_quality[ver] = 4.0;
-				}
-				else if (crt > 25) {
-					_channel_list[channel].video_quality[ver] = 3.0;
-				}
-				else if (crt > 20) {
-					_channel_list[channel].video_quality[ver] = 2.0;
-				}
-				else {
-					_channel_list[channel].video_quality[ver] = 1.0;
-				}
-			}
-		}
-	}
-}
-
-
 void set_VMAF(channel* _channel, bitrate_version_set* _version_set) {
 	//Qin, MMsys, Quality-aware Stategies for Optimizing ABR Video Streaming QoE and Reducing Data Usage, https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임.
 	//CBR 기준임
 	mt19937 random_generation(SEED);
 
-	int* mean = (int*)malloc(sizeof(int) * (_version_set->version_num + 1)); // bitrate set에 따라 VMAF mean이 달라짐. 
-	mean[6] = 95; //2000 
-	mean[5] = 92.5; //1500
-	mean[4] = 90; //1000
-	mean[3] = 72; //600
-	mean[2] = 60; //400
-	mean[1] = 40; //200
-
 	int SD = rand() % 13 + 2; // 각 비디오의 표준 편차는 2~14의 값을 가짐
 	bool is_finished = false;
 	while (!is_finished) {
 		for (int ver = 1; ver <= _version_set->version_num; ver++) {
-			normal_distribution<double> normal_distribution_for_vmaf(mean[ver], SD);
 			if (ver == 1) {
+				normal_distribution<double> normal_distribution_for_vmaf(_version_set->mean[ver], SD);
 				_channel->video_quality[1] = normal_distribution_for_vmaf(random_generation);
 				if (_channel->video_quality[1] > 100 || _channel->video_quality[1] < 0) {
 					break;
 				}
 			}
 			else if (ver >= 2 && ver <= _version_set->version_num - 1) {
+				normal_distribution<double> normal_distribution_for_vmaf(_version_set->mean[ver], SD);
 				_channel->video_quality[ver] = normal_distribution_for_vmaf(random_generation);
 				if (_channel->video_quality[ver] <= _channel->video_quality[ver - 1] || _channel->video_quality[ver] > 100 || _channel->video_quality[ver] < 0) {
 					break;
@@ -259,7 +78,15 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 
 	mt19937 random_generation(SEED);
 	for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
-		if (_version_set->resolution[ver] == 19201080) {
+		if (_version_set->resolution[ver] == 38402160) { //스케일링해서 구함
+			a[ver] = 2.597554426;
+			b[ver] = 0.184597645;
+		}
+		else if (_version_set->resolution[ver] == 25601440) { //스케일링해서 구함
+			a[ver] = 1.819367444;
+			b[ver] = 0.10754013;
+		}
+		else if (_version_set->resolution[ver] == 19201080) {
 			a[ver] = 1.547002;
 			b[ver] = 0.08057;
 		}
@@ -267,13 +94,49 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 			a[ver] = 1.341512;
 			b[ver] = 0.060222;
 		}
+		else if (_version_set->resolution[ver] == 960540) { //스케일링해서 구함
+			a[ver] = 1.041912;
+			b[ver] = 0.044521;
+		}
+		else if (_version_set->resolution[ver] == 854480) { //스케일링해서 구함
+			a[ver] = 0.961305333;
+			b[ver] = 0.040296683;
+		}
+		else if (_version_set->resolution[ver] == 720480) { //스케일링해서 구함
+			a[ver] = 0.913512;
+			b[ver] = 0.037792;
+		}
+		else if (_version_set->resolution[ver] == 640480) { //스케일링해서 구함
+			a[ver] = 0.884978667;
+			b[ver] = 0.036296667;
+		}
 		else if (_version_set->resolution[ver] == 640360) {
 			a[ver] = 0.827912;
 			b[ver] = 0.033306;
 		}
+		else if (_version_set->resolution[ver] == 512384) { //스케일링해서 구함
+			a[ver] = 0.79075496;
+			b[ver] = 0.03122664;
+		}
+		else if (_version_set->resolution[ver] == 480270) { //스케일링해서 구함
+			a[ver] = 0.717074239;
+			b[ver] = 0.027103364;
+		}
+		else if (_version_set->resolution[ver] == 384288) { //스케일링해서 구함
+			a[ver] = 0.696173404;
+			b[ver] = 0.025933724;
+		}
+		else if (_version_set->resolution[ver] == 426240) { //스케일링해서 구함
+			a[ver] = 0.686989703;
+			b[ver] = 0.025419791;
+		}
 		else if (_version_set->resolution[ver] == 400224) {
 			a[ver] = 0.673091;
 			b[ver] = 0.024642;
+		}
+		else if (_version_set->resolution[ver] == 320240) { //스케일링해서 구함
+			a[ver] = 0.659016364;
+			b[ver] = 0.023854364;
 		}
 
 		double GHz = a[ver] * pow((double)_version_set->bitrate[ver]/1000, b[ver]);

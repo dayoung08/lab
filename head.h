@@ -130,6 +130,7 @@ public: //그냥 전부 public 가자
 	double* data_size; 
 	// 엣지에서 데이터 외부 전송에 대한 돈을 받기 때문에...  bitrate(kbps) -> MB/s로 변환함. 
 	// GHz도 초당 사용량이니 이쪽도 초당 데이터 전송량으로 하면 되니까. 그러므로 이 값이 데이터 전송량이 되는 것.
+	double* mean;
 
 	int number_for_bit_opration;
 	int set_versions_number_for_bit_opration;
@@ -139,6 +140,7 @@ public: //그냥 전부 public 가자
 
 /* channel.cpp */
 void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type);
+//void set_metric_score(channel* _channel_list, bitrate_version_set* _version_set, int metric_type);
 void set_VMAF(channel* _channel, bitrate_version_set* _version_set);
 void set_GHz(channel* _channel, bitrate_version_set* _version_set);
 void set_PWQ(channel* _channel, bitrate_version_set* _version_set);
