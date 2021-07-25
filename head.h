@@ -127,7 +127,7 @@ public: //그냥 전부 public 가자
 
 	int* resolution; //1080p면 값이 1080임
 	int* bitrate; // 논문에서의 r을 위한 값. 단 여기선 kbps고, r은 Mbps(GHz 구할 때 변환함). set_GHz 최상단의 논문의 수식 참고.
-	double* data_size; 
+	//double* data_size; 
 	// 엣지에서 데이터 외부 전송에 대한 돈을 받기 때문에...  bitrate(kbps) -> MB/s로 변환함. 
 	// GHz도 초당 사용량이니 이쪽도 초당 데이터 전송량으로 하면 되니까. 그러므로 이 값이 데이터 전송량이 되는 것.
 	double* mean;

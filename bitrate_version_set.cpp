@@ -21,7 +21,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 	version_set_num = pow(2, (version_num - 2));
 	resolution = (int*)malloc(sizeof(int) * (version_num + 1));
 	bitrate = (int*)malloc(sizeof(int) * (version_num + 1));
-	data_size = (double*)malloc(sizeof(double) * (version_num + 1));
+	//data_size = (double*)malloc(sizeof(double) * (version_num + 1));
 	mean = (double*)malloc(sizeof(double) * (version_num)); 
 
 	if (index == 0) { //Zecoder
