@@ -1,6 +1,6 @@
 #include "head.h"
 
-void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type) {
+void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type, int _metric_type) {
 	double* channel_pop = set_gamma_pop(NUM_OF_CHANNEL, K_gamma, THETA_gamma);
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		_channel_list[ch].index = ch;
@@ -31,13 +31,13 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].sum_of_transfer_data_size[set] = 0;
 		}
 		//위 까지 인기도 계산
-		set_video_metric(&(_channel_list[ch]), _version_set); // 비디오 퀄리티 값 계산
+		set_video_metric(&(_channel_list[ch]), _version_set, _metric_type); // 비디오 퀄리티 값 계산
 		set_GHz(&(_channel_list[ch]), _version_set); // processing-rate 계산
 		set_PWQ(&(_channel_list[ch]), _version_set); // PWQ 계산
 	}
 }
 
-void set_video_metric(channel* _channel, bitrate_version_set* _version_set) {
+void set_video_metric(channel* _channel, bitrate_version_set* _version_set, int _metric_type) {
 	//Qin, MMsys, Quality-aware Stategies for Optimizing ABR Video Streaming QoE and Reducing Data Usage, https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임.
 	//CBR 기준임
 	mt19937 random_generation(SEED);
@@ -49,8 +49,20 @@ void set_video_metric(channel* _channel, bitrate_version_set* _version_set) {
 			if (ver == 1) {
 				normal_distribution<double> normal_distribution_for_vmaf(_version_set->mean[ver], SD);
 				_channel->video_quality[1] = normal_distribution_for_vmaf(random_generation);
-				if (_channel->video_quality[1] > 100 || _channel->video_quality[1] < 0) {
-					break;
+				if (_metric_type == VMAF) {
+					if (_channel->video_quality[1] > 100 || _channel->video_quality[1] < 0) {
+						break;
+					}
+				}
+				else if (_metric_type == PSNR || _metric_type == MOS) {
+					if (_channel->video_quality[1] > 50 || _channel->video_quality[1] < 0) {
+						break;
+					}
+				}
+				else if (_metric_type == SSIM) {
+					if (_channel->video_quality[1] > 1 || _channel->video_quality[1] < 0) {
+						break;
+					}
 				}
 			}
 			else if (ver >= 2 && ver <= _version_set->version_num - 1) {
@@ -59,10 +71,52 @@ void set_video_metric(channel* _channel, bitrate_version_set* _version_set) {
 				if (_channel->video_quality[ver] <= _channel->video_quality[ver - 1] || _channel->video_quality[ver] > 100 || _channel->video_quality[ver] < 0) {
 					break;
 				}
+				if (_metric_type == VMAF) {
+					if (_channel->video_quality[ver] <= _channel->video_quality[ver - 1] || _channel->video_quality[ver] > 100 || _channel->video_quality[ver] < 0) {
+						break;
+					}
+				}
+				else if (_metric_type == PSNR || _metric_type == MOS) {
+					if (_channel->video_quality[ver] <= _channel->video_quality[ver - 1] || _channel->video_quality[ver] > 50 || _channel->video_quality[ver] < 0) {
+						break;
+					}
+				}
+				else if (_metric_type == SSIM) {
+					if (_channel->video_quality[ver] <= _channel->video_quality[ver - 1] || _channel->video_quality[ver] > 1 || _channel->video_quality[ver] < 0) {
+						break;
+					}
+				}
 			}
 			else if (ver == _version_set->version_num) {
-				_channel->video_quality[_version_set->version_num] = 100;
+				if (_metric_type == VMAF) {
+					_channel->video_quality[_version_set->version_num] = 100;
+				}
+				else if (_metric_type == PSNR || _metric_type == MOS) { // https://stackoverflow.com/questions/39615894/handling-infinite-value-of-psnr-when-calculating-psnr-value-of-video
+					_channel->video_quality[_version_set->version_num] = 43; // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 이 논문 기반임
+				}
+				else if (_metric_type == SSIM) {
+					_channel->video_quality[_version_set->version_num] = 1;
+				}
 				is_finished = true;
+			}
+
+			if (_metric_type == MOS) { // An ANFIS-based Hybrid Video Quality Prediction Model for Video Streaming over Wireless Networks
+				float crt = _channel->video_quality[ver];
+				if (crt > 37) {
+					_channel->video_quality[ver] = 5.0;
+				}
+				else if (crt > 31) {
+					_channel->video_quality[ver] = 4.0;
+				}
+				else if (crt > 25) {
+					_channel->video_quality[ver] = 3.0;
+				}
+				else if (crt > 20) {
+					_channel->video_quality[ver] = 2.0;
+				}
+				else {
+					_channel->video_quality[ver] = 1.0;
+				}
 			}
 		}
 	}
@@ -174,8 +228,8 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 
 		_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[1]; //기본적으로 가장 낮은 버전은 반드시 트랜스코딩 하므로
 
-		_channel->sum_of_transfer_data_size[set] += _version_set->data_size[1]; //가장 낮은버전은 무조건 들어감
-		_channel->sum_of_transfer_data_size[set] += _version_set->data_size[_version_set->version_num]; //원본
+		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[1]; //가장 낮은버전은 무조건 들어감
+		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[_version_set->version_num]; //원본
 
 		int prev_ver = 1; // set에 해당 버전이 없으면 그 아래 있는 버전을 스트리밍하므로
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -186,7 +240,7 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 				_channel->sum_of_video_quality[set] += _channel->video_quality[ver];
 				_channel->sum_of_pwq[set] += _channel->popularity[ver] * _channel->video_quality[ver];
 				_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[ver];
-				_channel->sum_of_transfer_data_size[set] += _version_set->data_size[ver];
+				//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[ver];
 
 				prev_ver = ver;
 			}

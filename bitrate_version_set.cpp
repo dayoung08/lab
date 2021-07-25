@@ -191,10 +191,10 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		mean[1] = 45; // 253
 	}
 
-	for (int ver = 1; ver <= version_num; ver++) {
+	/*for (int ver = 1; ver <= version_num; ver++) {
 		data_size[ver] = ((double)bitrate[ver] * 1000) / (8 * 1024 * 1024); // MB/s ´ÜÀ§ÀÓ
 		//cout << data_size[ver];
-	}
+	}*/
 	
 	number_for_bit_opration = pow(2, version_num - 3);
 	set_versions_number_for_bit_opration = version_num - 2;
