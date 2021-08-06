@@ -682,6 +682,9 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			}
 		}
 	}
+	else{
+		cout << "error\n";
+	}
 }
 
 
@@ -846,7 +849,7 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = get_monthly_charge_for_onoff_model(&(_server_list[ES]));
+				double cost = _server_list[ES].cost_alpha;
 				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
@@ -913,7 +916,7 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 				set<pair<double, int>> lowest_price_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
-						double cost = get_monthly_charge_for_onoff_model(&(_server_list[ES]));
+						double cost = _server_list[ES].cost_alpha;
 						//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 						lowest_price_of_ES.insert(make_pair(cost, ES));
 					}
@@ -1009,7 +1012,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = get_monthly_charge_for_onoff_model(&(_server_list[ES]));
+				double cost = _server_list[ES].cost_alpha;
 				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
@@ -1076,7 +1079,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = get_monthly_charge_for_onoff_model(&(_server_list[ES]));
+				double cost = _server_list[ES].cost_alpha;
 				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}

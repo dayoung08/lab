@@ -16,20 +16,16 @@ using namespace std;
 //#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
 #define CPU_USAGE_MODEL 0
 #define ONOFF_MODEL 1
+#define STEP_MODEL 2
 
 //아래는 교수님이 주신 파일 기반. 코드 보니까 클라이언트 수 x 유저 수를 채널로 해도 될 것 같다. 필요 시 coord.c 파일 수정해서 파일들 다시 뽑으면 될 듯.
 //#define NUM_OF_CLIENT	816
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-//#define NUM_OF_ES 100 // linear model이면 100, leasing이면 1000으로 생각중
-#define NUM_OF_ES 1000 // linear model이면 100, leasing이면 1000으로 생각중
+#define NUM_OF_ES 120
+#define NUM_OF_MACHINE 5
 
-#define NUM_OF_MACHINE_FOR_LINEAR_MODEL 5
-#define NUM_OF_LINEAR_COST_MODEL 5
-
-#define NUM_OF_MACHINE_FOR_ONOFF_MODEL 5
-#define NUM_OF_ONOFF_COST_MODEL 5
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
 #define NUM_OF_CHANNEL 6000 //6000이 기준
 
@@ -85,6 +81,7 @@ public:
 
 	int machine_type; // 엣지 기기의 종류 
 	int cost_model_type; // 비용 함수의 종류
+	double cost_alpha; // 논문에서 alpha 값, CPU usage가 100%일때의 값임.
 
 	//아래는 채널 할당으로 인해 갱신되는 값.
 	/*int total_GHz;
@@ -149,8 +146,7 @@ double* set_version_pop(bitrate_version_set* _bitrate_version_set, int _version_
 /* server.cpp */
 void server_initalization(server* _server_list, int _model);
 double calculate_ES_cost(server* _server, double _used_GHz, int _model);
-double get_full_charge(server* _server_list, int _cost_model);
-double get_monthly_charge_for_onoff_model(server* _server);
+double get_total_charge(server* _server_list, int _cost_model);
 void set_coverage_infomation(channel* _channel_list, server* _server_list);
 double calculate_distance(channel* _channel, server* _server);
 double deg2rad(double _deg);

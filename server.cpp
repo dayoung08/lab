@@ -3,58 +3,27 @@
 //시뮬레이션 환경 설정
 //0번은 CTS
 //Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
-//위의 것이 10대 있다고 가정하자.
 
-
-// [Linear model : CPU 사용량에 따라 가격이 결정되는 구조]
-// AWS와 Google의 가격 단위 및 조건을 맞추기 위해 "시간당 요금 (사용한 만큼 지불)"로 통일해서 계산함 (이게 제일 낮은 시간 단위기도 함)
-double hourly_charge_for_linear_model[NUM_OF_LINEAR_COST_MODEL + 1] = { 0, 0.0208, 0.0416, 0.063, 0.01096, 0.03288 };
-// 1개의 vcpu당 double 달러가 소요됨. 
-//1. AWS Wavelength (t3.medium) - 2 vCPU, 0.0416 USD
-//2. AWS Wavelength (t3.xlarge) - 4 vCPU, 0.1664 USD
-//3. AWS Wavelength (r5.2xlarge) - 8 vCPU, 0.504 USD
-//4. Google Cloud Anthos, 퍼블릭 클라우드에서 Anthos 사용 - 1 vCPU, 0.01096 USD
-//5. Google Cloud Anthos, 온프레미스(On-premise) 환경에서 Anthos 사용 - 1 vCPU, 0.03288 USD
-
-int ES_number_of_vCPUs_for_linear_model[NUM_OF_MACHINE_FOR_LINEAR_MODEL + 1] = { 0, 768, 1024, 256, 224, 256 };
-double ES_GHz_for_linear_model[NUM_OF_MACHINE_FOR_LINEAR_MODEL + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6};
-//1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html -> vcpu : 768개
-//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html -> vcpu: 1024개
-//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html -> vcpu: 256개
-//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html -> vcpu: 224개
-//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html -> vcpu: 256개
-
-
-// onoff model : onoff하는 디바이스에 따라 가격이 결정되는 구조.
-// Snowball Edge(1, 2), MS Azure Stack Edge(3, 4, 5) 의 월간 금액, 스노우볼 엣지는 일간 금액이므로 x 30일 함. (단위 및 조건을 맞추기 위해)
-double monthly_charge_for_onoff_model[NUM_OF_MACHINE_FOR_ONOFF_MODEL + 1] = { 0, 2400, 4500, 717, 2358, 1368 };
-double ES_GHz_for_onoff_model[NUM_OF_MACHINE_FOR_ONOFF_MODEL + 1] = { 0, 28.8, 108.8, 52.8, 44, 20.8 }; // 소숫점 내림 총 합 3517
-
-//1. Snowball Edge Storage Optimized(EC2 컴퓨팅 기능 포함) - Intel Xeon D 프로세서, 16코어, 1.8Ghz
-//2. Snowball Edge Compute Optimized - AMD Naples, 32코어, 3.4Ghz
-//3. Azure Stack Edge Pro - 2 X Intel Xeon 실버 4214 CPU, 2.20 GHz, 24 개 물리적 코어(CPU 당 12 개)
-//4. Azure Stack Edge Pro R - 2 X Intel Xeon 실버 4114 CPU, 2.20GHz, 20개의 물리적 코어(CPU 당 10 개)
-//5. Azure Stack Edge Mini R - Intel Xeon-D 1577, 1.3GHz, 16코어
+double ES_GHz[NUM_OF_MACHINE + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6};
+//1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html
+//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html
+//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html 
+//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html 
+//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html
 
 void server_initalization(server* _server_list, int _model) {
 	_server_list[0].index = 0;
 	_server_list[0].machine_type = 0;
 	_server_list[0].cost_model_type = 0;
+	
 	_server_list[0].processing_capacity = 1814.4;
+	_server_list[0].cost_alpha = 0;
 
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		_server_list[ES].index = ES;
-
-		if (_model == CPU_USAGE_MODEL) {
-			_server_list[ES].machine_type = rand() % NUM_OF_MACHINE_FOR_LINEAR_MODEL + 1;
-			_server_list[ES].cost_model_type = rand() % NUM_OF_LINEAR_COST_MODEL + 1;
-			_server_list[ES].processing_capacity = ES_GHz_for_linear_model[_server_list[ES].machine_type];
-		}
-		else if (_model == ONOFF_MODEL) {
-			_server_list[ES].machine_type = rand() % NUM_OF_MACHINE_FOR_ONOFF_MODEL + 1;
-			_server_list[ES].cost_model_type = rand() % NUM_OF_ONOFF_COST_MODEL + 1;
-			_server_list[ES].processing_capacity = ES_GHz_for_onoff_model[_server_list[ES].machine_type];
-		}
+		_server_list[ES].cost_alpha = ((double)(rand() % 37 + 63)) / 100;
+		_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
+		_server_list[ES].processing_capacity = ES_GHz[_server_list[ES].machine_type];
 	}
 }
 
@@ -62,37 +31,46 @@ void server_initalization(server* _server_list, int _model) {
 double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초당 cost
 	double cost = 0;
 	if (_model == CPU_USAGE_MODEL) {
-		double full_charge = ES_number_of_vCPUs_for_linear_model[_server->machine_type] * hourly_charge_for_linear_model[_server->cost_model_type];
-		double percent = _used_GHz / _server->processing_capacity;
-		cost = full_charge * percent;
+		cost = _server->cost_alpha * (_used_GHz / _server->processing_capacity);
 	}
 	else if (_model == ONOFF_MODEL) {
 		if (_used_GHz)
-			cost = monthly_charge_for_onoff_model[_server->machine_type];
+			cost = _server->cost_alpha;
 		else
 			cost = 0;
+	}
+	else if (_model == STEP_MODEL) {
+		double percent = _used_GHz / _server->processing_capacity;
+		double step = 0;
+
+		if (percent) {
+			if (percent == 1) {
+				step = 1;
+			}
+			else {
+				if (percent > 0.1)
+					step = ((double)((int)(percent * 10))) / 10;
+				else
+					step = 0.1;
+
+			}
+		}
+		else
+			step = 0;
+
+		cost = _server->cost_alpha * step;
 	}
 
 	return cost;
 
-	//log 형이랑 exponential 형 모델도 넣자 
 }
 
-double get_full_charge(server* _server_list, int _cost_model) {
+double get_total_charge(server* _server_list, int _cost_model) {
 	double full_total_charge = 0;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-		if (_cost_model == CPU_USAGE_MODEL) {
-			full_total_charge += ES_number_of_vCPUs_for_linear_model[_server_list[ES].machine_type] * hourly_charge_for_linear_model[_server_list[ES].cost_model_type];
-		}
-		else if (_cost_model == ONOFF_MODEL) {
-			full_total_charge += monthly_charge_for_onoff_model[_server_list[ES].machine_type];
-		}
+		full_total_charge += _server_list[ES].cost_alpha;
 	}
 	return full_total_charge;
-}
-
-double get_monthly_charge_for_onoff_model(server* _server) {
-	return monthly_charge_for_onoff_model[_server->machine_type];
 }
 
 //아래는 전부 커버리지 관련
