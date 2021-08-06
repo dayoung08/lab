@@ -2,7 +2,7 @@
 int main() {
 	srand(SEED);
 
-	double ratio = 0.2;
+	double ratio = 0.5;
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = MOS;
