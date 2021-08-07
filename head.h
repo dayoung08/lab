@@ -23,7 +23,7 @@ using namespace std;
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-#define NUM_OF_ES 120
+#define NUM_OF_ES 125 // 125, 250, 375, 500
 #define NUM_OF_MACHINE 5
 
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
@@ -158,8 +158,8 @@ void set_version_set(bitrate_version_set* _version_set, short* _selected_set, sh
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
 void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_limit, short* _selected_set);
-void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
-void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model);
+void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model, bool is_lowest_version);
+void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, short* _ES_count, int _model, bool is_lowest_version);
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);

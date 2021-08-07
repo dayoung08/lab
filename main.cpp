@@ -2,7 +2,7 @@
 int main() {
 	srand(SEED);
 
-	double ratio = 0.5;
+	double ratio = 0.5; // 置社 0.25稽 馬切 0.25 0.5 0.75 1
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = MOS;
