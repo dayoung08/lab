@@ -23,11 +23,11 @@ using namespace std;
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
 //#define ES_NUM 125 // 교수님 주신 파일의 NUM_OF_SERVER
-#define NUM_OF_ES 125 // 125, 250, 375, 500
+#define NUM_OF_ES 125 // 125, 250, 375, 500 ... 디폴트 125로 하자. 원래 파일이 그거였으니...
 #define NUM_OF_MACHINE 5
 
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
-#define NUM_OF_CHANNEL 6000 //6000이 기준
+#define NUM_OF_CHANNEL 6000 //4000~8000 사이이고, 6000이 기준
 
 //#define VERSION_NUM 7
 //#define VERSION_SET_NUM 32 // 오리지널 버전 제외하고, 마지막 버전은 반드시 저장. 2^(7-2) set 1이 오리지널과 마지막 버전만 들어있는 것.

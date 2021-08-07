@@ -369,9 +369,11 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 		versions_in_CTS.erase(versions_in_CTS.begin());// list_CR의 맨 앞 삭제함
 
-		_ES_count[0]--;
-		_used_GHz[0] -= _channel_list[ch_in_CTS].video_GHz[ver_in_CTS];
-		_selected_ES[ch_in_CTS][ver_in_CTS] = -1;
+		if ((is_lowest_version && ver_in_CTS == 1) && (!is_lowest_version && ver_in_CTS != 1)) {
+			_ES_count[0]--;
+			_used_GHz[0] -= _channel_list[ch_in_CTS].video_GHz[ver_in_CTS];
+			_selected_ES[ch_in_CTS][ver_in_CTS] = -1;
+		}
 
 		if (_used_GHz[0] <= _server_list[0].processing_capacity) {
 			break;
