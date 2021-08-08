@@ -308,7 +308,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 					versions_in_CTS.insert(make_pair(slope, make_pair(ch, 1)));
 				}
 				else if (_selected_ES[ch][1] >= 1 && !is_turn_on[_selected_ES[ch][1]]) { // ES에 할당된 버전들은 pwq의 합을 구해줌
-					pwq[_selected_ES[ch][1]] += _channel_list[ch].pwq[1];
+					pwq[_selected_ES[ch][1]] += (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]);
 				}
 			}
 			else {
@@ -319,7 +319,8 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 						versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver)));
 					}
 					else if (_selected_ES[ch][ver] >= 1 && !is_turn_on[_selected_ES[ch][ver]]) { // ES에 할당된 버전들은 pwq의 합을 구해줌
-						pwq[_selected_ES[ch][ver]] += _channel_list[ch].pwq[ver];
+						int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
+						pwq[_selected_ES[ch][ver]] += (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]);
 					}
 				}
 			}
