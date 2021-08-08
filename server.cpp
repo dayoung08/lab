@@ -13,7 +13,7 @@ double ES_GHz[NUM_OF_MACHINE + 1] = { 0, 288, 302.4, 256, 324.8, 313.6};
 
 void server_initalization(server* _server_list, int _model) {
 	_server_list[0].index = 0;
-	_server_list[0].machine_type = 0;
+	//_server_list[0].machine_type = 0;
 	_server_list[0].cost_model_type = 0;
 	
 	_server_list[0].processing_capacity = 1814.4;
@@ -22,8 +22,8 @@ void server_initalization(server* _server_list, int _model) {
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		_server_list[ES].index = ES;
 		_server_list[ES].cost_alpha = ((double)(rand() % 37 + 63)) / 100;
-		_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
-		_server_list[ES].processing_capacity = ES_GHz[_server_list[ES].machine_type];
+		//_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
+		_server_list[ES].processing_capacity = ES_GHz[rand() % NUM_OF_MACHINE + 1];
 	}
 }
 

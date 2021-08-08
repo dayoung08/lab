@@ -12,8 +12,7 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 		_channel_list[ch].sum_of_video_quality = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_pwq = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_version_set_GHz = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
-		_channel_list[ch].sum_of_transfer_data_size = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
-
+		
 		_channel_list[ch].version_pop_type = _version_pop_type;
 		double* ver_pop = set_version_pop(_version_set, _channel_list[ch].version_pop_type);
 		
@@ -28,7 +27,6 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].sum_of_video_quality[set] = 0;
 			_channel_list[ch].sum_of_pwq[set] = 0;
 			_channel_list[ch].sum_of_version_set_GHz[set] = 0;
-			_channel_list[ch].sum_of_transfer_data_size[set] = 0;
 		}
 		//위 까지 인기도 계산
 		set_video_metric(&(_channel_list[ch]), _version_set, _metric_type); // 비디오 퀄리티 값 계산
