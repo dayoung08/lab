@@ -226,11 +226,11 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 			if (is_lowest_version) {
 				if (_selected_ES[ch][1] == 0) {
-					double slope = _channel_list[ch].sum_of_pwq[1] / _channel_list[ch].video_GHz[1];
+					double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_GHz[1];
 					versions_in_CTS.insert(make_pair(slope, make_pair(ch, 1)));
 				}
 				if (_selected_ES[ch][1] >= 1) {
-					double slope = _channel_list[ch].sum_of_pwq[1] / calculate_ES_cost(&(_server_list[_selected_ES[ch][1]]), _channel_list[ch].video_GHz[1], _model);
+					double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / calculate_ES_cost(&(_server_list[_selected_ES[ch][1]]), _channel_list[ch].video_GHz[1], _model);
 					list_CR.insert(make_pair(slope, make_pair(ch, 1)));
 				}
 			}
@@ -256,7 +256,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			list_CR.erase(list_CR.begin());// list_CR의 맨 앞 삭제함
 
 			if (is_lowest_version) {
-				double slope = _channel_list[ch_in_ES].sum_of_pwq[1] / _channel_list[ch_in_ES].video_GHz[1];
+				double slope = (_channel_list[ch_in_ES].sum_of_pwq[_selected_set[ch_in_ES]] - _channel_list[ch_in_ES].sum_of_pwq[1]) / _channel_list[ch_in_ES].video_GHz[1];
 				versions_in_CTS.insert(make_pair(slope, make_pair(ch_in_ES, ver_in_ES))); //CTS에 임시 할당
 			}
 			else {
@@ -297,7 +297,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 			if (is_lowest_version) {
 				if (_selected_ES[ch][1] == 0) {
-					double slope = _channel_list[ch].sum_of_pwq[1] / _channel_list[ch].video_GHz[1];
+					double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_GHz[1];
 					versions_in_CTS.insert(make_pair(slope, make_pair(ch, 1)));
 				}
 				else if (_selected_ES[ch][1] >= 1) { // ES에 할당된 버전들은 pwq의 합을 구해줌
@@ -344,7 +344,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 				if (is_lowest_version) { // 어차피 TA에서 lowest version만 할당하고 바로 CR 오므로 여기 lowest version만 들어있음.
 					if (_selected_ES[ch][1] == ES) {
-						double slope = _channel_list[ch].sum_of_pwq[1] / _channel_list[ch].video_GHz[1];
+						double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_GHz[1];
 						versions_in_CTS.insert(make_pair(slope, make_pair(ch, 1)));
 						_selected_ES[ch][1] = 0; //CTS에 임시 할당
 					}
