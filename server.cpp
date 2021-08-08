@@ -116,7 +116,6 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// generate random coverage range
 	// set coverage for each edge server
 	// range: 450m~750m
-	srand(SEED);
 	_server_list[0].coverage = INF; // CTS.
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		_server_list[ES].coverage = rand() % 301 + 450;

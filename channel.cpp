@@ -141,7 +141,6 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 	double* b = (double*)malloc(sizeof(double) * (_version_set->version_num)); // 맨 위 버전은 트랜스코딩 원본으로 쓰므로 빠진 것에 유의할 것
 	//int r[] = { 0, 200, 400, 600, 1000, 1500, 2000 };
 
-	mt19937 random_generation(SEED);
 	for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
 		if (_version_set->resolution[ver] == 38402160) { //스케일링해서 구함
 			a[ver] = 2.597554426;
@@ -221,7 +220,6 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 	//number_for_bit_opration = pow(2, info->version_num - 3);
 	//set_versions_number = info->version_num - 2;
-	srand(SEED);
 
 	_channel->pwq[1] = _channel->popularity[1] * _channel->video_quality[1]; //기본적으로 가장 낮은 버전은 반드시 포함되므로
 	_channel->pwq[_version_set->version_num] = _channel->popularity[_version_set->version_num] * _channel->video_quality[_version_set->version_num]; //기본적으로 원본버전은 반드시 포함되므로
