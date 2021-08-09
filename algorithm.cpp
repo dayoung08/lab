@@ -110,7 +110,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
 	}
 }
-
+/*
 void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_limit, short* _selected_set) {
 	//나중에 각 페이즈마다 함수 생성할 것. 그래야 보는 게 편하다.
 	//1. TD phase
@@ -146,7 +146,7 @@ void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		}
 	}
 }
-
+*/
 void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model, bool _is_lowest_only_mode) {
 	// 2. TA phase
 	set<pair<double, int>, greater<pair<double, int>>> ES_sort;
