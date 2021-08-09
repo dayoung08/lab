@@ -49,14 +49,14 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 	bool is_turn_on[NUM_OF_ES + 1];
 	memset(is_turn_on, 0, (sizeof(bool) * (NUM_OF_ES + 1)));
-	for (int is_lowest_version = 1; is_lowest_version >= 0; is_lowest_version--) { // mode = 1 : lowest version만, mode = 0; 2~N^ver 버전들 전부.
-		if (is_lowest_version)
+	for (int is_lowest_only_mode = 1; is_lowest_only_mode >= 0; is_lowest_only_mode--) { // mode = 1 : lowest version만, mode = 0; 2~N^ver 버전들 전부.
+		if (is_lowest_only_mode)
 			std::printf("[Lowest version만 우선 할당]\n");
 		else
 			std::printf("[2~N^ver 버전들 전부 할당]\n");
 
 		//TA_phase 
-		TA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model, is_lowest_version);
+		TA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model, is_lowest_only_mode);
 		total_cost = 0;
 		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 			total_cost += calculate_ES_cost(&(_server_list[ES]), used_GHz[ES], _model);
@@ -70,7 +70,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 		std::printf("=TA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
-		if (is_lowest_version) {
+		if (is_lowest_only_mode) {
 			int alloc_cnt = 0;
 			for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 				alloc_cnt += ES_count[ES];
@@ -147,20 +147,23 @@ void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	}
 }
 
-void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model, bool is_lowest_version) {
+void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model, bool _is_lowest_only_mode) {
 	// 2. TA phase
 	set<pair<double, int>, greater<pair<double, int>>> ES_sort;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		double slope;
 		if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
-			//slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / _server_list[ES].cost_alpha;
 			if (_used_GHz[ES])
-				slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / (calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model));
+				slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 			else
-				slope = (_server_list[ES].processing_capacity - _used_GHz[ES]);
+				slope = _server_list[ES].processing_capacity;
 		}
-		if (_model == ONOFF_MODEL)
-			slope = _used_GHz[ES] / _server_list[ES].cost_alpha;
+		if (_model == ONOFF_MODEL) {
+			if (_used_GHz[ES])
+				slope = _used_GHz[ES] / _server_list[ES].cost_alpha;
+			else
+				slope = 1 / _server_list[ES].cost_alpha;
+		}
 
 		ES_sort.insert(make_pair(slope, ES)); //set
 	}
@@ -169,7 +172,7 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TA;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-		if (is_lowest_version) {
+		if (_is_lowest_only_mode) {
 			double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_GHz[1];
 			list_TA.insert(make_pair(slope, make_pair(ch, 1)));
 		}
@@ -220,14 +223,17 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			ES_sort.erase(pos);
 			double slope;
 			if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
-				//slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / _server_list[ES].cost_alpha;
 				if (_used_GHz[ES])
-					slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / (calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model));
+					slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 				else
-					slope = (_server_list[ES].processing_capacity - _used_GHz[ES]);
+					slope = _server_list[ES].processing_capacity;
 			}
-			if (_model == ONOFF_MODEL)
-				slope = _used_GHz[ES] / _server_list[ES].cost_alpha;
+			if (_model == ONOFF_MODEL) {
+				if (_used_GHz[ES])
+					slope = _used_GHz[ES] / _server_list[ES].cost_alpha;
+				else
+					slope = 1 / _server_list[ES].cost_alpha;
+			}
 			ES_sort.insert(make_pair(slope, ES)); //set
 		}
 		else if (_used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
@@ -238,12 +244,12 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	}
 
 	//set 계산하기
-	if (!is_lowest_version)
+	if (!_is_lowest_only_mode)
 		set_version_set(_version_set, _selected_set, _selected_ES);
 }
 
 //3. CR phase
-void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model, bool* is_turn_on) {
+void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model, bool* _turn_on_at_lowest) {
 	set<pair<double, pair<int, int>>> versions_in_CTS;
 
 	//cost limit를 만족할 때 까지 ES 에서 각 버전들을 제거하고,
@@ -313,7 +319,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 					double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
 					versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver)));
 				}
-				else if (_selected_ES[ch][ver] >= 1 && !is_turn_on[_selected_ES[ch][ver]]) { // ES에 할당된 버전들은 pwq의 합을 구해줌
+				else if (_selected_ES[ch][ver] >= 1 && !_turn_on_at_lowest[_selected_ES[ch][ver]]) { // ES에 할당된 버전들은 pwq의 합을 구해줌
 					pwq[_selected_ES[ch][ver]] += (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]);
 				}
 			}
@@ -322,7 +328,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		set<pair<double, int>> list_CR;
 		// slope (pwq/cost) 값 / ES
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-			if (!is_turn_on[ES]) {
+			if (!_turn_on_at_lowest[ES]) {
 				double slope = pwq[ES] / calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 				list_CR.insert(make_pair(slope, ES));
 			}
