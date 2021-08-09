@@ -72,6 +72,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 		//CR_phase
 		if (total_cost > _cost_limit) {
+			printf("CR phase 진입, current cost: %lf\n", total_cost);
 			CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model, is_lowest_version, is_turn_on);
 
 			total_cost = 0;
@@ -383,12 +384,14 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 						_selected_ES[ch][1] = 0; //CTS에 임시 할당
 					}
 				}
-				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
-					if (_selected_ES[ch][ver] == ES) {
-						int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
-						double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
-						versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver))); //CTS에 임시 할당
-						_selected_ES[ch][ver] = 0; //CTS에 임시 할당
+				else {
+					for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+						if (_selected_ES[ch][ver] == ES) {
+							int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
+							double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
+							versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver))); //CTS에 임시 할당
+							_selected_ES[ch][ver] = 0; //CTS에 임시 할당
+						}
 					}
 				}
 			}
