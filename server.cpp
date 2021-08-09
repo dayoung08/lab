@@ -39,30 +39,20 @@ double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //ÃÊ´ç
 		else
 			cost = 0;
 	}
-	else if (_model == STEP_MODEL) {
+	/*else if (_model == STEP_MODEL) {
 		double percent = _used_GHz / _server->processing_capacity;
 		double step = 0;
 
 		if (percent) {
-			if (percent == 1) {
-				step = 1;
-			}
-			else {
-				if (percent > 0.1)
-					step = ((double)((int)(percent * 10))) / 10;
-				else
-					step = 0.1;
-
-			}
+			step = ((double)((int)(percent * 10) + 1)) / 10;
 		}
 		else
 			step = 0;
 
 		cost = _server->cost_alpha * step;
-	}
+	}*/
 
 	return cost;
-
 }
 
 double get_total_charge(server* _server_list, int _cost_model) {

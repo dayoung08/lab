@@ -37,7 +37,8 @@ int main() {
 
 	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
-	if (model == CPU_USAGE_MODEL || model == STEP_MODEL) {
+	//if (model == CPU_USAGE_MODEL || model == STEP_MODEL) {
+	if (model == CPU_USAGE_MODEL) {
 		comparison_schemes(cost_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 		comparison_schemes(cost_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	}

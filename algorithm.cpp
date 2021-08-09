@@ -150,7 +150,8 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	set<pair<double, int>, greater<pair<double, int>>> ES_sort;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		double slope;
-		if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+		//if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+		if (_model == CPU_USAGE_MODEL) {
 			if (_used_GHz[ES])
 				slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 			else
@@ -220,7 +221,8 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 			ES_sort.erase(pos);
 			double slope;
-			if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+			//if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+			if (_model == CPU_USAGE_MODEL) {
 				if (_used_GHz[ES])
 					slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 				else
@@ -251,7 +253,8 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 	//cost limit를 만족할 때 까지 ES 에서 각 버전들을 제거하고,
 	//제거된 버전들을 CTS로 옮긴다음, CTS capacity 넘는 것을 제거한다. // 20210713 추가함.
-	if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+		//if (_model == CPU_USAGE_MODEL || _model == STEP_MODEL) {
+	if (_model == CPU_USAGE_MODEL) {
 		set<pair<double, pair<int, int>>> list_CR;
 		// slope (pwq/cost) 값 / channel-version
 		// pwq 값 / channel-version
