@@ -65,8 +65,11 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		total_GHz = 0;
 		total_pwq = 0;
 		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+			if (is_lowest_only_mode) 
+				total_pwq += _channel_list[ch].sum_of_pwq[1];
+			else
+				total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
 			total_GHz += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
-			total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
 		}
 		std::printf("=TA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 

@@ -53,28 +53,28 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 
 void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
 	if (method_index == GHz_WF_AP) {
-		printf("<<GHz_worst_fit_AP>>\n");
+		printf("\n<<GHz_worst_fit_AP>>\n");
 	}
 	if (method_index == GHz_WF_HPF) {
-		printf("<<GHz_worst_fit_HPF>>\n");
+		printf("\n<<GHz_worst_fit_HPF>>\n");
 	}
 	if (method_index == cost_WF_AP) {
-		printf("<<cost_worst_fit_AP>>\n");
+		printf("\n<<cost_worst_fit_AP>>\n");
 	}
 	if (method_index == cost_WF_HPF) {
-		printf("<<cost_worst_fit_HPF>>\n");
+		printf("\n<<cost_worst_fit_HPF>>\n");
 	}
 	if (method_index == LPF_AP) {
-		printf("<<lowest_price_first_AP>>\n");
+		printf("\n<<lowest_price_first_AP>>\n");
 	}
 	if (method_index == LPF_HPF) {
-		printf("<<lowest_price_first_HPF>>\n");
+		printf("\n<<lowest_price_first_HPF>>\n");
 	}
 	if (method_index == RD_AP) {
-		printf("<<random_AP>>\n");
+		printf("\n<<random_AP>>\n");
 	}
 	if (method_index == RD_HPF) {
-		printf("<<random_HPF>>\n");
+		printf("\n<<random_HPF>>\n");
 	}
 	
 	double total_GHz = 0;

@@ -4,12 +4,12 @@
 //0번은 CTS
 //Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
 
-double ES_GHz[NUM_OF_MACHINE + 1] = { 0, 288, 302.4, 256, 324.8, 313.6};
-//1. ASUSTeK Computer Inc. RS700A-E9-RS4V2 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200313-01020.html//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html
-//Hewlett Packard Enterprise ProLiant DL580 Gen10 http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00883.html
-//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html 
-//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html 
-//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html
+double ES_GHz[NUM_OF_MACHINE + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6 };
+//1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html -> vcpu : 768개
+//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html -> vcpu: 1024개
+//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html -> vcpu: 256개
+//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html -> vcpu: 224개
+//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html -> vcpu: 256개
 
 void server_initalization(server* _server_list, int _model) {
 	_server_list[0].index = 0;
