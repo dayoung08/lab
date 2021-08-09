@@ -53,7 +53,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		if (is_lowest_only_mode)
 			std::printf("[Lowest version만 우선 할당]\n");
 		else
-			std::printf("[2~N^ver 버전들 전부 할당]\n");
+			std::printf("\n[2~N^ver 버전들 전부 할당]\n");
 
 		//TA_phase 
 		TA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model, is_lowest_only_mode);
@@ -71,14 +71,9 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		std::printf("=TA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
 		if (is_lowest_only_mode) {
-			int alloc_cnt = 0;
-			for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-				alloc_cnt += ES_count[ES];
-			}
-			if (alloc_cnt < NUM_OF_CHANNEL) {
-				std::printf("%d 채널의 lowest version이 할당되지 않는 문제 발생, cost budget을 높일 것.\n\n", NUM_OF_CHANNEL - alloc_cnt);
-			}
-			std::printf("lowest version cost : %lf $\n\n", total_cost);
+			is_success_for_lowest_allocation(selected_ES, ES_count, (total_cost >= _cost_limit));
+			if (total_cost >= _cost_limit)
+				exit(0);
 
 			// TA 페이즈의 lowest version 할당 결과, 태스크 1개 이상 할당 된 것이 있으면 on
 			if (_model == ONOFF_MODEL) {
@@ -91,7 +86,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 
 	//CR_phase
-	if (total_cost > _cost_limit) {
+	if (total_cost >= _cost_limit) {
 		//printf("CR phase 진입, current cost: %lf\n", total_cost);
 		CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model, is_turn_on);
 

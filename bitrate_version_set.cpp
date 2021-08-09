@@ -204,12 +204,25 @@ void set_version_set(bitrate_version_set* _version_set, short* _selected_set, sh
 	//set 계산하기
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		_selected_set[ch] = 0;
-		int set = 1;
+		int set = 0;
+		if (_selected_ES[ch][1] != -1)
+			set = 1;
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if (_selected_ES[ch][ver] != -1)
 				set += _version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1));
 			//다 계산하고 +1할것
 		}
 		_selected_set[ch] = set;
+	}
+}
+
+void is_success_for_lowest_allocation (short** _selected_ES, int* _ES_count, bool is_satisfied_cost_constraints) {
+	int alloc_cnt = 0;
+	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
+		alloc_cnt += _ES_count[ES];
+	}
+
+	if (alloc_cnt < NUM_OF_CHANNEL || is_satisfied_cost_constraints) {
+		std::printf("모든 채널의 lowest version이 cost budget 내에 할당되지 않는 문제 발생 \ncost budget을 높일 것.\n\n");
 	}
 }

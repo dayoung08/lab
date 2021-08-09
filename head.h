@@ -153,6 +153,7 @@ double rad2deg(double _rad);
 
 /* bitrate_version_set.cpp */
 void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES);
+void is_success_for_lowest_allocation(short** _selected_ES, int* _ES_count, bool is_satisfied_cost_constraints);
 
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
@@ -162,7 +163,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 /* comparison_schemes*/
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
-void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, double* _used_GHz, int* _ES_count, int _model);
+void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model);
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model);
 void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model);

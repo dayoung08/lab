@@ -48,10 +48,10 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 	}
 
 	set_version_set(_version_set, selected_set, selected_ES);
-	print_method(method_index, _server_list, _channel_list, _version_set, selected_set, used_GHz, ES_count, _model);
+	print_method(method_index, _server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
 }
 
-void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, double* _used_GHz, int* _ES_count, int _model) {
+void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
 	if (method_index == GHz_WF_AP) {
 		printf("<<GHz_worst_fit_AP>>\n");
 	}
@@ -92,7 +92,8 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 		total_cost += cost;
 		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 	}
-	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
+	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
+	is_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost >= _cost_limit));
 }
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
