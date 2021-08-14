@@ -80,7 +80,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		resolution[2] = 640360; //  640x360
 		resolution[1] = 426240; //  426x240
 
-		bitrate[11] = 35000;
+		bitrate[11] = 35500;
 		bitrate[10] = 23500;
 		bitrate[9] = 13500;
 		bitrate[8] = 9500;
