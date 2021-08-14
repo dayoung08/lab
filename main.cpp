@@ -8,8 +8,8 @@ int main() {
 	//int metric_type = PSNR;
 	int model = CPU_USAGE_MODEL;
 	//int model = ONOFF_MODEL;
-	int bitrate_set = 1;
-	//ÀÌ À§ÀÇ ÀÎÀÚµéÀ» ½ÇÇè È¯°æ¿¡ µû¶ó º¯°æ
+	int bitrate_set = 0;
+	//ì´ ìœ„ì˜ ì¸ìë“¤ì„ ì‹¤í—˜ í™˜ê²½ì— ë”°ë¼ ë³€ê²½
 
 	server server_list[NUM_OF_ES + 1];
 	channel channel_list[NUM_OF_CHANNEL + 1];
@@ -20,9 +20,9 @@ int main() {
 
 	double cost_limit = get_total_charge(server_list, model) * ratio;
 	printf("===== START =====\n");
-	printf("ºñ¿ë ÇÑµµ : %lf\n", cost_limit);
-	printf("°¨¸¶ ºĞÆ÷ - k °ª : %lf, ¼¼Å¸ °ª : %lf\n\n", K_gamma, THETA_gamma);
-	printf("¿§Áö ¼ö : %d, Ã¤³Î ¼ö : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
+	printf("ë¹„ìš© í•œë„ : %lf\n", cost_limit);
+	printf("ê°ë§ˆ ë¶„í¬ - k ê°’ : %lf, ì„¸íƒ€ ê°’ : %lf\n\n", K_gamma, THETA_gamma);
+	printf("ì—£ì§€ ìˆ˜ : %d, ì±„ë„ ìˆ˜ : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
 
 	clock_t start, end, spent_time;
 	start = clock();
@@ -31,9 +31,9 @@ int main() {
 	spent_time = end - start;
 	printf("%lf second\n\n", (double)spent_time / CLOCKS_PER_SEC);
 
-	//ºñ±³½ºÅ´ ¾ÆÁ÷ ÄÚµù ´ú ÇÔ
+	//ë¹„êµìŠ¤í‚´ ì•„ì§ ì½”ë”© ëœ í•¨
 
-	printf("===== ºñ±³ ½ºÅ´ =====\n\n");
+	printf("===== ë¹„êµ ìŠ¤í‚´ =====\n\n");
 
 	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
