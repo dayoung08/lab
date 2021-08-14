@@ -11,7 +11,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 	else if (index == 2) { // Neflix
 		version_num = 10;
 	}
-	else if (index == 4) { // ÎÖºÎ¨∏ https://doi.org/10.1145/3123266.3123426
+	else if (index == 4) { // ≥ÌπÆ https://doi.org/10.1145/3123266.3123426
 		version_num = 9;
 	}
 	else if (index == 3) { // IBM Watson Media
@@ -49,7 +49,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 			mean[2] = 60; //400
 			mean[1] = 40; //200
 		}
-		else if (_metric_type == PSNR || _metric_type == MOS) { // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 Ïù¥ ÎÖºÎ¨∏ Í∏∞Î∞òÏûÑ
+		else if (_metric_type == PSNR || _metric_type == MOS) { // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 ¿Ã ≥ÌπÆ ±‚π›¿”
 			mean[6] = 41.5; //2000 
 			mean[5] = 40; //1500
 			mean[4] = 38.5; //1000
@@ -57,7 +57,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 			mean[2] = 33.5; //400
 			mean[1] = 32; //200
 		}
-		else if (_metric_type == SSIM) { //SSIM->MOS Î≥ÄÌôò
+		else if (_metric_type == SSIM) { //SSIM->MOS ∫Ø»Ø
 			//Light-weight Video Coding Based on Perceptual Video Quality for Live Streaming https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8603274 
 			mean[6] = 0.97; //2000 
 			mean[5] = 0.96; //1500
@@ -67,7 +67,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 			mean[1] = 0.87; //200
 		}
 	}
-	else if (index == 1) { // Youtube https://support.google.com/youtube/answer/2853702?hl=ko Í∏∞Ï§Ä. ÎπÑÌä∏Î†àÏù¥Ìä∏Îäî mean ÏÇ¨Ïö©.
+	else if (index == 1) { // Youtube https://support.google.com/youtube/answer/2853702?hl=ko ±‚¡ÿ. ∫Ò∆Æ∑π¿Ã∆Æ¥¬ mean ªÁøÎ.
 		resolution[11] = 38402160; // 3840x2160
 		resolution[10] = 38402160; // 3840x2160
 		resolution[9] = 25601440; // 2560x1440
@@ -160,7 +160,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		mean[2] = 90; //1000
 		mean[1] = 60; //400
 	}
-	else if (index == 4) {  // ÎÖºÎ¨∏ https://doi.org/10.1145/3123266.3123426
+	else if (index == 4) {  // ≥ÌπÆ https://doi.org/10.1145/3123266.3123426
 		resolution[9] = 19201080; // 1920x1080
 		resolution[8] = 19201080; // 1920x1080
 		resolution[7] = 19201080; // 1920x1080
@@ -192,7 +192,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 	}
 
 	/*for (int ver = 1; ver <= version_num; ver++) {
-		data_size[ver] = ((double)bitrate[ver] * 1000) / (8 * 1024 * 1024); // MB/s Îã®ÏúÑÏûÑ
+		data_size[ver] = ((double)bitrate[ver] * 1000) / (8 * 1024 * 1024); // MB/s ¥‹¿ß¿”
 		//cout << data_size[ver];
 	}*/
 	
@@ -201,7 +201,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 }
 
 void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES) {
-	//set Í≥ÑÏÇ∞ÌïòÍ∏∞
+	//set ∞ËªÍ«œ±‚
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		_selected_set[ch] = 0;
 		int set = 0;
@@ -210,7 +210,7 @@ void set_version_set(bitrate_version_set* _version_set, short* _selected_set, sh
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			if (_selected_ES[ch][ver] != -1)
 				set += _version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1));
-			//Îã§ Í≥ÑÏÇ∞ÌïòÍ≥† +1Ìï†Í≤É
+			//¥Ÿ ∞ËªÍ«œ∞Ì +1«“∞Õ
 		}
 		_selected_set[ch] = set;
 	}
@@ -223,6 +223,6 @@ void is_success_for_lowest_allocation (short** _selected_ES, int* _ES_count, boo
 	}
 
 	if (alloc_cnt < NUM_OF_CHANNEL || is_satisfied_cost_constraints) {
-		std::printf("Î™®Îì† Ï±ÑÎÑêÏùò lowest versionÏù¥ cost budget ÎÇ¥Ïóê Ìï†ÎãπÎêòÏßÄ ÏïäÎäî Î¨∏Ï†ú Î∞úÏÉù. cost budgetÏùÑ ÎÜíÏùº Í≤É.\n");
+		std::printf("∏µÁ √§≥Œ¿« lowest version¿Ã cost budget ≥ªø° «“¥Áµ«¡ˆ æ ¥¬ πÆ¡¶ πﬂª˝. cost budget¿ª ≥Ù¿œ ∞Õ.\n");
 	}
 }
