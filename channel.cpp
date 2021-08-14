@@ -1,6 +1,7 @@
 #include "head.h"
 
 void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type, int _metric_type) {
+	srand(SEED);
 	double* channel_pop = set_gamma_pop(NUM_OF_CHANNEL, K_gamma, THETA_gamma);
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		_channel_list[ch].index = ch;

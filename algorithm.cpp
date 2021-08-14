@@ -244,8 +244,8 @@ void TA_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	}
 
 	//set 계산하기
-	if (!_is_lowest_only_mode)
-		set_version_set(_version_set, _selected_set, _selected_ES);
+	//if (!_is_lowest_only_mode)
+	//	set_version_set(_version_set, _selected_set, _selected_ES);
 }
 
 void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model, bool* _is_turned_on_at_lowest) {
@@ -375,6 +375,9 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		int ver_in_CTS = (*versions_in_CTS.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 
 		versions_in_CTS.erase(versions_in_CTS.begin());// list_CR의 맨 앞 삭제함
+
+		if (ver_in_CTS == 1)
+			printf("error\n");
 
 		_ES_count[0]--;
 		_used_GHz[0] -= _channel_list[ch_in_CTS].video_GHz[ver_in_CTS];
