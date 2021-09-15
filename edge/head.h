@@ -13,27 +13,27 @@ using namespace std;
 #define SEED 1234
 #define INF 987654321
 
-//#define PERIOD 30 // ÇÑ ´Þ¿¡ ÇÑ ¹ø µ· ³½´Ù°í °¡Á¤ÇÏÀÚ
+//#define PERIOD 30 // í•œ ë‹¬ì— í•œ ë²ˆ ëˆ ë‚¸ë‹¤ê³  ê°€ì •í•˜ìž
 #define CPU_USAGE_MODEL 0
 #define ONOFF_MODEL 1
 //#define STEP_MODEL 2
 
-//¾Æ·¡´Â ±³¼ö´ÔÀÌ ÁÖ½Å ÆÄÀÏ ±â¹Ý. ÄÚµå º¸´Ï±î Å¬¶óÀÌ¾ðÆ® ¼ö x À¯Àú ¼ö¸¦ Ã¤³Î·Î ÇØµµ µÉ °Í °°´Ù. ÇÊ¿ä ½Ã coord.c ÆÄÀÏ ¼öÁ¤ÇØ¼­ ÆÄÀÏµé ´Ù½Ã »ÌÀ¸¸é µÉ µí.
+//ì•„ëž˜ëŠ” êµìˆ˜ë‹˜ì´ ì£¼ì‹  íŒŒì¼ ê¸°ë°˜. ì½”ë“œ ë³´ë‹ˆê¹Œ í´ë¼ì´ì–¸íŠ¸ ìˆ˜ x ìœ ì € ìˆ˜ë¥¼ ì±„ë„ë¡œ í•´ë„ ë  ê²ƒ ê°™ë‹¤. í•„ìš” ì‹œ coord.c íŒŒì¼ ìˆ˜ì •í•´ì„œ íŒŒì¼ë“¤ ë‹¤ì‹œ ë½‘ìœ¼ë©´ ë  ë“¯.
 //#define NUM_OF_CLIENT	816
 //#define NUM_OF_SERVER	125
 //#define NUM_OF_USER	10 // the number of user for each ip block
-//#define ES_NUM 125 // ±³¼ö´Ô ÁÖ½Å ÆÄÀÏÀÇ NUM_OF_SERVER
+//#define ES_NUM 125 // êµìˆ˜ë‹˜ ì£¼ì‹  íŒŒì¼ì˜ NUM_OF_SERVER
 #define NUM_OF_ES 100 // 50 75 ((100)) 125 150
 #define NUM_OF_MACHINE 5
 
-//#define CHANNEL_NUM 8160  // ±³¼ö´Ô ÁÖ½Å ÆÄÀÏÀÇ NUM_OF_CLIENT * NUM_OF_USER
-#define NUM_OF_CHANNEL 6000 //4000~8000 »çÀÌÀÌ°í, ((6000ÀÌ ±âÁØ))
+//#define CHANNEL_NUM 8160  // êµìˆ˜ë‹˜ ì£¼ì‹  íŒŒì¼ì˜ NUM_OF_CLIENT * NUM_OF_USER
+#define NUM_OF_CHANNEL 6000 //4000~8000 ì‚¬ì´ì´ê³ , ((6000ì´ ê¸°ì¤€))
 
 //#define VERSION_NUM 7
-//#define VERSION_SET_NUM 32 // ¿À¸®Áö³Î ¹öÀü Á¦¿ÜÇÏ°í, ¸¶Áö¸· ¹öÀüÀº ¹Ýµå½Ã ÀúÀå. 2^(7-2) set 1ÀÌ ¿À¸®Áö³Î°ú ¸¶Áö¸· ¹öÀü¸¸ µé¾îÀÖ´Â °Í.
-//set 1 = (1)00000(1)ÀÌ¶ó¼­ 1¹ø, ¿À¸®Áö³Î ¹öÀü¸¸
-//set 2 = (1)00001(1)ÀÌ¶ó¼­ 1¹ø, ¿À¸®Áö³Î ¹öÀü°ú ÇÔ²² 2¹ø ¹öÀü¸¸,
-//set 3 = (1)00010(1)ÀÌ¶ó¼­ 1¹ø, ¿À¸®Áö³Î ¹öÀü°ú ÇÔ²² 3¹ø ¹öÀü¸¸.
+//#define VERSION_SET_NUM 32 // ì˜¤ë¦¬ì§€ë„ ë²„ì „ ì œì™¸í•˜ê³ , ë§ˆì§€ë§‰ ë²„ì „ì€ ë°˜ë“œì‹œ ì €ìž¥. 2^(7-2) set 1ì´ ì˜¤ë¦¬ì§€ë„ê³¼ ë§ˆì§€ë§‰ ë²„ì „ë§Œ ë“¤ì–´ìžˆëŠ” ê²ƒ.
+//set 1 = (1)00000(1)ì´ë¼ì„œ 1ë²ˆ, ì˜¤ë¦¬ì§€ë„ ë²„ì „ë§Œ
+//set 2 = (1)00001(1)ì´ë¼ì„œ 1ë²ˆ, ì˜¤ë¦¬ì§€ë„ ë²„ì „ê³¼ í•¨ê»˜ 2ë²ˆ ë²„ì „ë§Œ,
+//set 3 = (1)00010(1)ì´ë¼ì„œ 1ë²ˆ, ì˜¤ë¦¬ì§€ë„ ë²„ì „ê³¼ í•¨ê»˜ 3ë²ˆ ë²„ì „ë§Œ.
 
 #define HVP 1
 #define MVP 2
@@ -45,13 +45,13 @@ using namespace std;
 #define PSNR 2
 #define MOS 3
 
-//#define ALPHA 2.0 // ÀÎ±âµµ - ÁöÇÁ ºÐÆ÷¿¡ »ç¿ëÇÏ´Â ¾ËÆÄ º£Å¸ °ª
+//#define ALPHA 2.0 // ì¸ê¸°ë„ - ì§€í”„ ë¶„í¬ì— ì‚¬ìš©í•˜ëŠ” ì•ŒíŒŒ ë² íƒ€ ê°’
 //#define BETA 1.0
 
-#define SIGMA 1 // ¹öÀü ÀÎ±âµµ - ³ë¸Ö ºÐÆ÷¿¡ »ç¿ëÇÏ´Â °ª
- //0.25 0.5 0.75 <Default 1> 1.25 1.5 1.75 2 »çÀÌÀÇ °ª.
+#define SIGMA 1 // ë²„ì „ ì¸ê¸°ë„ - ë…¸ë©€ ë¶„í¬ì— ì‚¬ìš©í•˜ëŠ” ê°’
+ //0.25 0.5 0.75 <Default 1> 1.25 1.5 1.75 2 ì‚¬ì´ì˜ ê°’.
 
-#define K_gamma 0.399 // ÀÎ±âµµ - °¨¸¶ ºÐÆ÷¿¡ »ç¿ëÇÏ´Â k, ¼¼Å¸°ª
+#define K_gamma 0.399 // ì¸ê¸°ë„ - ê°ë§ˆ ë¶„í¬ì— ì‚¬ìš©í•˜ëŠ” k, ì„¸íƒ€ê°’
 #define THETA_gamma 14260.0
 
 #define M_E 2.7182818284590452354 /* e */
@@ -77,13 +77,13 @@ public:
 	double processing_capacity;
 	location server_location; // int capacity; // server's capacity
 
-	int coverage; // Ä¿¹ö¸®Áö
+	int coverage; // ì»¤ë²„ë¦¬ì§€
 
-	//int machine_type; // ¿§Áö ±â±âÀÇ Á¾·ù 
-	int cost_model_type; // ºñ¿ë ÇÔ¼öÀÇ Á¾·ù
-	double cost_alpha; // ³í¹®¿¡¼­ alpha °ª, CPU usage°¡ 100%ÀÏ¶§ÀÇ °ªÀÓ.
+	//int machine_type; // ì—£ì§€ ê¸°ê¸°ì˜ ì¢…ë¥˜ 
+	int cost_model_type; // ë¹„ìš© í•¨ìˆ˜ì˜ ì¢…ë¥˜
+	double cost_alpha; // ë…¼ë¬¸ì—ì„œ alpha ê°’, CPU usageê°€ 100%ì¼ë•Œì˜ ê°’ìž„.
 
-	//¾Æ·¡´Â Ã¤³Î ÇÒ´çÀ¸·Î ÀÎÇØ °»½ÅµÇ´Â °ª.
+	//ì•„ëž˜ëŠ” ì±„ë„ í• ë‹¹ìœ¼ë¡œ ì¸í•´ ê°±ì‹ ë˜ëŠ” ê°’.
 	/*int total_GHz;
 	double total_transfer_data_size;
 	double total_cost;*/
@@ -91,47 +91,47 @@ public:
 
 class channel {
 public:
-	location broadcaster_location; // ÀÌ Ã¤³Î broadcasterÀÇ À§Ä¡. ÀÌ°Í°ú ¿§ÁöÀÇ distance¸¦ ±¸ÇØ¾ßÇÔ.
+	location broadcaster_location; // ì´ ì±„ë„ broadcasterì˜ ìœ„ì¹˜. ì´ê²ƒê³¼ ì—£ì§€ì˜ distanceë¥¼ êµ¬í•´ì•¼í•¨.
 
 	int index; // channel;
 	int version_pop_type; //HVP MVP LVP RVP
 
 	double* video_quality;//[VERSION_NUM + 1];
-	double* popularity;//[VERSION_NUM + 1]; // [0] ¿©±â´Â ÀüÃ¼ Ã¤³ÎÀÇ pop, Áï ÀüÃ¼ ¹öÀü versionÀÇ pop ÇÕ.
+	double* popularity;//[VERSION_NUM + 1]; // [0] ì—¬ê¸°ëŠ” ì „ì²´ ì±„ë„ì˜ pop, ì¦‰ ì „ì²´ ë²„ì „ versionì˜ pop í•©.
 	double* video_GHz;//[VERSION_NUM + 1];
-	double* pwq;//[VERSION_NUM + 1]; // weighted video quality¶ó°í ¾²¿©ÀÖÀ½. ÇÏµµ Æò¼Ò¿¡ video pwqÀÌ¶ó ºÒ·¯¼­ ÄÚµù¶§µµ ÀÌ·¸°Ô ÇÔ.
+	double* pwq;//[VERSION_NUM + 1]; // weighted video qualityë¼ê³  ì“°ì—¬ìžˆìŒ. í•˜ë„ í‰ì†Œì— video pwqì´ë¼ ë¶ˆëŸ¬ì„œ ì½”ë”©ë•Œë„ ì´ë ‡ê²Œ í•¨.
 	
 	double* sum_of_video_quality;//[VERSION_SET_NUM + 1];
 	double* sum_of_pwq;//[VERSION_SET_NUM + 1];
-	//ÀÌ set Áö¿ìÁö ¸»°Í. pwq ÇÕ °è»êÇÒ¶§ ÀÌ°É·Î µ¹¸®´Â°Ô Á¦ÀÏ ÆíÇÏ´Ù.
+	//ì´ set ì§€ìš°ì§€ ë§ê²ƒ. pwq í•© ê³„ì‚°í• ë•Œ ì´ê±¸ë¡œ ëŒë¦¬ëŠ”ê²Œ ì œì¼ íŽ¸í•˜ë‹¤.
 	double* sum_of_version_set_GHz;
 
 	double get_channel_popularity();
 	bool available_server_list[NUM_OF_ES]; // true: user i is in server j's coverage
 
-	//¾Æ·¡´Â ¾Ë°í¸®ÁòÀÇ °á°ú·Î °áÁ¤µÉ ÆÄ¶ó¹ÌÅÍ
-	int allocated_server_index; //ÀÌ°Ô Áß¿äÇÔ. ±³¼ö´ÔÀÌ ÁÖ½Å ÆÄÀÏ¿¡¼­ int assign[NUM_OF_CLIENT * NUM_OF_USER]; // assigned server index -> ÀÌ°Í°ú °°Àº ¿ªÇÒÀÓ.
-	int determined_version_set; //ÀÌ°Ô Áß¿äÇÔ 2.
+	//ì•„ëž˜ëŠ” ì•Œê³ ë¦¬ì¦˜ì˜ ê²°ê³¼ë¡œ ê²°ì •ë  íŒŒë¼ë¯¸í„°
+	int allocated_server_index; //ì´ê²Œ ì¤‘ìš”í•¨. êµìˆ˜ë‹˜ì´ ì£¼ì‹  íŒŒì¼ì—ì„œ int assign[NUM_OF_CLIENT * NUM_OF_USER]; // assigned server index -> ì´ê²ƒê³¼ ê°™ì€ ì—­í• ìž„.
+	int determined_version_set; //ì´ê²Œ ì¤‘ìš”í•¨ 2.
 };
 
 class bitrate_version_set {
-public: //±×³É ÀüºÎ public °¡ÀÚ
-	int index; // 0Àº ¿ì¸®°¡ ¾²´Â zencoder Á¶ÇÕ.
+public: //ê·¸ëƒ¥ ì „ë¶€ public ê°€ìž
+	int index; // 0ì€ ìš°ë¦¬ê°€ ì“°ëŠ” zencoder ì¡°í•©.
 
 	int version_num;
 	int version_set_num;
 
-	int* resolution; //1080p¸é °ªÀÌ 1080ÀÓ
-	int* bitrate; // ³í¹®¿¡¼­ÀÇ rÀ» À§ÇÑ °ª. ´Ü ¿©±â¼± kbps°í, rÀº Mbps(GHz ±¸ÇÒ ¶§ º¯È¯ÇÔ). set_GHz ÃÖ»ó´ÜÀÇ ³í¹®ÀÇ ¼ö½Ä Âü°í.
+	int* resolution; //1080pë©´ ê°’ì´ 1080ìž„
+	int* bitrate; // ë…¼ë¬¸ì—ì„œì˜ rì„ ìœ„í•œ ê°’. ë‹¨ ì—¬ê¸°ì„  kbpsê³ , rì€ Mbps(GHz êµ¬í•  ë•Œ ë³€í™˜í•¨). set_GHz ìµœìƒë‹¨ì˜ ë…¼ë¬¸ì˜ ìˆ˜ì‹ ì°¸ê³ .
 	//double* data_size; 
-	// ¿§Áö¿¡¼­ µ¥ÀÌÅÍ ¿ÜºÎ Àü¼Û¿¡ ´ëÇÑ µ·À» ¹Þ±â ¶§¹®¿¡...  bitrate(kbps) -> MB/s·Î º¯È¯ÇÔ. 
-	// GHzµµ ÃÊ´ç »ç¿ë·®ÀÌ´Ï ÀÌÂÊµµ ÃÊ´ç µ¥ÀÌÅÍ Àü¼Û·®À¸·Î ÇÏ¸é µÇ´Ï±î. ±×·¯¹Ç·Î ÀÌ °ªÀÌ µ¥ÀÌÅÍ Àü¼Û·®ÀÌ µÇ´Â °Í.
+	// ì—£ì§€ì—ì„œ ë°ì´í„° ì™¸ë¶€ ì „ì†¡ì— ëŒ€í•œ ëˆì„ ë°›ê¸° ë•Œë¬¸ì—...  bitrate(kbps) -> MB/së¡œ ë³€í™˜í•¨. 
+	// GHzë„ ì´ˆë‹¹ ì‚¬ìš©ëŸ‰ì´ë‹ˆ ì´ìª½ë„ ì´ˆë‹¹ ë°ì´í„° ì „ì†¡ëŸ‰ìœ¼ë¡œ í•˜ë©´ ë˜ë‹ˆê¹Œ. ê·¸ëŸ¬ë¯€ë¡œ ì´ ê°’ì´ ë°ì´í„° ì „ì†¡ëŸ‰ì´ ë˜ëŠ” ê²ƒ.
 	double* mean;
 
 	int number_for_bit_opration;
 	int set_versions_number_for_bit_opration;
 
-	bitrate_version_set(int _index, int _metric_type); //initiation.cpp¿¡ ±¸Çö ÀÖÀ½
+	bitrate_version_set(int _index, int _metric_type); //initiation.cppì— êµ¬í˜„ ìžˆìŒ
 };
 
 /* channel.cpp */
