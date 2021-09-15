@@ -1,15 +1,15 @@
 #include "head.h"
 
-//½Ã¹Ä·¹ÀÌ¼Ç È¯°æ ¼³Á¤
-//0¹øÀº CTS
+//ì‹œë®¬ë ˆì´ì…˜ í™˜ê²½ ì„¤ì •
+//0ë²ˆì€ CTS
 //Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
 
 double ES_GHz[NUM_OF_MACHINE + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6 };
-//1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html -> vcpu : 768°³
-//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html -> vcpu: 1024°³
-//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html -> vcpu: 256°³
-//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html -> vcpu: 224°³
-//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html -> vcpu: 256°³
+//1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html -> vcpu : 768ê°œ
+//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html -> vcpu: 1024ê°œ
+//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html -> vcpu: 256ê°œ
+//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html -> vcpu: 224ê°œ
+//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html -> vcpu: 256ê°œ
 
 void server_initalization(server* _server_list, int _model) {
 	_server_list[0].index = 0;
@@ -27,8 +27,8 @@ void server_initalization(server* _server_list, int _model) {
 	}
 }
 
-//ºñ¿ë °ü·Ã
-double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //ÃÊ´ç cost
+//ë¹„ìš© ê´€ë ¨
+double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //ì´ˆë‹¹ cost
 	double cost = 0;
 	if (_model == CPU_USAGE_MODEL) {
 		cost = _server->cost_alpha * (_used_GHz / _server->processing_capacity);
@@ -63,11 +63,11 @@ double get_total_charge(server* _server_list, int _cost_model) {
 	return full_total_charge;
 }
 
-//¾Æ·¡´Â ÀüºÎ Ä¿¹ö¸®Áö °ü·Ã
-void set_coverage_infomation(channel* _channel_list, server* _server_list) { // ±³¼ö´ÔÀÌ ÁÖ½Å ÄÚµåÀÓ.
+//ì•„ë˜ëŠ” ì „ë¶€ ì»¤ë²„ë¦¬ì§€ ê´€ë ¨
+void set_coverage_infomation(channel* _channel_list, server* _server_list) { // êµìˆ˜ë‹˜ì´ ì£¼ì‹  ì½”ë“œì„.
 	FILE* fp;
 	   
-	// º»·¡ ÀÌ ÄÚµå¿¡´Â ¼­¹ö¿¡ ÇÒ´ç °¡´ÉÇÑ À¯ÀúÀÇ ¼ıÀÚ¸¦ capacity·Î ³ªÅ¸³»°í ÀÌ¿¡ ´ëÇÑ ÄÚµå°¡ ÀÖÀ¸³ª, ¿ì¸®´Â GHz¿Í Cost°¡ ÀÌ ¿ªÇÒÀ» ÇÏ¹Ç·Î »ç¿ëÇÏÁö ¾ÊÀ½.
+	// ë³¸ë˜ ì´ ì½”ë“œì—ëŠ” ì„œë²„ì— í• ë‹¹ ê°€ëŠ¥í•œ ìœ ì €ì˜ ìˆ«ìë¥¼ capacityë¡œ ë‚˜íƒ€ë‚´ê³  ì´ì— ëŒ€í•œ ì½”ë“œê°€ ìˆìœ¼ë‚˜, ìš°ë¦¬ëŠ” GHzì™€ Costê°€ ì´ ì—­í• ì„ í•˜ë¯€ë¡œ ì‚¬ìš©í•˜ì§€ ì•ŠìŒ.
 	// server read
 	fopen_s(&fp, "servercoord.txt", "r");
 
@@ -82,7 +82,7 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	}
 	fclose(fp);
 
-	//210717 ¹ö±× ¼öÁ¤
+	//210717 ë²„ê·¸ ìˆ˜ì •
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		double latitude = coverage[(ES - 1) % 125 + 1].first;
 		double longitude = coverage[(ES - 1) % 125 + 1].second;
@@ -114,8 +114,8 @@ void set_coverage_infomation(channel* _channel_list, server* _server_list) { // 
 	// assign
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel* ch_ptr = &(_channel_list[ch]);
-		_channel_list[ch].available_server_list[0] = true; // CTSÀº (index 0) ¹«Á¶°Ç coverage¿¡ µé¾î°¨.
-		for (int ES = 1; ES <= NUM_OF_ES; ES++) { // ±âÁ¸ ÄÚµå¿¡µµ ¼­¹ö ¼ıÀÚ¿´´Ù
+		_channel_list[ch].available_server_list[0] = true; // CTSì€ (index 0) ë¬´ì¡°ê±´ coverageì— ë“¤ì–´ê°.
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) { // ê¸°ì¡´ ì½”ë“œì—ë„ ì„œë²„ ìˆ«ìì˜€ë‹¤
 			server* ES_ptr = &(_server_list[ES]);
 			double dist = calculate_distance(ch_ptr, ES_ptr);
 			// the user is at outside of coverage
