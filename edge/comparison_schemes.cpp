@@ -1,14 +1,14 @@
 #include "head.h"
 
-//Àü¹İÀûÀ¸·Î È®ÀÎ ÇÒ ÇÊ¿ä°¡ ÀÖÀ½ 20210515
-//ºñ±³ ½ºÅ´µéÀÌ ±¸ÇöµÇ¾ú´Ù.
+//ì „ë°˜ì ìœ¼ë¡œ í™•ì¸ í•  í•„ìš”ê°€ ìˆìŒ 20210515
+//ë¹„êµ ìŠ¤í‚´ë“¤ì´ êµ¬í˜„ë˜ì—ˆë‹¤.
 
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model) {
-	short selected_set[NUM_OF_CHANNEL + 1]; // °¢ Ã¤³Î¿¡¼­ »ç¿ëÇÏ´Â ºñÆ®·¹ÀÌÆ® set
+	short selected_set[NUM_OF_CHANNEL + 1]; // ê° ì±„ë„ì—ì„œ ì‚¬ìš©í•˜ëŠ” ë¹„íŠ¸ë ˆì´íŠ¸ set
 	memset(selected_set, 0, (sizeof(short) * (NUM_OF_ES + 1)));
 
-	short** selected_ES;//[CHANNEL_NUM + 1][VERSION_NUM]; // °¢ Ã¤³Î¿¡¼­ »ç¿ëÇÏ´Â ºñÆ®·¹ÀÌÆ® set¿¡ ¼ÓÇÏ´Â °¢ ¹öÀüÀÌ ¾î¶² es¿¡¼­ ¼±ÅÃµÇ¾ú´Â°¡.
-	//¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇØ¼­ ¹è¿­ Å©±â°¡ Àú·¸´Ù.
+	short** selected_ES;//[CHANNEL_NUM + 1][VERSION_NUM]; // ê° ì±„ë„ì—ì„œ ì‚¬ìš©í•˜ëŠ” ë¹„íŠ¸ë ˆì´íŠ¸ setì— ì†í•˜ëŠ” ê° ë²„ì „ì´ ì–´ë–¤ esì—ì„œ ì„ íƒë˜ì—ˆëŠ”ê°€.
+	//ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•´ì„œ ë°°ì—´ í¬ê¸°ê°€ ì €ë ‡ë‹¤.
 
 	double used_GHz[NUM_OF_ES + 1];
 	int ES_count[NUM_OF_ES + 1];
@@ -17,8 +17,8 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 
 	selected_ES = (short**)malloc(sizeof(short*) * (NUM_OF_CHANNEL + 1));
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-		selected_ES[ch] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // ¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇÏ´Ï±î
-		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {  // ¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇÏ´Ï±î
+		selected_ES[ch] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•˜ë‹ˆê¹Œ
+		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {  // ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•˜ë‹ˆê¹Œ
 			selected_ES[ch][ver] = -1;
 		}
 	}
@@ -85,7 +85,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	}
 
 	double total_cost = 0; 
-	double remained_GHz[NUM_OF_ES + 1]; // processing capacity[es] - used_GHz[es] ÇÏ¸é remained_GHz[es] ÇÏ¸é ³ª¿È. ¸ğµç ³ëµåÀÇ ³²Àº GHz °è»êÀ» À§ÇØ.
+	double remained_GHz[NUM_OF_ES + 1]; // processing capacity[es] - used_GHz[es] í•˜ë©´ remained_GHz[es] í•˜ë©´ ë‚˜ì˜´. ëª¨ë“  ë…¸ë“œì˜ ë‚¨ì€ GHz ê³„ì‚°ì„ ìœ„í•´.
 
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 		double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
@@ -97,8 +97,8 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 }
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ GHz°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
-	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ GHzê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
+	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -113,9 +113,9 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
-		channel_popularities_set.erase(channel_popularities_set.begin()); //°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		channel_popularities_set.erase(channel_popularities_set.begin()); //ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ GHz¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ GHzì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
@@ -144,10 +144,10 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -171,10 +171,10 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
-			//2~version_num-1±îÁö
+			//2~version_num-1ê¹Œì§€
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
-				//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ GHz¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+				//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ GHzì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 				set<pair<double, int>> lowest_used_GHz_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES])
@@ -205,11 +205,11 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
@@ -229,10 +229,10 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
+			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
+			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
@@ -250,24 +250,24 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 }
 
 void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ GHz°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
-	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ GHzê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
+	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 	
-	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
+	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
-		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
+		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
 		int ch = (*version_popularities_set.begin()).second.first;
 		version_popularities_set.erase(version_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ GHz¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ GHzì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if(_channel_list[ch].available_server_list[ES])
@@ -298,11 +298,11 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 				is_allocated = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -314,7 +314,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		}
 	}
 
-	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
+	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -328,9 +328,9 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, ±× ES¿¡ ÇÒ´çµÈ ver¹ø ¹öÀüÀÇ °¹¼ö¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê·¸ ESì— í• ë‹¹ëœ verë²ˆ ë²„ì „ì˜ ê°¯ìˆ˜ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<int, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
@@ -365,7 +365,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
@@ -381,8 +381,8 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 }
 
 void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ cost°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
-	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ costê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
+	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -398,9 +398,9 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
 		channel_popularities_set.erase(channel_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -433,11 +433,11 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -462,10 +462,10 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
-			//2~version_num-1±îÁö
+			//2~version_num-1ê¹Œì§€
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
-				//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+				//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 				set<pair<double, int>> lowest_cost_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
@@ -498,11 +498,11 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
@@ -522,10 +522,10 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
+			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
+			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
@@ -547,24 +547,24 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 
 void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ GHz°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
-	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ GHzê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
+	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
-	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
+	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
-		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
+		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
 		int ch = (*version_popularities_set.begin()).second.first;
 		version_popularities_set.erase(version_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ë ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš© ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -598,11 +598,11 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 				is_allocated = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -614,7 +614,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		}
 	}
 
-	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
+	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -628,9 +628,9 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, ±× ESÀÇ cost¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê·¸ ESì˜ costì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -667,7 +667,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
@@ -684,8 +684,8 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 
 void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, °¡Àå ³·Àº leasing ±İ¾×À» °¡Áø ES¿¡ ¿ì¼±ÀûÀ¸·Î ÇÒ´çÇÑ´Ù.
-	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ê°€ì¥ ë‚®ì€ leasing ê¸ˆì•¡ì„ ê°€ì§„ ESì— ìš°ì„ ì ìœ¼ë¡œ í• ë‹¹í•œë‹¤.
+	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -701,9 +701,9 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
 		channel_popularities_set.erase(channel_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, °¡Àå ³·Àº ÀÓ´ë ±İ¾×¿¡ µû¶ó Á¤·Ä.
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê°€ì¥ ë‚®ì€ ì„ëŒ€ ê¸ˆì•¡ì— ë”°ë¼ ì •ë ¬.
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -737,11 +737,11 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -766,11 +766,11 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
-			//2~version_num-1±îÁö
+			//2~version_num-1ê¹Œì§€
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
 
-				//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, °¡Àå ³·Àº ÀÓ´ë ±İ¾×¿¡ µû¶ó Á¤·Ä.
+				//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê°€ì¥ ë‚®ì€ ì„ëŒ€ ê¸ˆì•¡ì— ë”°ë¼ ì •ë ¬.
 				set<pair<double, int>> lowest_price_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
@@ -804,11 +804,11 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
@@ -828,10 +828,10 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
+			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
+			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
@@ -849,24 +849,24 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 }
 
 void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, °¡Àå ³·Àº leasing ±İ¾×À» °¡Áø ES¿¡ ¿ì¼±ÀûÀ¸·Î ÇÒ´çÇÑ´Ù. °°Àº ±İ¾×ÀÌ¸é »ç¿ëÇÑ GHzÀÇ ÇÕÀÌ Á¦ÀÏ Å« ES¿¡ ÇÒ´çÇÑ´Ù.
-	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ê°€ì¥ ë‚®ì€ leasing ê¸ˆì•¡ì„ ê°€ì§„ ESì— ìš°ì„ ì ìœ¼ë¡œ í• ë‹¹í•œë‹¤. ê°™ì€ ê¸ˆì•¡ì´ë©´ ì‚¬ìš©í•œ GHzì˜ í•©ì´ ì œì¼ í° ESì— í• ë‹¹í•œë‹¤.
+	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
-	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
+	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
-		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
+		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
 		int ch = (*version_popularities_set.begin()).second.first;
 		version_popularities_set.erase(version_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ë ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš© ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -901,11 +901,11 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 				is_allocated = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -917,7 +917,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		}
 	}
 
-	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
+	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -931,9 +931,9 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());
-		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, ±× ESÀÇ cost¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê·¸ ESì˜ costì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
@@ -972,7 +972,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
@@ -989,8 +989,8 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 
 void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - coverage°¡ ¸Â´Â ES server¸¦ ·£´ıÀ¸·Î ¼±Á¤ÇÑ´Ù.
-	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - coverageê°€ ë§ëŠ” ES serverë¥¼ ëœë¤ìœ¼ë¡œ ì„ ì •í•œë‹¤.
+	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -1005,9 +1005,9 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
-		channel_popularities_set.erase(channel_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		channel_popularities_set.erase(channel_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
+		//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
 		vector<int> ESs_in_coverage;
 		for (int es = 1; es <= NUM_OF_ES; es++) {
 			if (_channel_list[ch].available_server_list[es]) {
@@ -1039,11 +1039,11 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -1067,12 +1067,12 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 	if (alloc_cnt == NUM_OF_CHANNEL) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
-			channel_popularities_set.erase(channel_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
-			//2~version_num-1±îÁö
+			channel_popularities_set.erase(channel_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+			//2~version_num-1ê¹Œì§€
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
 
-				//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
+				//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
 				vector<int> ESs_in_coverage;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (_channel_list[ch].available_server_list[es]) {
@@ -1105,11 +1105,11 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
@@ -1129,10 +1129,10 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
+			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
+			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
@@ -1150,11 +1150,11 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 }
 
 void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//¿§Áö ¼±ÅÃ - coverage°¡ ¸Â´Â ES server¸¦ ·£´ıÀ¸·Î ¼±Á¤ÇÑ´Ù.//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+	//ì—£ì§€ ì„ íƒ - coverageê°€ ë§ëŠ” ES serverë¥¼ ëœë¤ìœ¼ë¡œ ì„ ì •í•œë‹¤.//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
-	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
+	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
@@ -1162,11 +1162,11 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
 
-		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
+		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
 		int ch = (*version_popularities_set.begin()).second.first;
-		version_popularities_set.erase(version_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		version_popularities_set.erase(version_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
+		//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
 		vector<int> ESs_in_coverage;
 		for (int es = 1; es <= NUM_OF_ES; es++) {
 			if (_channel_list[ch].available_server_list[es]) {
@@ -1199,11 +1199,11 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 
 				is_allocated = true;
 				break;
-			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
@@ -1215,7 +1215,7 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 		}
 	}
 
-	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
+	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -1228,9 +1228,9 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 		int ch = (*version_popularities_set.begin()).second.first;
 		int ver = (*version_popularities_set.begin()).second.second;
 
-		version_popularities_set.erase(version_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+		version_popularities_set.erase(version_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
 
-		//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
+		//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
 		vector<int> ESs_in_coverage;
 		for (int es = 1; es <= NUM_OF_ES; es++) {
 			if (_channel_list[ch].available_server_list[es]) {
@@ -1268,7 +1268,7 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
