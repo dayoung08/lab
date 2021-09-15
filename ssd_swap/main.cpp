@@ -24,7 +24,7 @@ int main() {
 		memset(ADWD_for_curr_day, 0, (sizeof(double) * (NUM_OF_SSDs + 1)));
 
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) { // 6시간 간격으로 워크로드가 바뀐다고 가정.
-			cout << time << endl;
+			//cout << time << endl;
 			update_SSDs_and_insert_new_videos(SSD_list, segment_list);
 			run(SSD_list, segment_list, 1); // 2로 바꾸면 비교스킴
 
