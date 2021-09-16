@@ -9,20 +9,21 @@ void initalization(SSD* _SSD_list, video_segment* _segment_list) {
 		int index = ssd;
 		_SSD_list[index].index = index;
 		_SSD_list[index].DWPD = ((double)(rand() % (MAX_DWPD+1) + MIN_DWPD)) / 100;
-		_SSD_list[index].storage_space = 8000; // 용량 각각 다 다르게 하니 제대로 안 돌아감
+		_SSD_list[index].storage_space = 32000; // 용량 각각 다 다르게 하니 제대로 안 돌아감
+		//_SSD_list[index].storage_space = 0.5 * pow(2, (rand() % 8)); // 0.5, 1, 2, 4, 8. 16. 32TB
 
 		_SSD_list[index].maximum_bandwidth = rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1) + MIN_SSD_BANDWIDTH;
 		total_maximum_bandwidth += _SSD_list[index].maximum_bandwidth; 
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
 
-		_SSD_list[index].ADWD = 0;
+		_SSD_list[index].ADWD = 1;
 		_SSD_list[index].storage_usage = 0;
 		_SSD_list[index].bandwidth_usage = 0;
-		//_SSD_list[index].average_MB_write = 0;
+		//_SSD_list[index].MB_write = 0;
 	}
 
-	total_maximum_bandwidth *= 0.999;
+	total_maximum_bandwidth *= 0.5;
 	seg_pop = set_zipf_pop(NUM_OF_SEGMENTs, ALPHA, BETA);
 	vector<double>seg_pop_shuffle(seg_pop, seg_pop + NUM_OF_SEGMENTs);
 	std::random_device rd;
@@ -67,8 +68,6 @@ void initalization(SSD* _SSD_list, video_segment* _segment_list) {
 
 		_SSD_list[SSD_index].storage_usage += _segment_list[index].size;
 		_SSD_list[SSD_index].bandwidth_usage += _segment_list[index].requested_bandwidth;
-
-		_SSD_list[SSD_index].MB_write = 0;
 
 		//_segment_list[index].is_alloc = true;
 	}
