@@ -9,17 +9,17 @@ using namespace std;
 //#define INFINITY 987654321
 #define NUM_OF_SSDs 30
 
-#define NUM_OF_SEGMENTs 120000 //오히려 이 값 작아지면 세그먼트 하나의 밴드윗이 너무 커져서 안좋음
-#define SIZE_OF_SEGMENT 4 // Z값임
+#define NUM_OF_SEGMENTs 50000 //오히려 이 값 작아지면 세그먼트 하나의 밴드윗이 너무 커져서 안좋음
+#define SIZE_OF_SEGMENT 1 // Z값임
 
 #define NUM_OF_DATEs 10
-#define NUM_OF_TIMEs 60*24 // 1분 간격으로 워크로드 변경된다고 가정함
+#define NUM_OF_TIMEs 4
 
 //#define MAX_VIDEO_BANDWIDTH_USAGE 5000
 //#define MIN_VIDEO_BANDWIDTH_USAGE 200
 
-#define MAX_DWPD 1000 //10
-#define MIN_DWPD 5    //0.05
+#define MAX_DWPD 150 // 1.5
+#define MIN_DWPD 4   //0.04
 
 #define MAX_SSD_BANDWIDTH 5000
 #define MIN_SSD_BANDWIDTH 400
@@ -27,8 +27,8 @@ using namespace std;
 #define OUR_METHOD 1
 #define COMPARATIVE_METHOD 2
 
-#define ALPHA 0.2//1-0.271 // 1-세타. 보통 0.729 인기도 - 지프 분포에 사용하는 알파 베타 값
-#define BETA 1.0
+#define ALPHA 0.2 // 보통 비디오는 0.729임. 인기도 - 지프 분포에 사용하는 알파 베타 값
+#define BETA  1.0
 
 struct SSD {
 	int index;

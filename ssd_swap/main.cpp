@@ -40,12 +40,11 @@ int main() {
 					//total_for_curr_day += SSD_list[ssd].ADWD;
 					SSD_list[ssd].ADWD = ((ADWD_for_prev_day[ssd] * day) + SSD_list[ssd].ADWD) / (day + 1);
 					total_ADWD += SSD_list[ssd].ADWD;
-					printf("[SSD %d] %.2f\n", ssd, SSD_list[ssd].ADWD);
+					//printf("[SSD %d] %.2f\n", ssd, SSD_list[ssd].ADWD);
 					//printf("[SSD bandwidth %d] %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 					//printf("[SSD storage %d] %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
 				}
 				//printf("[DAY%d] ADWD %lf\n", day, (total_for_curr_day / (NUM_OF_SSDs)));
-				printf("[DAY%d] Migration number %d\n", day, migration_num);
 				printf("[DAY%d] Migration number %d\n", day, migration_num);
 			}
 		}

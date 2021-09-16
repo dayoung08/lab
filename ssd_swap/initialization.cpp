@@ -9,7 +9,7 @@ void initalization(SSD* _SSD_list, video_segment* _segment_list) {
 		int index = ssd;
 		_SSD_list[index].index = index;
 		_SSD_list[index].DWPD = ((double)(rand() % (MAX_DWPD+1) + MIN_DWPD)) / 100;
-		_SSD_list[index].storage_space = 32000; // 용량 각각 다 다르게 하니 제대로 안 돌아감
+		_SSD_list[index].storage_space = 2000; // 용량 각각 다 다르게 하니 제대로 안 돌아감
 		//_SSD_list[index].storage_space = 0.5 * pow(2, (rand() % 8)); // 0.5, 1, 2, 4, 8. 16. 32TB
 
 		_SSD_list[index].maximum_bandwidth = rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1) + MIN_SSD_BANDWIDTH;
