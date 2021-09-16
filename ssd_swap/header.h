@@ -5,30 +5,36 @@
 #include <random>
 using namespace std;
 
-#define SEED 1234
+#define SEED 111
 //#define INFINITY 987654321
 #define NUM_OF_SSDs 30
 
-#define NUM_OF_SEGMENTs 40000 //오히려 이 값 작아지면 세그먼트 하나의 밴드윗이 너무 커져서 안좋음
-#define SIZE_OF_SEGMENT 1 // Z값임
+//#define NUM_OF_VIDEOs 120000
+//#define SIZE_OF_VIDEO 450 // Z값임. 15분 정도라고 가정하자. (300MB가 10분)
+#define NUM_OF_VIDEOs 60000
+#define SIZE_OF_VIDEO 900
 
-#define NUM_OF_DATEs 10
+#define NUM_OF_DATEs 30
 #define NUM_OF_TIMEs 4
 
-//#define MAX_VIDEO_BANDWIDTH_USAGE 5000
-//#define MIN_VIDEO_BANDWIDTH_USAGE 200
+//#define VIDEO_BANDWIDTH_USAGE 0.5f //비디오가 4000kbps(즉 4Mbps)라고 가정해봅시다. 4*0.125=0.5,하나에 0.5MB/s가 듭니다.
+#define VIDEO_BANDWIDTH_USAGE 1 //비디오가 8000kbps(즉 8Mbps)라고 가정해봅시다. 4*0.125=0.5,하나에 1MB/s가 듭니다.
 
-#define MAX_DWPD 150 // 1.5
+#define MAX_DWPD 150 //1.50
 #define MIN_DWPD 4   //0.04
+
+#define MAX_WAF 40 // 4.0 
+#define MIN_WAF 20 // 2.0  //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
+//https://www.samsung.com/semiconductor/global.semi.static/Multi-stream_Cassandra_Whitepaper_Final-0.pdf 이건 1~3.2. 1이면 그냥 가비지 콜렉션으로 인한 쓰기 증폭이 없는것
 
 #define MAX_SSD_BANDWIDTH 5000
 #define MIN_SSD_BANDWIDTH 400
 
 #define OUR_METHOD 1
-#define COMPARATIVE_METHOD 2
+#define BENCHMARK 2
 
-#define ALPHA 0.2 // 보통 비디오는 0.729임. 인기도 - 지프 분포에 사용하는 알파 베타 값
-#define BETA  1.0
+#define ALPHA 0.729 // 보통 비디오는 0.729임. 인기도 - 지프 분포에 사용하는 알파 베타 값
+#define BETA  1
 
 struct SSD {
 	int index;
@@ -36,17 +42,18 @@ struct SSD {
 	double DWPD;
 	double ADWD;
 
-	double MB_write;
+	double WAF;
+
 	int storage_space;
 	double maximum_bandwidth;
 
 	int storage_usage;
 	double bandwidth_usage;
 
-	set<pair<double, int>, less<pair<double, int>>> assigned_segments;
+	set<pair<double, int>, less<pair<double, int>>> assigned_VIDEOs;
 };
 
-struct video_segment {
+struct video_VIDEO {
 	int index;
 
 	int size;
@@ -57,14 +64,14 @@ struct video_segment {
 	bool is_alloc;
 };
 
-void initalization(SSD* _SSD_list, video_segment* _segment_list);
+void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 double* set_zipf_pop(int length, double alpha, double beta);
-void update_SSDs_and_insert_new_videos(SSD* _SSD_list, video_segment* _segment_list);
+void update_SSDs_and_insert_new_videos(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 
-int run(SSD* _SSD_list, video_segment* _segment_list, int _mothod);
-int our_algorithm(SSD* _SSD_list, video_segment* _segment_list);
-int benchmark(SSD* _SSD_list, video_segment* _segment_list);
+int run(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
+int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+int benchmark(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 
 void update_infomation(SSD* _SSD_list, bool* _is_over_load, bool* _is_full, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
-pair<double, double> get_slope_to(SSD* _SSD_list, video_segment* _segment_list, int _from_ssd, int _to_ssd, int _from_seg, bool* _is_full);
-pair<double, double> get_slope_from(SSD* _SSD_list, video_segment* _segment_list, int _from_ssd, int _to_ssd, int _from_seg, bool* _is_full);
+pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, bool* _is_full);
+pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, bool* _is_full);
