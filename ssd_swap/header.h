@@ -9,7 +9,7 @@ using namespace std;
 //#define INFINITY 987654321
 #define NUM_OF_SSDs 30
 
-#define NUM_OF_SEGMENTs 50000 //오히려 이 값 작아지면 세그먼트 하나의 밴드윗이 너무 커져서 안좋음
+#define NUM_OF_SEGMENTs 40000 //오히려 이 값 작아지면 세그먼트 하나의 밴드윗이 너무 커져서 안좋음
 #define SIZE_OF_SEGMENT 1 // Z값임
 
 #define NUM_OF_DATEs 10

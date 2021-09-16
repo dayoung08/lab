@@ -17,13 +17,13 @@ void initalization(SSD* _SSD_list, video_segment* _segment_list) {
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
 
-		_SSD_list[index].ADWD = 1;
+		_SSD_list[index].ADWD = 0;
 		_SSD_list[index].storage_usage = 0;
 		_SSD_list[index].bandwidth_usage = 0;
 		//_SSD_list[index].MB_write = 0;
 	}
 
-	total_maximum_bandwidth *= 0.5;
+	total_maximum_bandwidth *= 0.8;
 	seg_pop = set_zipf_pop(NUM_OF_SEGMENTs, ALPHA, BETA);
 	vector<double>seg_pop_shuffle(seg_pop, seg_pop + NUM_OF_SEGMENTs);
 	std::random_device rd;
@@ -83,6 +83,7 @@ void update_SSDs_and_insert_new_videos(SSD* _SSD_list, video_segment* _segment_l
 		int index = ssd;
 		_SSD_list[index].bandwidth_usage = 0;
 		_SSD_list[index].assigned_segments.clear();
+		_SSD_list[index].ADWD = 0;
 	}
 	for (int vid = 1; vid <= NUM_OF_SEGMENTs; vid++) {
 		int index = vid;
