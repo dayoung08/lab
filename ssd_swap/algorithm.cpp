@@ -32,7 +32,7 @@ int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 		int from_vid = element.second;
 
 		//sort го╠Б
-		set<pair<pair<double, double>, int>, greater<pair<pair<double, double>, int>>> ADWD_after_list;
+		set<pair<double, int>, greater<pair<double, int>>> ADWD_after_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= NUM_OF_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
 				//ADWD_after_list.insert(make_pair(((_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].bandwidth_usage) / _SSD_list[to_ssd_temp].ADWD), to_ssd_temp));
@@ -40,7 +40,7 @@ int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 				double slope_to = (get_slope_to(_SSD_list, _VIDEO_list, from_ssd, to_ssd_temp, from_vid, is_full)).second;
 				double slope_from = (get_slope_from(_SSD_list, _VIDEO_list, from_ssd, to_ssd_temp, from_vid, is_full)).second;
 
-				ADWD_after_list.insert(make_pair(make_pair(slope_to,slope_from), to_ssd_temp));
+				ADWD_after_list.insert(make_pair(max(slope_to,slope_from), to_ssd_temp));
 			}
 		}
 

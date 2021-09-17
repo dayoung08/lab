@@ -3,7 +3,7 @@
 int main() {
 	SSD SSD_list[NUM_OF_SSDs + 1];
 	video_VIDEO VIDEO_list[NUM_OF_VIDEOs + 1];
-	int METHOD = 2; // 2로 바꾸면 비교스킴
+	int METHOD = 1; // 2로 바꾸면 비교스킴
 	//#define OUR_METHOD 1
 	//#define COMPARATIVE_METHOD 2
 
