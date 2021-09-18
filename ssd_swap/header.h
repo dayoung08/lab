@@ -7,7 +7,7 @@ using namespace std;
 
 #define SEED 111
 //#define INFINITY 987654321
-#define NUM_OF_SSDs 30
+#define NUM_OF_SSDs 32
 
 //#define NUM_OF_VIDEOs 120000
 //#define SIZE_OF_VIDEO 450 // Z값임. 15분 정도라고 가정하자. (300MB가 10분)
@@ -72,6 +72,6 @@ int run(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
 int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 int benchmark(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 
-void update_infomation(SSD* _SSD_list, bool* _is_over_load, bool* _is_full, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
-pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, bool* _is_full);
-pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, bool* _is_full);
+void update_infomation(SSD* _SSD_list, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
+pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
+pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
