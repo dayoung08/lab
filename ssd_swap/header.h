@@ -5,7 +5,7 @@
 #include <random>
 using namespace std;
 
-#define SEED 111
+#define SEED 123
 //#define INFINITY 987654321
 #define NUM_OF_SSDs 32
 

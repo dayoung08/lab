@@ -11,7 +11,8 @@ void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 		_SSD_list[index].DWPD = ((double)(rand() % (MAX_DWPD - MIN_DWPD + 1) + MIN_DWPD)) / 100;
 		_SSD_list[index].WAF = ((double)(rand() % (MAX_WAF - MIN_WAF + 1) + MIN_WAF)) / 10;
 		_SSD_list[index].DWPD /= _SSD_list[index].WAF;
-		_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
+		_SSD_list[index].storage_space = 500000 * pow(2, rand() % 4); // 0.5, 1, 2, 4TB
+		//_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
 
 		_SSD_list[index].maximum_bandwidth = rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1) + MIN_SSD_BANDWIDTH;
 		total_maximum_bandwidth += _SSD_list[index].maximum_bandwidth; 
