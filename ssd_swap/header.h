@@ -5,14 +5,14 @@
 #include <random>
 using namespace std;
 
-#define SEED 123
+#define SEED 111
 //#define INFINITY 987654321
-#define NUM_OF_SSDs 32
+#define NUM_OF_SSDs 20
 
 //#define NUM_OF_VIDEOs 120000
 //#define SIZE_OF_VIDEO 450 // Z값임. 15분 정도라고 가정하자. (300MB가 10분)
-#define NUM_OF_VIDEOs 60000
-#define SIZE_OF_VIDEO 900
+#define NUM_OF_VIDEOs 2000000
+#define SIZE_OF_VIDEO 10
 
 #define NUM_OF_DATEs 30
 #define NUM_OF_TIMEs 4

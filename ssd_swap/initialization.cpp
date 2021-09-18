@@ -24,12 +24,12 @@ void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 		_SSD_list[index].bandwidth_usage = 0;
 	}
 
-	double cal = (VIDEO_BANDWIDTH_USAGE * NUM_OF_VIDEOs);
+	/*double cal = (VIDEO_BANDWIDTH_USAGE * NUM_OF_VIDEOs);
 	if (cal > total_maximum_bandwidth) {
 		printf("세그먼트 숫자의 밴드윗 총 합이 SSD 밴드윗 총 합보다 큼\n");
 		exit(0);
-	}
-
+	}*/
+	total_maximum_bandwidth *= 0.75;
 	vid_pop = set_zipf_pop(NUM_OF_VIDEOs, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + NUM_OF_VIDEOs);
 	std::mt19937 g(SEED + cnt);
@@ -47,7 +47,7 @@ void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 
 		double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid];
 		vid_pop_shuffle.pop_back();
-		_VIDEO_list[index].requested_bandwidth = pop * (VIDEO_BANDWIDTH_USAGE * NUM_OF_VIDEOs); //0916 수정
+		_VIDEO_list[index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
 		
 		int SSD_index = -1;
 		std::shuffle(not_full_ssd_list.begin(), not_full_ssd_list.end(), g);
@@ -96,7 +96,7 @@ void update_SSDs_and_insert_new_videos(SSD* _SSD_list, video_VIDEO* _VIDEO_list)
 		if (SSD_index != -1) {
 			double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid];
 			vid_pop_shuffle.pop_back();
-			_VIDEO_list[index].requested_bandwidth = pop * (VIDEO_BANDWIDTH_USAGE * NUM_OF_VIDEOs); //0916 수정
+			_VIDEO_list[index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
 			_SSD_list[SSD_index].bandwidth_usage += _VIDEO_list[index].requested_bandwidth;
 			_SSD_list[SSD_index].assigned_VIDEOs.insert(make_pair(_VIDEO_list[index].requested_bandwidth, index));
 		}
