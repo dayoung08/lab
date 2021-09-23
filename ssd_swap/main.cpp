@@ -3,7 +3,7 @@
 int main() {
 	SSD SSD_list[NUM_OF_SSDs + 1];
 	video_VIDEO VIDEO_list[NUM_OF_VIDEOs + 1];
-	int METHOD = 2; // 2로 바꾸면 비교스킴
+	int METHOD = 1; // 2로 바꾸면 비교스킴
 	//#define OUR_METHOD 1
 	//#define COMPARATIVE_METHOD 2
 
@@ -21,7 +21,8 @@ int main() {
 	printf("\n[START]\n\n");
 
 	double prev_ADWD[NUM_OF_SSDs + 1];
-	double total_ADWD = 0;
+	double sum_for_AVG = 0;
+	double sum_for_STD = 0;
 	double prev_migration_num = 0;
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		int migration_num = 0;
@@ -29,22 +30,29 @@ int main() {
 			//cout << time << endl;
 			update_SSDs_and_insert_new_videos(SSD_list, VIDEO_list);
 			migration_num += run(SSD_list, VIDEO_list, METHOD); 
-			total_ADWD = 0;
 			if (time == NUM_OF_TIMEs) {
+				sum_for_AVG = 0;
+				sum_for_STD = 0;
 				for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 					double curr_ADWD = ((prev_ADWD[ssd] * (day - 1)) + SSD_list[ssd].ADWD) / day;
 					prev_ADWD[ssd] = curr_ADWD;
-					total_ADWD += curr_ADWD;
+					sum_for_AVG += curr_ADWD;
 					SSD_list[ssd].ADWD = 0;
+					//printf("[SSD %d] ADWD %.2f\n", ssd, curr_ADWD);
 					//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 					//printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
 				}
+				for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
+					sum_for_STD += pow(prev_ADWD[ssd] - (sum_for_AVG / (NUM_OF_SSDs)), 2);
+				}
 				prev_migration_num = ((prev_migration_num * (day - 1)) + migration_num) / day;
-				//printf("[DAY%d] ADWD %lf\n", day, (total_for_curr_day / (NUM_OF_SSDs)));
 			}
 		}
- 		printf("[DAY%d] Average migration number %lf \n", day, prev_migration_num);
-		printf("[DAY%d] Average ADWD %lf\n\n", day, (total_ADWD / (NUM_OF_SSDs)));
+		if (day == 1 || day == 7 || day == 15 || day == 30) {
+			//printf("[DAY%d] Average migration number %lf \n", day, prev_migration_num);
+			printf("[DAY%d] Average ADWD %lf\n", day, (sum_for_AVG / (NUM_OF_SSDs)));
+			printf("[DAY%d] Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_STD / (NUM_OF_SSDs)));
+		}
 	}
 
 	return 0;

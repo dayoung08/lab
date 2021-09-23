@@ -35,8 +35,10 @@ int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 		for (int to_ssd_temp = 1; to_ssd_temp <= NUM_OF_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
 				double slope_to = (get_slope_to(_SSD_list, _VIDEO_list, from_ssd, to_ssd_temp, from_vid)).second;
-				
-				ADWD_after_list.insert(make_pair(slope_to, to_ssd_temp));
+				double slope_from = (get_slope_from(_SSD_list, _VIDEO_list, from_ssd, to_ssd_temp, from_vid)).second;
+				double slope = max(slope_to, slope_from);
+
+				ADWD_after_list.insert(make_pair(slope, to_ssd_temp));
 			}
 		}
 
@@ -268,7 +270,7 @@ pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int 
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
 		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
 	}
-	slope_to =  (_SSD_list[_to_ssd].ADWD + ADWD_to) / (_SSD_list[_to_ssd].maximum_bandwidth - (_SSD_list[_to_ssd].bandwidth_usage + bt_difference));
+	slope_to =  (_SSD_list[_to_ssd].ADWD + ADWD_to) / (_SSD_list[_to_ssd].bandwidth_usage + bt_difference);
 
 	return make_pair(ADWD_to, slope_to);
 }
@@ -285,7 +287,7 @@ pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, in
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
 		ADWD_from = 0;
 	}
-	slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / ((_SSD_list[_from_ssd].bandwidth_usage - bt_difference) - _SSD_list[_from_ssd].maximum_bandwidth);
+	slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / (_SSD_list[_from_ssd].bandwidth_usage - bt_difference);
 
 	return make_pair(ADWD_from, slope_from);
 }

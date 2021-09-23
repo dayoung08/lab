@@ -29,7 +29,7 @@ void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 		printf("ºº±◊∏’∆Æ º˝¿⁄¿« πÍµÂ¿≠ √— «’¿Ã SSD πÍµÂ¿≠ √— «’∫∏¥Ÿ ≈≠\n");
 		exit(0);
 	}*/
-	total_maximum_bandwidth *= 0.75;
+	total_maximum_bandwidth *= 0.7;
 	vid_pop = set_zipf_pop(NUM_OF_VIDEOs, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + NUM_OF_VIDEOs);
 	std::mt19937 g(SEED + cnt);

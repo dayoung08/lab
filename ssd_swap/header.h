@@ -7,11 +7,9 @@ using namespace std;
 
 #define SEED 111
 //#define INFINITY 987654321
-#define NUM_OF_SSDs 20
+#define NUM_OF_SSDs 30 //디폴트 20
 
-//#define NUM_OF_VIDEOs 120000
-//#define SIZE_OF_VIDEO 450 // Z값임. 15분 정도라고 가정하자. (300MB가 10분)
-#define NUM_OF_VIDEOs 2000000
+#define NUM_OF_VIDEOs 2000000 // 디폴트 2000000
 #define SIZE_OF_VIDEO 10
 
 #define NUM_OF_DATEs 30
@@ -33,7 +31,7 @@ using namespace std;
 #define OUR_METHOD 1
 #define BENCHMARK 2
 
-#define ALPHA 0.729 // 보통 비디오는 0.729임. 인기도 - 지프 분포에 사용하는 알파 베타 값
+#define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
 struct SSD {
