@@ -270,7 +270,7 @@ pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int 
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
 		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
 	}
-	slope_to =  (_SSD_list[_to_ssd].ADWD + ADWD_to) / (_SSD_list[_to_ssd].bandwidth_usage + bt_difference);
+	slope_to =  (_SSD_list[_to_ssd].ADWD + ADWD_to) / bt_difference;
 
 	return make_pair(ADWD_to, slope_to);
 }
@@ -287,7 +287,7 @@ pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, in
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
 		ADWD_from = 0;
 	}
-	slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / (_SSD_list[_from_ssd].bandwidth_usage - bt_difference);
+	slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / bt_difference;
 
 	return make_pair(ADWD_from, slope_from);
 }

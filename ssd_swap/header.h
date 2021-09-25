@@ -7,7 +7,7 @@ using namespace std;
 
 #define SEED 111
 //#define INFINITY 987654321
-#define NUM_OF_SSDs 30 //디폴트 20
+#define NUM_OF_SSDs 20 //디폴트 20
 
 #define NUM_OF_VIDEOs 2000000 // 디폴트 2000000
 #define SIZE_OF_VIDEO 10
