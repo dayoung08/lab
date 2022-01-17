@@ -28,8 +28,10 @@ using namespace std;
 #define MAX_SSD_BANDWIDTH 5000
 #define MIN_SSD_BANDWIDTH 400
 
-#define OUR_METHOD 1
-#define BENCHMARK 2
+#define PLACEMENT_OURS 1
+#define PLACEMENT_RANDOM 2
+#define MIGRATION_OURS 1
+#define MIGRATION_BANDWIDTH_AWARE 2
 
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
@@ -48,13 +50,13 @@ struct SSD {
 	int storage_usage;
 	double bandwidth_usage;
 
-	set<pair<double, int>, less<pair<double, int>>> assigned_VIDEOs;
+	set<pair<double, int>, less<pair<double, int>>> assigned_VIDEOs_low_bandwidth_first;
 };
 
 struct video_VIDEO {
 	int index;
 
-	int size;
+	//int size;
 	double requested_bandwidth;
 
 	int assigned_SSD;
@@ -64,12 +66,20 @@ struct video_VIDEO {
 
 void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 double* set_zipf_pop(int length, double alpha, double beta);
-void update_SSDs_and_insert_new_videos(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+void update_video_bandwidth(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 
-int run(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
-int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
-int benchmark(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+int placement(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _method);
+int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+void allocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
 
+int migration(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
+int migration_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+int migration_bandwidth_aware(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+int get_swap_flag(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int from_vid, int to_ssd);
+void swap(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid);
+void reallocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
+void eliminate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _from_vid);
 void update_infomation(SSD* _SSD_list, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
-pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
-pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
+pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, int flag);
+pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, int flag);

@@ -3,12 +3,12 @@
 int main() {
 	SSD SSD_list[NUM_OF_SSDs + 1];
 	video_VIDEO VIDEO_list[NUM_OF_VIDEOs + 1];
-	int METHOD = 1; // 2로 바꾸면 비교스킴
-	//#define OUR_METHOD 1
-	//#define COMPARATIVE_METHOD 2
+	int placement_method = 1;
+	int migration_method = 1; // 2로 바꾸면 비교스킴
 
 	srand(SEED);
 	initalization(SSD_list, VIDEO_list);
+	placement(SSD_list, VIDEO_list, placement_method); // 비디오 하나씩 추가하는 걸로 수정할 것
 	printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
 
 	//먼저 여기에 SSD의 절반만 다 채워버리자.
@@ -28,8 +28,8 @@ int main() {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) { 
 			//cout << time << endl;
-			update_SSDs_and_insert_new_videos(SSD_list, VIDEO_list);
-			migration_num += run(SSD_list, VIDEO_list, METHOD); 
+			update_video_bandwidth(SSD_list, VIDEO_list);
+			migration_num += migration(SSD_list, VIDEO_list, migration_method); 
 			if (time == NUM_OF_TIMEs) {
 				sum_for_AVG = 0;
 				sum_for_STD = 0;
