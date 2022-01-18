@@ -1,5 +1,5 @@
 #include "header.h"
-
+//메모리 부족으로 학교 컴퓨터로 돌릴것
 int main() {
 	SSD SSD_list[NUM_OF_SSDs + 1];
 	video_VIDEO VIDEO_list[NUM_OF_VIDEOs + 1];
