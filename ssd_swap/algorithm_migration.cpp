@@ -176,12 +176,14 @@ int get_swap_flag(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int from_vid, int to
 	}
 	else {
 		int to_vid = (*_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
+		int from_ssd = _VIDEO_list[from_vid].assigned_SSD;
 		if (((_SSD_list[to_ssd].storage_usage + SIZE_OF_VIDEO) <= _SSD_list[to_ssd].storage_space) &&
 			((_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth) <= _SSD_list[to_ssd].maximum_bandwidth)) {
 			// 그냥 옮기면 됨. swap 아님.
 			return FLAG_REALLOCATE;
 		}
-		else if ((_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth) <= _SSD_list[to_ssd].maximum_bandwidth) {
+		else if ((_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth) <= _SSD_list[to_ssd].maximum_bandwidth &&
+			(_SSD_list[from_ssd].bandwidth_usage + _VIDEO_list[to_vid].requested_bandwidth - _VIDEO_list[from_vid].requested_bandwidth) <= _SSD_list[from_ssd].maximum_bandwidth) {
 			// swap 해야할 경우
 			return FLAG_SWAP;
 		}

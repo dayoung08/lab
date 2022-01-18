@@ -43,7 +43,7 @@ void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 		_VIDEO_list[index].is_alloc = false;
 		_VIDEO_list[index].assigned_SSD = 0;
 
-		double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid];
+		double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid]; // 혹은 [vid-1]
 		vid_pop_shuffle.pop_back();
 		_VIDEO_list[index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
 
@@ -78,21 +78,23 @@ void update_video_bandwidth(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 }
 
 double* set_zipf_pop(int length, double alpha, double beta) {
-	double* zipf = (double*)malloc(sizeof(double) * length);
-	double* pop = (double*)malloc(sizeof(double) * length);
+	double* zipf = new double[length];
+	double* pop = new double[length];
+	cout << "dfdfdf" << endl;
 	double sum_caculatedValue = 0;
 	double caculatedValue = 0;
 
 	zipf[0] = 0;
-	for (int i = 1; i < length + 1; i++) {
+	for (int i = 1; i <= length; i++) {
 		caculatedValue = (double)beta / powl(i, alpha);
 		sum_caculatedValue += caculatedValue;
 		zipf[i-1] = caculatedValue;
 	}
 	double sum = 0;
-	for (int i = 1; i < length + 1; i++) {
+	for (int i = 1; i <= length; i++) {
 		zipf[i-1] /= sum_caculatedValue;
 		pop[i-1] = zipf[i-1];
 	}
+	delete[] zipf;
 	return pop;
 }

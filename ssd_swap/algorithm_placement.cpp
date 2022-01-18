@@ -1,6 +1,6 @@
 #include "header.h"
 
-int rand_cnt = 0; //for generation seed in placement_random
+int rand_count = 0; //for generation seed in placement_random
 
 int placement(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _method) {
 	int placement_num = 0;
@@ -16,7 +16,7 @@ int placement(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _method) {
 }
 
 int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
-	bool is_full[NUM_OF_SSDs];
+	bool is_full[NUM_OF_SSDs+1];
 	memset(is_full, false, sizeof(is_full));
 
 	set<pair<double, int>, greater<pair<double, int>>> video_list_with_bandwidth_sort;
@@ -27,6 +27,7 @@ int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 	int placement_num = 0;
 	while (!video_list_with_bandwidth_sort.empty()) {
 		int video_index = (*video_list_with_bandwidth_sort.begin()).second;
+		video_list_with_bandwidth_sort.erase(*video_list_with_bandwidth_sort.begin());
 		set<pair<double, int>, greater<pair<double, int>>> ratio_of_ADWD_to_bandwidth;
 		for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 			if (!is_full[ssd]) {
@@ -59,6 +60,7 @@ int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 			_VIDEO_list[video_index].is_alloc = false;
 		}
 	}
+	return placement_num;
 }
 
 int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
@@ -71,8 +73,8 @@ int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 	for (int vid = 1; vid <= NUM_OF_VIDEOs; vid++) {
 		int video_index = vid;
 		int SSD_index = 0;
-		std::mt19937 g(SEED + rand_cnt);
-		rand_cnt++;
+		std::mt19937 g(SEED + rand_count);
+		rand_count++;
 		std::shuffle(not_full_ssd_list.begin(), not_full_ssd_list.end(), g); //랜덤으로 할당하기 위한 것. 
 		while (!not_full_ssd_list.empty()) {
 			SSD_index = not_full_ssd_list.back();
@@ -96,6 +98,7 @@ int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 			_VIDEO_list[video_index].is_alloc = false;
 		}
 	}
+	return placement_num;
 }
 
 void allocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _video_index, int _SSD_index) {
