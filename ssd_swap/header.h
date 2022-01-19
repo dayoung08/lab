@@ -73,13 +73,9 @@ int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 void allocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
 
-int migration(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
-int migration_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
-int migration_bandwidth_aware(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
-int get_swap_flag(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int from_vid, int to_ssd);
-void swap(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid);
-void reallocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
-void eliminate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _from_vid);
+int run(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
+int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+int benchmark(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 void update_infomation(SSD* _SSD_list, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
-pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, int flag);
-pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid, int flag);
+pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
+pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);

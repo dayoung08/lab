@@ -1,5 +1,5 @@
 #include "header.h"
-//메모리 부족으로 학교 컴퓨터로 돌릴것
+
 int main() {
 	SSD SSD_list[NUM_OF_SSDs + 1];
 	video_VIDEO VIDEO_list[NUM_OF_VIDEOs + 1];
@@ -26,10 +26,10 @@ int main() {
 	double prev_migration_num = 0;
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		int migration_num = 0;
-		for (int time = 1; time <= NUM_OF_TIMEs; time++) { 
+		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//cout << time << endl;
 			update_video_bandwidth(SSD_list, VIDEO_list);
-			migration_num += migration(SSD_list, VIDEO_list, migration_method); 
+			migration_num += run(SSD_list, VIDEO_list, migration_method);
 			if (time == NUM_OF_TIMEs) {
 				sum_for_AVG = 0;
 				sum_for_STD = 0;
@@ -38,9 +38,9 @@ int main() {
 					prev_ADWD[ssd] = curr_ADWD;
 					sum_for_AVG += curr_ADWD;
 					SSD_list[ssd].ADWD = 0;
-					//printf("[SSD %d] ADWD %.2f\n", ssd, curr_ADWD);
-					//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
-					//printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
+					printf("[SSD %d] ADWD %.2f\n", ssd, curr_ADWD);
+					printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
+					printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
 				}
 				for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 					sum_for_STD += pow(prev_ADWD[ssd] - (sum_for_AVG / (NUM_OF_SSDs)), 2);

@@ -80,7 +80,6 @@ void update_video_bandwidth(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 double* set_zipf_pop(int length, double alpha, double beta) {
 	double* zipf = new double[length];
 	double* pop = new double[length];
-	cout << "dfdfdf" << endl;
 	double sum_caculatedValue = 0;
 	double caculatedValue = 0;
 
