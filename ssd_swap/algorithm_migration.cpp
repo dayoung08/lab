@@ -70,6 +70,7 @@ int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		}
 
 		//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
+		//dayoung -> 여기가 과제인데, 일단 이 부분 구현 해보는 것을 내일의 목표로 합시다. (사실 오늘 했어야함 ㅋㅋ...)
 		if (ADWD_after_list.empty()) {
 			//나라면 element 삭제하고 해당 SSD만 따로 어디에 모아두겠음.
 			for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
@@ -191,9 +192,9 @@ void swap(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int fro
 	_SSD_list[from_ssd].bandwidth_usage -= (_VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth);
 	_SSD_list[to_ssd].bandwidth_usage += (_VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth);
 
-	/*_SSD_list[from_ssd].storage_usage -= SIZE_OF_VIDEO;
+	/*_SSD_list[from_ssd].storage_usage -= _VIDEO_list[from_vid].size;
 	_SSD_list[from_ssd].storage_usage += _VIDEO_list[to_vid].size;
-	_SSD_list[to_ssd].storage_usage += SIZE_OF_VIDEO;
+	_SSD_list[to_ssd].storage_usage += _VIDEO_list[from_vid].size;
 	_SSD_list[to_ssd].storage_usage -= _VIDEO_list[to_vid].size;*/
 }
 void reallocate(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid) {
@@ -202,9 +203,9 @@ void reallocate(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, i
 	_VIDEO_list[from_vid].assigned_SSD = to_ssd;
 
 	_SSD_list[from_ssd].bandwidth_usage -= _VIDEO_list[from_vid].requested_bandwidth;
-	_SSD_list[from_ssd].storage_usage -= SIZE_OF_VIDEO;
+	_SSD_list[from_ssd].storage_usage -= _VIDEO_list[from_vid].size;
 	_SSD_list[to_ssd].bandwidth_usage += _VIDEO_list[from_vid].requested_bandwidth;
-	_SSD_list[to_ssd].storage_usage += SIZE_OF_VIDEO;
+	_SSD_list[to_ssd].storage_usage += _VIDEO_list[from_vid].size;
 }
 
 
@@ -229,11 +230,11 @@ pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_
 	if (is_not_enough_storage_space(_SSD_list, _VIDEO_list, _to_ssd, _from_vid)) {
 		int _to_vid = (*_SSD_list[_to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		bt_difference = (_VIDEO_list[_from_vid].requested_bandwidth - _VIDEO_list[_to_vid].requested_bandwidth);
-		ADWD_to = SIZE_OF_VIDEO / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
+		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
 	}
 	else {
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
-		ADWD_to = SIZE_OF_VIDEO / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
+		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
 	}
 	slope_to = (_SSD_list[_to_ssd].ADWD + ADWD_to) / bt_difference;
 
@@ -246,7 +247,7 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _fro
 	if (is_not_enough_storage_space(_SSD_list, _VIDEO_list, _to_ssd, _from_vid)) {
 		int _to_vid = (*_SSD_list[_to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		bt_difference = (_VIDEO_list[_from_vid].requested_bandwidth - _VIDEO_list[_to_vid].requested_bandwidth);
-		ADWD_from = SIZE_OF_VIDEO / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
+		ADWD_from = _VIDEO_list[_to_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
 	}
 	else {
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
@@ -257,18 +258,13 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _fro
 	return make_pair(ADWD_from, slope_from);
 }
 
-
-bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO* _VIDEO_list, int _to_ssd, int _from_vid) {
-	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_list[_from_vid].size) > _SSD_list[_to_ssd].storage_space;
-}
-
 int get_migration_flag(SSD* _SSD_list, VIDEO* _VIDEO_list, int from_ssd, int to_ssd, int from_vid, int to_vid) {
 	if (to_vid != -1 && to_ssd != -1) {
-		if ( (is_not_enough_storage_space(_SSD_list, _VIDEO_list, to_ssd, from_vid)) &&
+		if ( is_not_enough_storage_space(_SSD_list, _VIDEO_list, to_ssd, from_vid) &&
 			( (_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth)) {
 			return FLAG_SWAP;
 		}
-		else if ( !(is_not_enough_storage_space(_SSD_list, _VIDEO_list, to_ssd, from_vid)) &&
+		else if ( !is_not_enough_storage_space(_SSD_list, _VIDEO_list, to_ssd, from_vid) &&
 			(_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth ) {
 			return FLAG_REALLOCATE;
 		}
