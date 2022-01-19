@@ -72,7 +72,8 @@ int placement(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _method);
 int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 void allocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
-
+void swap(SSD* _SSD_list, video_VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid, int to_vid);
+void reallocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
 int run(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
 int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
 int benchmark(SSD* _SSD_list, video_VIDEO* _VIDEO_list);

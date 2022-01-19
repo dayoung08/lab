@@ -38,9 +38,9 @@ int main() {
 					prev_ADWD[ssd] = curr_ADWD;
 					sum_for_AVG += curr_ADWD;
 					SSD_list[ssd].ADWD = 0;
-					printf("[SSD %d] ADWD %.2f\n", ssd, curr_ADWD);
-					printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
-					printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
+					//printf("[SSD %d] ADWD %.2f\n", ssd, curr_ADWD);
+					//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
+					//printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
 				}
 				for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 					sum_for_STD += pow(prev_ADWD[ssd] - (sum_for_AVG / (NUM_OF_SSDs)), 2);
