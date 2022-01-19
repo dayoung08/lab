@@ -39,7 +39,7 @@ void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	for (int vid = 1; vid <= NUM_OF_VIDEOs; vid++) {
 		int index = vid;
 		_VIDEO_list[index].index = index;
-		//_VIDEO_list[index].size = SIZE_OF_VIDEO;
+		_VIDEO_list[index].size = SIZE_OF_VIDEO;
 		_VIDEO_list[index].is_alloc = false;
 		_VIDEO_list[index].assigned_SSD = 0;
 

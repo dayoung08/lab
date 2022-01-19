@@ -56,7 +56,7 @@ struct SSD {
 struct VIDEO {
 	int index;
 
-	//int size;
+	int size;
 	double requested_bandwidth;
 
 	int assigned_SSD;
@@ -72,12 +72,14 @@ int placement(SSD* _SSD_list, VIDEO* _VIDEO_list, int _method);
 int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
 int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_list);
 void allocate(SSD* _SSD_list, VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
-void swap(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid, int to_vid);
-void reallocate(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
+
 int run(SSD* _SSD_list, VIDEO* _VIDEO_list, int _mothod);
 int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
 int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list);
+void swap(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid, int to_vid);
+void reallocate(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
 void update_infomation(SSD* _SSD_list, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
 pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
 pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
 bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO* _VIDEO_list, int _to_ssd, int _from_vid);
+int get_migration_flag(SSD* _SSD_list, VIDEO* _VIDEO_list, int from_ssd, int to_ssd, int from_vid, int to_vid);
