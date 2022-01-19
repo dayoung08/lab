@@ -2,7 +2,7 @@
 
 int rand_count = 0; //for generation seed in placement_random
 
-int placement(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _method) {
+int placement(SSD* _SSD_list, VIDEO* _VIDEO_list, int _method) {
 	int placement_num = 0;
 	switch (_method) {
 	case PLACEMENT_OURS:
@@ -15,7 +15,7 @@ int placement(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _method) {
 	return placement_num;
 }
 
-int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
+int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	bool is_full[NUM_OF_SSDs+1];
 	memset(is_full, false, sizeof(is_full));
 
@@ -63,7 +63,7 @@ int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 	return placement_num;
 }
 
-int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
+int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	int placement_num = 0;
 	vector<int> not_full_ssd_list(NUM_OF_SSDs);
 	for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
@@ -101,7 +101,7 @@ int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 	return placement_num;
 }
 
-void allocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _video_index, int _SSD_index) {
+void allocate(SSD* _SSD_list, VIDEO* _VIDEO_list, int _video_index, int _SSD_index) {
 	_VIDEO_list[_video_index].assigned_SSD = _SSD_index;
 	_SSD_list[_SSD_index].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_list[_video_index].requested_bandwidth, _video_index));
 

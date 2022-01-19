@@ -4,7 +4,7 @@
 double total_maximum_bandwidth = 0;
 double* vid_pop;
 int rand_cnt = 0;
-void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
+void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 		int index = ssd;
 		_SSD_list[index].index = index;
@@ -51,7 +51,7 @@ void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
 	}
 }
 
-void update_video_bandwidth(SSD* _SSD_list, video_VIDEO* _VIDEO_list) {
+void update_video_bandwidth(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	//원래 새로운 비디오를 추가하는 것도 넣으려고 했으나 지금은 아님.
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + NUM_OF_VIDEOs);
 	std::mt19937 g(SEED + rand_cnt);

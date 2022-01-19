@@ -53,7 +53,7 @@ struct SSD {
 	set<pair<double, int>, less<pair<double, int>>> assigned_VIDEOs_low_bandwidth_first;
 };
 
-struct video_VIDEO {
+struct VIDEO {
 	int index;
 
 	//int size;
@@ -64,19 +64,20 @@ struct video_VIDEO {
 	bool is_alloc;
 };
 
-void initalization(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list);
 double* set_zipf_pop(int length, double alpha, double beta);
-void update_video_bandwidth(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+void update_video_bandwidth(SSD* _SSD_list, VIDEO* _VIDEO_list);
 
-int placement(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _method);
-int placement_myAlgorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
-int placement_random(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
-void allocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
-void swap(SSD* _SSD_list, video_VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid, int to_vid);
-void reallocate(SSD* _SSD_list, video_VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
-int run(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _mothod);
-int our_algorithm(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
-int benchmark(SSD* _SSD_list, video_VIDEO* _VIDEO_list);
+int placement(SSD* _SSD_list, VIDEO* _VIDEO_list, int _method);
+int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
+int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_list);
+void allocate(SSD* _SSD_list, VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
+void swap(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid, int to_vid);
+void reallocate(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
+int run(SSD* _SSD_list, VIDEO* _VIDEO_list, int _mothod);
+int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
+int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list);
 void update_infomation(SSD* _SSD_list, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
-pair<double, double> get_slope_to(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
-pair<double, double> get_slope_from(SSD* _SSD_list, video_VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
+pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
+pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
+bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO* _VIDEO_list, int _to_ssd, int _from_vid);
