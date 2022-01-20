@@ -3,8 +3,8 @@
 int main() {
 	SSD SSD_list[NUM_OF_SSDs + 1];
 	VIDEO VIDEO_list[NUM_OF_VIDEOs + 1];
-	int placement_method = 2;
-	int migration_method = 2; // 2로 바꾸면 비교스킴
+	int placement_method = 1;
+	int migration_method = 1; // 2로 바꾸면 비교스킴
 
 	srand(SEED);
 	initalization(SSD_list, VIDEO_list);

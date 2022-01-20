@@ -51,20 +51,20 @@ int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		}
 
 		//할당 가능한 ssd 찾기, swap할 VIDEO도 찾기.
-		int to_vid = -1;
-		int to_ssd = -1;
+		int to_vid = NONE_ALLOC;
+		int to_ssd = NONE_ALLOC;
 		while (!ADWD_after_list.empty()) {
 			to_ssd = (*ADWD_after_list.begin()).second;
 			ADWD_after_list.erase(*ADWD_after_list.begin());
 			if (to_ssd == from_ssd) {
-				to_ssd = -1;
+				to_ssd = NONE_ALLOC;
 				continue;
 			}
 
 			if (!_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.empty())
 				to_vid = (*_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 			else
-				to_vid = -1;
+				to_vid = NONE_ALLOC;
 			
 			if (get_migration_flag(_SSD_list, _VIDEO_list, from_ssd, to_ssd, from_vid, to_vid) != FLAG_DENY) {
 				break;
@@ -135,13 +135,13 @@ int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 			}
 		}
 
-		int to_vid = -1;
-		int to_ssd = -1;
+		int to_vid = NONE_ALLOC;
+		int to_ssd = NONE_ALLOC;
 		while (!under_load_list.empty()) {
 			to_ssd = (*under_load_list.begin()).second;
 			under_load_list.erase(*under_load_list.begin());
 			if (to_ssd == from_ssd) {
-				to_ssd = -1;
+				to_ssd = NONE_ALLOC;
 				continue;
 			}
 
@@ -271,7 +271,7 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _fro
 }
 
 int get_migration_flag(SSD* _SSD_list, VIDEO* _VIDEO_list, int from_ssd, int to_ssd, int from_vid, int to_vid) {
-	if (to_vid != -1 && to_ssd != -1) {
+	if (to_vid != NONE_ALLOC && to_ssd != NONE_ALLOC) {
 		if ( is_not_enough_storage_space(_SSD_list, _VIDEO_list, to_ssd, from_vid) &&
 			( (_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth)) {
 			return FLAG_SWAP;

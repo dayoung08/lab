@@ -44,7 +44,7 @@ void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		vid_pop_shuffle.pop_back();
 		_VIDEO_list[video_index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
 
-		_VIDEO_list[video_index].assigned_SSD = -1;
+		_VIDEO_list[video_index].assigned_SSD = NONE_ALLOC;
 		_VIDEO_list[video_index].is_alloc = false;
 		//여기부터 할당
 	}
@@ -64,7 +64,7 @@ void update_video_bandwidth(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	for (int vid = 1; vid <= NUM_OF_VIDEOs; vid++) {
 		int index = vid;
 		int SSD_index = _VIDEO_list[index].assigned_SSD;
-		if (SSD_index != -1) {
+		if (SSD_index != NONE_ALLOC) {
 			double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid];
 			vid_pop_shuffle.pop_back();
 			_VIDEO_list[index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
