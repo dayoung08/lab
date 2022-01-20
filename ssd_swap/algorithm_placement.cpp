@@ -27,7 +27,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	while (!video_list_with_bandwidth_sort.empty()) {
 		int video_index = (*video_list_with_bandwidth_sort.begin()).second;
 		video_list_with_bandwidth_sort.erase(*video_list_with_bandwidth_sort.begin());
-		set<pair<double, int>, greater<pair<double, int>>> target_ssd_list_with_ratio_sort;
+		set<pair<double, int>, less<pair<double, int>>> target_ssd_list_with_ratio_sort;
 		for (int ssd_temp = 1; ssd_temp <= NUM_OF_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_list, ssd_temp, video_index) &&
 				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
