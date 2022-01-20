@@ -74,6 +74,7 @@ bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO* _VIDEO_list, int _to_ssd
 
 int placement(SSD* _SSD_list, VIDEO* _VIDEO_list, int _method);
 int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
+int placement_bandwidth_aware(SSD* _SSD_list, VIDEO* _VIDEO_list);
 int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_list);
 void allocate(SSD* _SSD_list, VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
 
