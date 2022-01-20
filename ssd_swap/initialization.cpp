@@ -3,7 +3,7 @@
 
 double total_maximum_bandwidth = 0;
 double* vid_pop;
-int rand_cnt = 0;
+int cnt = 0;
 void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 		int index = ssd;
@@ -15,7 +15,7 @@ void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		//_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
 
 		_SSD_list[index].maximum_bandwidth = rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1) + MIN_SSD_BANDWIDTH;
-		total_maximum_bandwidth += _SSD_list[index].maximum_bandwidth; 
+		total_maximum_bandwidth += _SSD_list[index].maximum_bandwidth;
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
 
@@ -32,32 +32,59 @@ void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	total_maximum_bandwidth *= 0.7;
 	vid_pop = set_zipf_pop(NUM_OF_VIDEOs, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + NUM_OF_VIDEOs);
-	std::mt19937 g(SEED + rand_cnt);
-	rand_cnt++;
+	std::mt19937 g(SEED + cnt);
+	cnt++;
 	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 
+	vector<int> not_full_ssd_list(NUM_OF_SSDs);
+	for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
+		not_full_ssd_list[ssd - 1] = ssd;
+	}
 	for (int vid = 1; vid <= NUM_OF_VIDEOs; vid++) {
 		int index = vid;
 		_VIDEO_list[index].index = index;
 		_VIDEO_list[index].size = SIZE_OF_VIDEO;
-		_VIDEO_list[index].is_alloc = false;
-		_VIDEO_list[index].assigned_SSD = 0;
 
-		double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid]; // 혹은 [vid-1]
+		double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid];
 		vid_pop_shuffle.pop_back();
 		_VIDEO_list[index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
 
-		//여기에 원래 placement가 들어갔는데, 이 부분을 지금은 뺐다.
+		int SSD_index = -1;
+		std::shuffle(not_full_ssd_list.begin(), not_full_ssd_list.end(), g);
+		while (true) {
+			if (not_full_ssd_list.empty()) {
+				printf("모든 용량이 꽉 차서 저장할 만한 SSD가 없음\n");
+				/*for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
+					printf("[SSD %d] %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_space, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_space));
+				}*/
+				exit(0);
+			}
+			else {
+				SSD_index = not_full_ssd_list.back();
+				if ((_SSD_list[SSD_index].storage_usage + _VIDEO_list[index].size) > _SSD_list[SSD_index].storage_space)
+					not_full_ssd_list.pop_back();
+				else {
+					break;
+				}
+			}
+		}
+
+		_VIDEO_list[index].assigned_SSD = SSD_index;
+		_SSD_list[SSD_index].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_list[index].requested_bandwidth, index));
+
+		_SSD_list[SSD_index].storage_usage += _VIDEO_list[index].size;
+		_SSD_list[SSD_index].bandwidth_usage += _VIDEO_list[index].requested_bandwidth;
+
+		_VIDEO_list[index].is_alloc = true;
 	}
 }
 
 void update_video_bandwidth(SSD* _SSD_list, VIDEO* _VIDEO_list) {
-	//원래 새로운 비디오를 추가하는 것도 넣으려고 했으나 지금은 아님.
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + NUM_OF_VIDEOs);
-	std::mt19937 g(SEED + rand_cnt);
-	rand_cnt++;
+	std::mt19937 g(SEED + cnt);
+	cnt++;
 	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
-	
+
 	for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 		int index = ssd;
 		_SSD_list[index].bandwidth_usage = 0;
@@ -67,34 +94,32 @@ void update_video_bandwidth(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		int index = vid;
 		int SSD_index = _VIDEO_list[index].assigned_SSD;
 		if (SSD_index != -1) {
-			double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid]; // pop을 바꿔줌으로써 비디오의 밴드윗들을 다 바꿔줬음.
+			double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid];
 			vid_pop_shuffle.pop_back();
 			_VIDEO_list[index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
 			_SSD_list[SSD_index].bandwidth_usage += _VIDEO_list[index].requested_bandwidth;
 			_SSD_list[SSD_index].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_list[index].requested_bandwidth, index));
-			//원래 할당되었던 곳에 그대로 넣음. 계산 쉽게 하려고 다 뺐던거라...
 		}
 	}
 }
 
 double* set_zipf_pop(int length, double alpha, double beta) {
-	double* zipf = new double[length];
-	double* pop = new double[length];
+	double* zipf = (double*)malloc(sizeof(double) * length);
+	double* pop = (double*)malloc(sizeof(double) * length);
 	double sum_caculatedValue = 0;
 	double caculatedValue = 0;
 
 	zipf[0] = 0;
-	for (int i = 1; i <= length; i++) {
+	for (int i = 1; i < length + 1; i++) {
 		caculatedValue = (double)beta / powl(i, alpha);
 		sum_caculatedValue += caculatedValue;
-		zipf[i-1] = caculatedValue;
+		zipf[i - 1] = caculatedValue;
 	}
 	double sum = 0;
-	for (int i = 1; i <= length; i++) {
-		zipf[i-1] /= sum_caculatedValue;
-		pop[i-1] = zipf[i-1];
+	for (int i = 1; i < length + 1; i++) {
+		zipf[i - 1] /= sum_caculatedValue;
+		pop[i - 1] = zipf[i - 1];
 	}
-	delete[] zipf;
 	return pop;
 }
 

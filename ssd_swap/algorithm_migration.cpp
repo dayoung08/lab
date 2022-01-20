@@ -56,8 +56,10 @@ int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		while (!ADWD_after_list.empty()) {
 			to_ssd = (*ADWD_after_list.begin()).second;
 			ADWD_after_list.erase(*ADWD_after_list.begin());
-			if (to_ssd == from_ssd)
+			if (to_ssd == from_ssd) {
+				to_ssd = -1;
 				continue;
+			}
 
 			if (!_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.empty())
 				to_vid = (*_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
@@ -133,26 +135,30 @@ int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 			}
 		}
 
-		//할당 가능한 ssd 찾기, swap할 VIDEO도 찾기.
 		int to_vid = -1;
 		int to_ssd = -1;
 		while (!under_load_list.empty()) {
 			to_ssd = (*under_load_list.begin()).second;
 			under_load_list.erase(*under_load_list.begin());
-			if (to_ssd == from_ssd)
+			if (to_ssd == from_ssd) {
+				to_ssd = -1;
 				continue;
+			}
 
-			if (!_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.empty())
+			if (_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.size()) { // 옮겼을때 할당 가능한 경우들
 				to_vid = (*_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
-			else
-				to_vid = -1;
-
-			if (get_migration_flag(_SSD_list, _VIDEO_list, from_ssd, to_ssd, from_vid, to_vid) != FLAG_DENY) {
+				if ((((_SSD_list[to_ssd].storage_usage + _VIDEO_list[from_vid].size) > _SSD_list[to_ssd].storage_space)) && ((_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth) && (_VIDEO_list[from_vid].requested_bandwidth > _VIDEO_list[to_vid].requested_bandwidth)) {
+					break;
+				}
+				else if ((((_SSD_list[to_ssd].storage_usage + _VIDEO_list[from_vid].size) <= _SSD_list[to_ssd].storage_space)) && (_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth) {
+					break;
+				}
+			}
+			else { // 마이그레이션 할 ssd가 비었을 경우
 				break;
 			}
 		}
-
-		//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
+		//할당 가능한 ssd 찾기, swap할 VIDEO도 찾기.
 		if (under_load_list.empty()) {
 			for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 				printf("[SSD %d] %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
@@ -179,8 +185,14 @@ int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		migration_num++;
 	}
 
+	/*for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
+		printf("[SSD bandwidth %d] %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
+		//printf("[SSD storage %d] %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
+	}*/
 	return migration_num;
 }
+
+
 
 void swap(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid, int to_vid) {
 	_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.erase(element);
