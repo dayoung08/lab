@@ -69,10 +69,10 @@ void update_video_bandwidth(SSD* _SSD_list, VIDEO* _VIDEO_list);
 double* set_zipf_pop(int length, double alpha, double beta);
 bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO* _VIDEO_list, int _to_ssd, int _from_vid);
 
-//int placement(SSD* _SSD_list, VIDEO* _VIDEO_list, int _method);
-//int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
-//int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_list);
-//void allocate(SSD* _SSD_list, VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
+int placement(SSD* _SSD_list, VIDEO* _VIDEO_list, int _method);
+int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
+int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_list);
+void allocate(SSD* _SSD_list, VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
 
 int run(SSD* _SSD_list, VIDEO* _VIDEO_list, int _mothod);
 int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);

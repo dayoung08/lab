@@ -35,47 +35,18 @@ void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	std::mt19937 g(SEED + cnt);
 	cnt++;
 	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
-
-	vector<int> not_full_ssd_list(NUM_OF_SSDs);
-	for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
-		not_full_ssd_list[ssd - 1] = ssd;
-	}
 	for (int vid = 1; vid <= NUM_OF_VIDEOs; vid++) {
-		int index = vid;
-		_VIDEO_list[index].index = index;
-		_VIDEO_list[index].size = SIZE_OF_VIDEO;
+		int video_index = vid;
+		_VIDEO_list[video_index].index = video_index;
+		_VIDEO_list[video_index].size = SIZE_OF_VIDEO;
 
-		double pop = vid_pop_shuffle[NUM_OF_VIDEOs - vid];
+		double pop = vid_pop_shuffle.back();
 		vid_pop_shuffle.pop_back();
-		_VIDEO_list[index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
+		_VIDEO_list[video_index].requested_bandwidth = pop * total_maximum_bandwidth; //0916 수정
 
-		int SSD_index = -1;
-		std::shuffle(not_full_ssd_list.begin(), not_full_ssd_list.end(), g);
-		while (true) {
-			if (not_full_ssd_list.empty()) {
-				printf("모든 용량이 꽉 차서 저장할 만한 SSD가 없음\n");
-				/*for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
-					printf("[SSD %d] %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_space, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_space));
-				}*/
-				exit(0);
-			}
-			else {
-				SSD_index = not_full_ssd_list.back();
-				if ((_SSD_list[SSD_index].storage_usage + _VIDEO_list[index].size) > _SSD_list[SSD_index].storage_space)
-					not_full_ssd_list.pop_back();
-				else {
-					break;
-				}
-			}
-		}
-
-		_VIDEO_list[index].assigned_SSD = SSD_index;
-		_SSD_list[SSD_index].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_list[index].requested_bandwidth, index));
-
-		_SSD_list[SSD_index].storage_usage += _VIDEO_list[index].size;
-		_SSD_list[SSD_index].bandwidth_usage += _VIDEO_list[index].requested_bandwidth;
-
-		_VIDEO_list[index].is_alloc = true;
+		_VIDEO_list[video_index].assigned_SSD = -1;
+		_VIDEO_list[video_index].is_alloc = false;
+		//여기부터 할당
 	}
 }
 
