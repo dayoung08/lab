@@ -43,15 +43,15 @@ struct SSD {
 	int index;
 
 	double DWPD;
-	double ADWD;
-
 	double WAF;
 
-	int storage_space;
+	int storage_capacity;
 	double maximum_bandwidth;
 
 	int storage_usage;
 	double bandwidth_usage;
+	double write_MB;
+	double ADWD;
 
 	set<pair<double, int>, less<pair<double, int>>> assigned_VIDEOs_low_bandwidth_first;
 };

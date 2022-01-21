@@ -77,7 +77,7 @@ int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 			//나라면 element 삭제하고 해당 SSD만 따로 어디에 모아두겠음.
 			for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
-				printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_space, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_space));
+				printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
 			}
 			exit(0);
 			//여기를 어떻게 할 지가 고민이야ㅠㅠ
@@ -147,10 +147,10 @@ int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 
 			if (_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.size()) { // 옮겼을때 할당 가능한 경우들
 				to_vid = (*_SSD_list[to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
-				if ((((_SSD_list[to_ssd].storage_usage + _VIDEO_list[from_vid].size) > _SSD_list[to_ssd].storage_space)) && ((_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth) && (_VIDEO_list[from_vid].requested_bandwidth > _VIDEO_list[to_vid].requested_bandwidth)) {
+				if ((((_SSD_list[to_ssd].storage_usage + _VIDEO_list[from_vid].size) > _SSD_list[to_ssd].storage_capacity)) && ((_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth - _VIDEO_list[to_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth) && (_VIDEO_list[from_vid].requested_bandwidth > _VIDEO_list[to_vid].requested_bandwidth)) {
 					break;
 				}
-				else if ((((_SSD_list[to_ssd].storage_usage + _VIDEO_list[from_vid].size) <= _SSD_list[to_ssd].storage_space)) && (_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth) {
+				else if ((((_SSD_list[to_ssd].storage_usage + _VIDEO_list[from_vid].size) <= _SSD_list[to_ssd].storage_capacity)) && (_SSD_list[to_ssd].bandwidth_usage + _VIDEO_list[from_vid].requested_bandwidth) < _SSD_list[to_ssd].maximum_bandwidth) {
 					break;
 				}
 			}
@@ -162,7 +162,7 @@ int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 		if (under_load_list.empty()) {
 			for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 				printf("[SSD %d] %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
-				printf("[SSD %d] %d / %d (%.2f%%)\n\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_space, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_space));
+				printf("[SSD %d] %d / %d (%.2f%%)\n\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
 			}
 			exit(0);
 			//여기를 어떻게 할 지가 고민이야ㅠㅠ
@@ -242,11 +242,11 @@ pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_
 	if (is_not_enough_storage_space(_SSD_list, _VIDEO_list, _to_ssd, _from_vid)) {
 		int _to_vid = (*_SSD_list[_to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		bt_difference = (_VIDEO_list[_from_vid].requested_bandwidth - _VIDEO_list[_to_vid].requested_bandwidth);
-		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
+		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD);
 	}
 	else {
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
-		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
+		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD);
 	}
 	slope_to = (_SSD_list[_to_ssd].ADWD + ADWD_to) / bt_difference;
 
@@ -259,7 +259,7 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _fro
 	if (is_not_enough_storage_space(_SSD_list, _VIDEO_list, _to_ssd, _from_vid)) {
 		int _to_vid = (*_SSD_list[_to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		bt_difference = (_VIDEO_list[_from_vid].requested_bandwidth - _VIDEO_list[_to_vid].requested_bandwidth);
-		ADWD_from = _VIDEO_list[_to_vid].size / (_SSD_list[_to_ssd].storage_space * _SSD_list[_to_ssd].DWPD);
+		ADWD_from = _VIDEO_list[_to_vid].size / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD);
 	}
 	else {
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;

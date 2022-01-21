@@ -8,13 +8,14 @@ void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 	for (int ssd = 1; ssd <= NUM_OF_SSDs; ssd++) {
 		int index = ssd;
 		_SSD_list[index].index = index;
+		_SSD_list[index].storage_capacity = 500000 * pow(2, rand() % 4); // 0.5, 1, 2, 4TB
+		//_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
+
 		_SSD_list[index].DWPD = ((double)(rand() % (MAX_DWPD - MIN_DWPD + 1) + MIN_DWPD)) / 100;
 		_SSD_list[index].WAF = ((double)(rand() % (MAX_WAF - MIN_WAF + 1) + MIN_WAF)) / 10;
 		_SSD_list[index].DWPD /= _SSD_list[index].WAF;
-		_SSD_list[index].storage_space = 500000 * pow(2, rand() % 4); // 0.5, 1, 2, 4TB
-		//_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
-
 		_SSD_list[index].maximum_bandwidth = rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1) + MIN_SSD_BANDWIDTH;
+
 		total_maximum_bandwidth += _SSD_list[index].maximum_bandwidth;
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
@@ -95,5 +96,5 @@ double* set_zipf_pop(int length, double alpha, double beta) {
 }
 
 bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO* _VIDEO_list, int _to_ssd, int _from_vid) {
-	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_list[_from_vid].size) > _SSD_list[_to_ssd].storage_space;
+	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
 }
