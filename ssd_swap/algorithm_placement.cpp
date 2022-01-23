@@ -38,7 +38,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 				double ss = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_list[video_index].size)); 
 				//³²Àº ¹êµåÀ­/°ø°£
 				
-				double ll = ((_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) - (_SSD_list[ssd_temp].write_MB + _VIDEO_list[video_index].size)) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD);
+				double ll = (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) - (_SSD_list[ssd_temp].write_MB + _VIDEO_list[video_index].size);
 				//double slope = bb / (ss * _SSD_list[ssd_temp].DWPD); //  ³²Àº ¼ö¸í ´ëºñ ³²Àº ¹êµåÀ­
 				double slope = bb / ll; //  ³²Àº ¼ö¸í ´ëºñ ³²Àº ¹êµåÀ­
 				target_ssd_list_with_ratio_sort.insert(make_pair(slope, ssd_temp));
