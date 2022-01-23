@@ -35,8 +35,8 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list) {
 				double ADWD_placement = _SSD_list[ssd_temp].ADWD + (_VIDEO_list[video_index].size / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD));
 				//낮을수록 좋아야함 분명히....
 				double bb = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_list[video_index].requested_bandwidth));
-				double ss = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_list[video_index].size)); 
-				//남은 밴드윗/공간
+				//double ss = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_list[video_index].size)); 
+				//bb / ss =남은 밴드윗/공간
 				
 				double ll = (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) - (_SSD_list[ssd_temp].write_MB + _VIDEO_list[video_index].size);
 				//double slope = bb / (ss * _SSD_list[ssd_temp].DWPD); //  남은 수명 대비 남은 밴드윗

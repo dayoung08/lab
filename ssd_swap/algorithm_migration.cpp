@@ -240,20 +240,20 @@ pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_
 	double ADWD_to;
 	double slope_to;
 	double bt_difference;
-	double write_to;
+	//double write_to;
 	if (is_not_enough_storage_space(_SSD_list, _VIDEO_list, _to_ssd, _from_vid)) {
 		int _to_vid = (*_SSD_list[_to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		bt_difference = (_VIDEO_list[_from_vid].requested_bandwidth - _VIDEO_list[_to_vid].requested_bandwidth);
 		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD);
-		write_to = (_SSD_list[_to_ssd].write_MB + _VIDEO_list[_from_vid].size) - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
+		//write_to = (_SSD_list[_to_ssd].write_MB + _VIDEO_list[_from_vid].size) - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
 	}
 	else {
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
 		ADWD_to = _VIDEO_list[_from_vid].size / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD);
-		write_to = (_SSD_list[_to_ssd].write_MB + _VIDEO_list[_from_vid].size) - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
+		//write_to = (_SSD_list[_to_ssd].write_MB + _VIDEO_list[_from_vid].size) - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
 	}
-	//slope_to = (_SSD_list[_to_ssd].ADWD + ADWD_to) / bt_difference;
-	slope_to = write_to / bt_difference;
+	slope_to = (_SSD_list[_to_ssd].ADWD + ADWD_to) / bt_difference;
+	//slope_to = write_to / bt_difference;
 
 	return make_pair(ADWD_to, slope_to);
 }
@@ -262,20 +262,20 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _fro
 	double ADWD_from;
 	double slope_from;
 	double bt_difference;
-	double write_from;
+	//double write_from;
 	if (is_not_enough_storage_space(_SSD_list, _VIDEO_list, _to_ssd, _from_vid)) {
 		int _to_vid = (*_SSD_list[_to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		bt_difference = (_VIDEO_list[_from_vid].requested_bandwidth - _VIDEO_list[_to_vid].requested_bandwidth);
 		ADWD_from = _VIDEO_list[_to_vid].size / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD);
-		write_from = (_SSD_list[_to_ssd].write_MB + _VIDEO_list[_to_vid].size) - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
+		//write_from = (_SSD_list[_to_ssd].write_MB + _VIDEO_list[_to_vid].size) - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
 	}
 	else {
 		bt_difference = _VIDEO_list[_from_vid].requested_bandwidth;
 		ADWD_from = 0;
-		write_from = 0 - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
+		//write_from = 0 - (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity);
 	}
-	//slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / bt_difference;
-	slope_from = (write_from) / bt_difference;
+	slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / bt_difference;
+	//slope_from = (write_from) / bt_difference;
 
 	return make_pair(ADWD_from, slope_from);
 }
