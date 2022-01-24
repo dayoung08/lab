@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <random>
+#include <string>
 using namespace std;
 
 #define SEED 111
@@ -28,7 +29,7 @@ using namespace std;
 #define MAX_SSD_BANDWIDTH 5000
 #define MIN_SSD_BANDWIDTH 400
 
-#define NONE_ALLOC 0
+#define NONE_ALLOC -1
 
 #define PLACEMENT_OURS 1
 #define PLACEMENT_BANDWIDTH_AWARE 2
@@ -54,9 +55,11 @@ struct SSD {
 	double ADWD;
 
 	set<pair<double, int>, less<pair<double, int>>> assigned_VIDEOs_low_bandwidth_first;
+
+	string node_hostname; // for hadoop datanode
 };
 
-struct VIDEO {
+struct VIDEO_SEGMENT {
 	int index;
 
 	int size;
@@ -65,25 +68,30 @@ struct VIDEO {
 	int assigned_SSD;
 
 	bool is_alloc;
+
+	string name;  // for hadoop file path
 };
 
-void initalization(SSD* _SSD_list, VIDEO* _VIDEO_list);
-void update_video_bandwidth(SSD* _SSD_list, VIDEO* _VIDEO_list);
+void initalization(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
+void update_video_bandwidth(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
 double* set_zipf_pop(int length, double alpha, double beta);
-bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO* _VIDEO_list, int _to_ssd, int _from_vid);
+bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid);
 
-int placement(SSD* _SSD_list, VIDEO* _VIDEO_list, int _method);
-int placement_myAlgorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
-int placement_bandwidth_aware(SSD* _SSD_list, VIDEO* _VIDEO_list);
-int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_list);
-void allocate(SSD* _SSD_list, VIDEO* _VIDEO_list, int _video_index, int _SSD_index);
+int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method);
+int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
+int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
+int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
+void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _video_index, int _SSD_index);
 
-int run(SSD* _SSD_list, VIDEO* _VIDEO_list, int _mothod);
-int our_algorithm(SSD* _SSD_list, VIDEO* _VIDEO_list);
-int benchmark(SSD* _SSD_list, VIDEO* _VIDEO_list);
-void swap(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid, int to_vid);
-void reallocate(SSD* _SSD_list, VIDEO* _VIDEO_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
+int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _mothod);
+int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
+int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
+void swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double, int> _element, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid);
+void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
 void update_infomation(SSD* _SSD_list, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs);
-pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
-pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO* _VIDEO_list, int _from_ssd, int _to_ssd, int _from_vid);
-int get_migration_flag(SSD* _SSD_list, VIDEO* _VIDEO_list, int from_ssd, int to_ssd, int from_vid, int to_vid);
+pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid);
+pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid);
+int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid);
+
+void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
+void create_migration_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int* _prev_assigned_SSD);
