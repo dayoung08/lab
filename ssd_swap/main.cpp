@@ -2,12 +2,22 @@
 #define NUM_OF_DATEs 30  // for simulation
 #define NUM_OF_TIMEs 4 // for simulation
 
-int placement_method = 2;
+int placement_method = 1;
 int migration_method = 2; // 2로 바꾸면 비교스킴
 int main() {
+	srand(SEED);
+
+	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
 	simulation();
 	printf("\n[END]\n\n");
 	return 0;
+}
+
+void testbed() {
+	SSD* SSD_list;
+	VIDEO_SEGMENT* VIDEO_SEGMENT_list;
+
+	initalization_for_testbed(SSD_list, VIDEO_SEGMENT_list);
 }
 
 void simulation() {
@@ -17,7 +27,6 @@ void simulation() {
 	SSD* SSD_list = new SSD[num_of_SSDs];
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
 
-	srand(SEED);
 	initalization_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos);
 
 	printf("\n[PLACEMENT START]\n\n");
@@ -41,13 +50,11 @@ void simulation() {
 
 
 	printf("\n[MIGRATION START]\n\n");
-	double sum_for_AVG_in_migration = 0;
-	double sum_for_STD_in_migration = 0;
+	//double sum_for_AVG_in_migration = 0;
+	//double sum_for_STD_in_migration = 0;
 
 	double* sum_ADWD = new double[num_of_SSDs];
 	fill(sum_ADWD, sum_ADWD + num_of_SSDs, 0);
-	double sum_for_DAILY_AVG_in_migration = 0;
-	double sum_for_DAILY_STD_in_migration = 0;
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
@@ -78,10 +85,10 @@ void simulation() {
 
 			//migration result 출력
 			if (time == NUM_OF_TIMEs) {
-				sum_for_AVG_in_migration = 0;
-				sum_for_STD_in_migration = 0;
+				//sum_for_AVG_in_migration = 0;
+				//sum_for_STD_in_migration = 0;
 				for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
-					sum_for_AVG_in_migration += SSD_list[ssd].ADWD;
+					//sum_for_AVG_in_migration += SSD_list[ssd].ADWD;
 					sum_ADWD[ssd] += SSD_list[ssd].ADWD;
 
 					SSD_list[ssd].ADWD = 0;
@@ -90,28 +97,27 @@ void simulation() {
 					//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 					//printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_space, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_space));
 				}
-				for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
-					sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
-				}
+				//for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
+				//	sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
+				//}
 			}
 		}
 		//if (day == 1 || day == 7 || day == 15 || day == 30) {
 			//printf("[DAY%d] Average migration number %lf \n", day, prev_migration_num);
-		printf("[DAY%d] 각 SSD의 Average ADWD %lf\n", day, (sum_for_AVG_in_migration / num_of_SSDs));
-		printf("[DAY%d] 각 SSD의 Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_STD_in_migration / num_of_SSDs) );
+		double sum_for_DAILY_AVG_in_migration = 0;
+		double sum_for_DAILY_STD_in_migration = 0;
+		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
+			sum_for_DAILY_AVG_in_migration += sum_ADWD[ssd];
+		}
+		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
+			sum_for_DAILY_STD_in_migration += pow(sum_ADWD[ssd] - (sum_for_DAILY_AVG_in_migration / num_of_SSDs), 2);
+		}
+		printf("각 SSD의 %d일 동안의 Average ADWD %lf\n", day, (sum_for_DAILY_AVG_in_migration / num_of_SSDs / day));
+		printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n", day, sqrt(sum_for_DAILY_STD_in_migration / num_of_SSDs / day));
 		//}
 	}
 
-	for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
-		sum_for_DAILY_AVG_in_migration += sum_ADWD[ssd];
-	}
-	for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
-		sum_for_DAILY_STD_in_migration += pow(sum_ADWD[ssd] - (sum_for_DAILY_AVG_in_migration / num_of_SSDs), 2);
-	}
 	delete[](sum_ADWD);
-	printf("각 SSD의 %d일 동안의 Average ADWD %lf\n", NUM_OF_DATEs, (sum_for_DAILY_AVG_in_migration / num_of_SSDs / NUM_OF_DATEs));
-	printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n", NUM_OF_DATEs, sqrt(sum_for_DAILY_STD_in_migration / num_of_SSDs / NUM_OF_DATEs));
-
 	delete[](SSD_list);
 	delete[](VIDEO_SEGMENT_list);
 }

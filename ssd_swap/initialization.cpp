@@ -111,6 +111,14 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGME
 	delete[] vid_pop;
 }
 
+void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
+	//https://tang2.tistory.com/335
+}
+
+void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_exist_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_new_list) {
+
+}
+
 double* set_zipf_pop(int length, double alpha, double beta) {
 	double* zipf = new double[length];
 	double* pop = new double[length];
