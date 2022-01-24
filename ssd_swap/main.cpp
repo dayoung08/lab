@@ -3,7 +3,7 @@
 #define NUM_OF_TIMEs 4 // for simulation
 
 int placement_method = 1;
-int migration_method = 2; // 2로 바꾸면 비교스킴
+int migration_method = 1; // 2로 바꾸면 비교스킴
 int main() {
 	srand(SEED);
 
