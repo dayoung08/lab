@@ -48,6 +48,7 @@ void simulation() {
 
 	int* prev_assigned_SSD = new int[num_of_videos];
 	double* prev_ADWD = new double[num_of_SSDs];
+	memset(prev_ADWD, 0, sizeof(double) * num_of_SSDs);
 
 	double sum_for_AVG_in_migration = 0;
 	double sum_for_STD_in_migration = 0;

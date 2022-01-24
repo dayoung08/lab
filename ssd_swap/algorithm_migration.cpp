@@ -258,8 +258,6 @@ pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	slope_to = (_SSD_list[_to_ssd].ADWD + ADWD_to) / bt_difference;
 	//slope_to = write_to / bt_difference;
 
-	//if (isnan(-ADWD_to))
-	//	cout << "debug";
 	return make_pair(ADWD_to, slope_to);
 }
 
@@ -282,8 +280,6 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMEN
 	slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / bt_difference;
 	//slope_from = (write_from) / bt_difference;
 
-	//if (isnan(-ADWD_from))
-	//	cout << "debug";
 	return make_pair(ADWD_from, slope_from);
 }
 
