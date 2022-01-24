@@ -34,6 +34,10 @@ void create_migration_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_l
 		int from_ssd_index = _prev_assigned_SSD[video_index];
 		int to_ssd_index = _VIDEO_SEGMENT_list[video_index].assigned_SSD;
 
+		if (from_ssd_index == to_ssd_index) { // migration 안 하는 경우는 line 출력 X
+			continue;
+		}
+
 		string line = "";
 		line += to_string(_VIDEO_SEGMENT_list[video_index].index) + "\t";
 		line += _SSD_list[from_ssd_index].node_hostname + "\t" + "DISK" + "\t"; // hadoop 환경에서 storage들 type 지정 안 하면 디폴트가 DISK임

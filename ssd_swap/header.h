@@ -13,8 +13,8 @@ using namespace std;
 #define NUM_OF_VIDEOs 2000000 // 디폴트 2000000
 #define SIZE_OF_VIDEO 10
 
-#define NUM_OF_DATEs 30
-#define NUM_OF_TIMEs 4
+#define NUM_OF_DATEs 1
+#define NUM_OF_TIMEs 1
 
 //#define VIDEO_BANDWIDTH_USAGE 0.5f //비디오가 4000kbps(즉 4Mbps)라고 가정해봅시다. 4*0.125=0.5,하나에 0.5MB/s가 듭니다.
 #define VIDEO_BANDWIDTH_USAGE 1 //비디오가 8000kbps(즉 8Mbps)라고 가정해봅시다. 4*0.125=0.5,하나에 1MB/s가 듭니다.

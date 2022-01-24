@@ -28,10 +28,10 @@ int main() {
 		sum_for_STD_in_placement += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_placement / (NUM_OF_SSDs)), 2);
 	}
 
-	//여기에 파일 빼내는 것 저장하기 
+	create_placement_infomation(SSD_list, VIDEO_SEGMENT_list); // 배치 정보 파일 생성
+
 	printf("[Placement] Average ADWD %lf\n", (sum_for_AVG_in_placement / (NUM_OF_SSDs)));
 	printf("[Placement] Standard deviation ADWD %lf\n\n", sqrt(sum_for_STD_in_placement / (NUM_OF_SSDs)));
-	create_placement_infomation(SSD_list, VIDEO_SEGMENT_list);
 
 	printf("\n[MIGRATION START]\n\n");
 
@@ -51,8 +51,10 @@ int main() {
 			for (int vid = 0; vid < NUM_OF_VIDEOs; vid++) {
 				prev_assigned_SSD[vid] = VIDEO_SEGMENT_list[vid].assigned_SSD;
 			}
-
 			migration_num += migration(SSD_list, VIDEO_SEGMENT_list, migration_method);
+
+			create_migration_infomation(SSD_list, VIDEO_SEGMENT_list, prev_assigned_SSD); // 이동 정보 파일 생성
+
 			if (time == NUM_OF_TIMEs) {
 				sum_for_AVG_in_migration = 0;
 				sum_for_STD_in_migration = 0;
