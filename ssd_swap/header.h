@@ -44,6 +44,8 @@ struct VIDEO_SEGMENT {
 
 	int size;
 	double requested_bandwidth;
+	//int pop_index; // gradually 하게 줄어들게 하려고
+	double popularity;
 
 	int assigned_SSD;
 
@@ -53,8 +55,8 @@ struct VIDEO_SEGMENT {
 };
 void simulation();
 
-void initalization(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int _size_of_video);
-void update_video_bandwidth(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int _size_of_video);
+void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos);
+void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_exist_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_new_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos);
 double* set_zipf_pop(int length, double alpha, double beta);
 bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid);
 

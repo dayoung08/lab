@@ -14,6 +14,7 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, i
 		placement_num = placement_random(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 		break;
 	}
+
 	return placement_num;
 }
 
@@ -51,11 +52,12 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 			placement_num++;
 		}
 		else {
-			for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
+			/*for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
 				printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
 				printf("[SSD %d] ADWD %lf\n", ssd, _SSD_list[ssd].ADWD);
-			}
+			}*/
+			//printf("%lf\n", _VIDEO_SEGMENT_list[video_index].requested_bandwidth);
    			printf("video %d 를 저장할 만한 SSD가 없음\n", video_index);
 			//_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 			//_VIDEO_SEGMENT_list[video_index].is_alloc = false;
@@ -121,11 +123,11 @@ int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _nu
 			allocate(_SSD_list, _VIDEO_SEGMENT_list, video_index, ssd_index);
 			placement_num++;
 		}
-		else {
+		/*else {
 			printf("video %d 를 저장할 만한 SSD가 없음\n", video_index);
 			//_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 			//_VIDEO_SEGMENT_list[video_index].is_alloc = false;
-		}
+		}*/
 	}
 	return placement_num;
 }
@@ -170,5 +172,5 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _video_ind
 
 	//220120
 	_SSD_list[_ssd_index].write_MB += _VIDEO_SEGMENT_list[_video_index].size;
-	_SSD_list[_ssd_index].ADWD += (_VIDEO_SEGMENT_list[_video_index].size / (_SSD_list[_ssd_index].storage_capacity * _SSD_list[_ssd_index].DWPD));
+	_SSD_list[_ssd_index].ADWD += _VIDEO_SEGMENT_list[_video_index].size / (_SSD_list[_ssd_index].storage_capacity * _SSD_list[_ssd_index].DWPD);
 }
