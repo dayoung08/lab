@@ -1,19 +1,19 @@
 #include "header.h"
 #include <fstream>     
 
-void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
+void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_videos) {
 	ofstream fout;        // 파일 출력 객체 생성
 	fout.open("placementInfo.in");   // 파일 열기
 
-	for (int vid = 0; vid < NUM_OF_VIDEOs; vid++) {
+	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		int ssd_index = _VIDEO_SEGMENT_list[video_index].assigned_SSD;
 
 		string line = "";
-		line += _VIDEO_SEGMENT_list[video_index].name + "\t";
+		line += _VIDEO_SEGMENT_list[video_index].path + "\t";
 		line += _SSD_list[ssd_index].node_hostname + "\t"	+ "0"; // 한 데이터노드 당 하나의 stroage만 사용하도록 hadoop 환경을 세팅해 놓을 예정임.
 
-		if (vid != NUM_OF_VIDEOs-1) {
+		if (vid != _num_of_videos -1) {
 			line += "\n";
 		}
 
@@ -25,11 +25,11 @@ void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_l
 	}
 }
 
-void create_migration_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int* _prev_assigned_SSD) {
+void create_migration_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int* _prev_assigned_SSD, int _num_of_videos) {
 	ofstream fout;        // 파일 출력 객체 생성
 	fout.open("movementInfo.in");   // 파일 열기
 
-	for (int vid = 0; vid < NUM_OF_VIDEOs; vid++) {
+	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		int from_ssd_index = _prev_assigned_SSD[video_index];
 		int to_ssd_index = _VIDEO_SEGMENT_list[video_index].assigned_SSD;
@@ -43,7 +43,7 @@ void create_migration_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_l
 		line += _SSD_list[from_ssd_index].node_hostname + "\t" + "DISK" + "\t"; // hadoop 환경에서 storage들 type 지정 안 하면 디폴트가 DISK임
 		line += _SSD_list[to_ssd_index].node_hostname + "\t" + "DISK" + "\t" + "0"; // 한 데이터노드 당 하나의 stroage만 사용하도록 hadoop 환경을 세팅해 놓을 예정임.
 
-		if (vid != NUM_OF_VIDEOs - 1) {
+		if (vid != _num_of_videos - 1) {
 			line += "\n";
 		}
 		fout << line;   // cout처럼 출력하면 됨.

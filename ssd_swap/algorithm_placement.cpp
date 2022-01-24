@@ -1,25 +1,25 @@
 #include "header.h"
 
 int rand_cnt_for_placement = 0; //for generation seed in placement_random
-int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method) {
+int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_videos) {
 	int placement_num = 0;
 	switch (_method) {
 	case PLACEMENT_OURS:
-		placement_num = placement_myAlgorithm(_SSD_list, _VIDEO_SEGMENT_list);
+		placement_num = placement_myAlgorithm(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 		break;
 	case PLACEMENT_BANDWIDTH_AWARE:
-		placement_num = placement_bandwidth_aware(_SSD_list, _VIDEO_SEGMENT_list);
+		placement_num = placement_bandwidth_aware(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 		break;
 	case PLACEMENT_RANDOM:
-		placement_num = placement_random(_SSD_list, _VIDEO_SEGMENT_list);
+		placement_num = placement_random(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 		break;
 	}
 	return placement_num;
 }
 
-int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
+int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	set<pair<double, int>, greater<pair<double, int>>> VIDEO_SEGMENT_list_with_bandwidth_sort;
-	for (int vid = 0; vid < NUM_OF_VIDEOs; vid++) {
+	for (int vid = 0; vid < _num_of_videos; vid++) {
 		VIDEO_SEGMENT_list_with_bandwidth_sort.insert(make_pair(_VIDEO_SEGMENT_list[vid].requested_bandwidth, vid));
 	}
 
@@ -29,7 +29,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
 		VIDEO_SEGMENT_list_with_bandwidth_sort.erase(*VIDEO_SEGMENT_list_with_bandwidth_sort.begin());
 		set<pair<double, int>, greater<pair<double, int>>> target_ssd_list_with_ratio_sort;
 
-		for (int ssd_temp = 0; ssd_temp < NUM_OF_SSDs; ssd_temp++) {
+		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
 				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
 				double ADWD_placement = _SSD_list[ssd_temp].ADWD + (_VIDEO_SEGMENT_list[video_index].size / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD));
@@ -51,7 +51,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
 			placement_num++;
 		}
 		else {
-			for (int ssd = 0; ssd < NUM_OF_SSDs; ssd++) {
+			for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
 				printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
 				printf("[SSD %d] ADWD %lf\n", ssd, _SSD_list[ssd].ADWD);
@@ -64,9 +64,9 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
 	return placement_num;
 }
 
-int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
+int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	set<pair<double, int>, greater<pair<double, int>>> VIDEO_SEGMENT_list_with_bandwidth_sort;
-	for (int vid = 0; vid < NUM_OF_VIDEOs; vid++) {
+	for (int vid = 0; vid < _num_of_videos; vid++) {
 		VIDEO_SEGMENT_list_with_bandwidth_sort.insert(make_pair(_VIDEO_SEGMENT_list[vid].requested_bandwidth, vid));
 	}
 
@@ -75,7 +75,7 @@ int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 		int video_index = (*VIDEO_SEGMENT_list_with_bandwidth_sort.begin()).second;
 		VIDEO_SEGMENT_list_with_bandwidth_sort.erase(*VIDEO_SEGMENT_list_with_bandwidth_sort.begin());
 		set<pair<double, int>, greater<pair<double, int>>> target_ssd_list_with_bandwidth_sort;
-		for (int ssd_temp = 0; ssd_temp < NUM_OF_SSDs; ssd_temp++) {
+		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
 				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
 				double slope = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
@@ -99,16 +99,16 @@ int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 	return placement_num;
 }
 
-int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) { 
+int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	std::mt19937 g(SEED + rand_cnt_for_placement);
 	rand_cnt_for_placement++;
 
 	int placement_num = 0;
-	for (int vid = 0; vid < NUM_OF_VIDEOs; vid++) {
+	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		int ssd_index = NONE_ALLOC;
 		vector<int> target_ssd_list;
-		for (int ssd_temp = 0; ssd_temp < NUM_OF_SSDs; ssd_temp++) {
+		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
 				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
 				target_ssd_list.push_back(ssd_temp);
@@ -130,17 +130,17 @@ int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list) {
 	return placement_num;
 }
 /*
-int placement_random(SSD* _SSD_list, VIDEO* _VIDEO_SEGMENT_list) { // ¹êµåÀ­ »ý°¢ ÀüÇô ¾øÀ½
+int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) { // ¹êµåÀ­ »ý°¢ ÀüÇô ¾øÀ½
 	int placement_num = 0;
 	std::mt19937 g(SEED + rand_cnt_for_placement);
 	rand_cnt_for_placement++;
 	vector<int> target_ssd_list;
-	for (int ssd = 0; ssd < NUM_OF_SSDs; ssd++) {
+	for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 		target_ssd_list.push_back(ssd);
 	}
 	std::shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);
 
-	for (int vid = 0; vid < NUM_OF_VIDEOs; vid++) {
+	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		int ssd_index = NONE_ALLOC;
 
