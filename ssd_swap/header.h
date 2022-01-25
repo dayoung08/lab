@@ -4,6 +4,8 @@
 #include <vector>
 #include <random>
 #include <string>
+#include <fstream>   
+#include <sstream>
 using namespace std;
 
 #define SEED 111
@@ -26,10 +28,10 @@ struct SSD {
 	double DWPD;
 	double WAF;
 
-	int storage_capacity;
+	double storage_capacity;
 	double maximum_bandwidth;
 
-	int storage_usage;
+	double storage_usage;
 	double bandwidth_usage;
 	double write_MB;
 	double ADWD;
@@ -41,27 +43,28 @@ struct SSD {
 
 struct VIDEO_SEGMENT {
 	int index;
+	string path;  // for hadoop file path
 
-	int size;
+	double size;
 	double requested_bandwidth;
-	//int pop_index; // gradually 하게 줄어들게 하려고
 	double popularity;
 
 	int assigned_SSD;
 
 	bool is_alloc;
-
-	string path;  // for hadoop file path
 };
+
+
 void simulation();
 
 void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos);
-void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_exist_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_new_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos);
-void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list);
-void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_exist_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_new_list);
+void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_existed_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_new_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos);
+void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_videos);
+void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_existed_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_new_list, int _num_of_SSDs, int _num_of_existed_videos, int& _num_of_new_videos);
 
 double* set_zipf_pop(int length, double alpha, double beta);
 bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid);
+string* split(string str, char Delimiter);
 
 int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_videos);
 int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos);

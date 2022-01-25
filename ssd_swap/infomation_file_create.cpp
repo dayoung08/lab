@@ -1,8 +1,7 @@
 #include "header.h"
-#include <fstream>     
 
 void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_videos) {
-	ofstream fout;        // 파일 출력 객체 생성
+	ofstream fout; // 파일 출력 객체 생성
 	fout.open("placementInfo.in");   // 파일 열기
 
 	for (int vid = 0; vid < _num_of_videos; vid++) {
@@ -11,7 +10,7 @@ void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_l
 
 		string line = "";
 		line += _VIDEO_SEGMENT_list[video_index].path + "\t";
-		line += _SSD_list[ssd_index].node_hostname + "\t"	+ "0"; // 한 데이터노드 당 하나의 stroage만 사용하도록 hadoop 환경을 세팅해 놓을 예정임.
+		line += _SSD_list[ssd_index].node_hostname + "\t"	+ "0"; // 한 데이터노드 당 하나의 storage만 사용하도록 hadoop 환경을 세팅해 놓을 예정임.
 
 		if (vid != _num_of_videos -1) {
 			line += "\n";
