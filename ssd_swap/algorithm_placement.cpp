@@ -39,7 +39,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 				//double ss = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size)); 
 				//bb / ss =³²Àº ¹êµåÀ­/°ø°£
 				
-				double remained_write_MB = (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) - (_SSD_list[ssd_temp].write_MB + _VIDEO_SEGMENT_list[video_index].size);
+				double remained_write_MB = (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) - (_SSD_list[ssd_temp].number_of_write_MB + _VIDEO_SEGMENT_list[video_index].size);
 				//double slope = bb / (ss * _SSD_list[ssd_temp].DWPD); //  ³²Àº ¼ö¸í ´ëºñ ³²Àº ¹êµåÀ­
 				double slope = remained_bandwidth / remained_write_MB; //  ³²Àº ¼ö¸í ´ëºñ ³²Àº ¹êµåÀ­
 				target_ssd_list_with_ratio_sort.insert(make_pair(slope, ssd_temp));
@@ -171,6 +171,6 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _video_ind
 	_VIDEO_SEGMENT_list[_video_index].is_alloc = true;
 
 	//220120
-	_SSD_list[_ssd_index].write_MB += _VIDEO_SEGMENT_list[_video_index].size;
+	_SSD_list[_ssd_index].number_of_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
 	_SSD_list[_ssd_index].ADWD += _VIDEO_SEGMENT_list[_video_index].size / (_SSD_list[_ssd_index].storage_capacity * _SSD_list[_ssd_index].DWPD);
 }
