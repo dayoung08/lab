@@ -121,6 +121,9 @@ void simulation() {
 	printf("\n[MIGRATION START]\n\n");
 	for (int day = 2; day <= NUM_OF_DATEs; day++) {
 		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
+			/*if (day == 2) {
+				SSD_list[ssd].total_write_MB = (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD);
+			}*/
 			SSD_list[ssd].ADWD = 0;
 			SSD_list[ssd].daily_write_MB = 0;
 			SSD_list[ssd].running_days = day;
