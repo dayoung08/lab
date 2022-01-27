@@ -13,7 +13,7 @@
 #define MIN_SSD_BANDWIDTH 400 // for simulation
 
 double video_bandwidth_once_usage = 1.25; //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-double size_of_video = 6; //세그먼트가 6초짜리라고 가정하면, 1MB/s x 6s = 6MB
+double size_of_video = 8; //세그먼트가 6초짜리라고 가정하면, 1MB/s x 6s = 6MB
 
 int rand_cnt = 0;
 void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {

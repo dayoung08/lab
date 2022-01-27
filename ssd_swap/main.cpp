@@ -3,7 +3,7 @@
 #define NUM_OF_TIMEs 4 // for simulation
 
 int placement_method = 1; //2,3으로 바꾸면 비교스킴
-int migration_method = 1; // 2로 바꾸면 비교스킴
+int migration_method = 2; // 2로 바꾸면 비교스킴
 int main(int argc, char* argv[]) {
 	srand(SEED);
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
