@@ -159,10 +159,10 @@ void simulation() {
 		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
 			double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / day;
 			sum_for_DAILY_AVG_in_migration += average_ADWD;
-			//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
-			//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
+			printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
+			printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
 			//printf("[SSD %d] DWPD/WAF %.2f\n", ssd, SSD_list[ssd].DWPD);
-			//printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
+			printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 		}
 		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
 			total_bandwidth_in_migration += SSD_list[ssd].bandwidth_usage;
