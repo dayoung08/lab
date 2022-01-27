@@ -18,10 +18,17 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_
 	return placement_num;
 }
 
+bool flag = false;
 int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos){
 	set<pair<double, int>, greater<pair<double, int>>> VIDEO_SEGMENT_list_with_bandwidth_sort;
 	for (int vid = 0; vid < _num_of_new_videos; vid++) {
 		VIDEO_SEGMENT_list_with_bandwidth_sort.insert(make_pair(_new_VIDEO_SEGMENT_list[vid].requested_bandwidth, vid));
+	}
+
+	double avr_ADWD_limit = AVR_ADWD_LIMIT;
+	if (!flag) {
+		avr_ADWD_limit = AVR_ADWD_FIRST_LIMIT;
+		flag = true;
 	}
 
 	int placement_num = 0;
@@ -40,7 +47,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_
 			}
 
 			if ((_SSD_list[ssd_temp].bandwidth_usage - removed_bandwidth + _new_VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth &&
-				((_SSD_list[ssd_temp].total_write_MB + _new_VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= AVR_ADWD_LIMIT) {
+				((_SSD_list[ssd_temp].total_write_MB + _new_VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= avr_ADWD_limit) {
 
 				double ADWD_placement = _SSD_list[ssd_temp].ADWD + (_new_VIDEO_SEGMENT_list[video_index].size / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD));
 				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _new_VIDEO_SEGMENT_list[video_index].requested_bandwidth));
