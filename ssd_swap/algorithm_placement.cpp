@@ -78,8 +78,8 @@ int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 		set<pair<double, int>, greater<pair<double, int>>> target_ssd_list_with_bandwidth_sort;
 		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
-				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth &&
-				((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= AVR_ADWD_LIMIT) {
+				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth ){
+				//&& ((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= AVR_ADWD_LIMIT) {
 				
 				double slope = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth))	/ (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
 				target_ssd_list_with_bandwidth_sort.insert(make_pair(slope, ssd_temp));
@@ -112,8 +112,8 @@ int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _nu
 		vector<int> target_ssd_list;
 		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
-				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth &&
-				((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= AVR_ADWD_LIMIT) {
+				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth ){
+				//&& ((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= AVR_ADWD_LIMIT) {
 				
 				target_ssd_list.push_back(ssd_temp);
 			}

@@ -49,19 +49,19 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	}*/
 
 	double* vid_pop = set_zipf_pop(_num_of_videos, ALPHA, BETA);
-	/*vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
+	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
 	std::mt19937 g(SEED + rand_cnt);
 	rand_cnt++;
-	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);*/
+	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		_VIDEO_SEGMENT_list[video_index].index = video_index;
 		_VIDEO_SEGMENT_list[video_index].size = size_of_video;
 		_VIDEO_SEGMENT_list[video_index].bandwidth = video_bandwidth_once_usage;
 
-		double pop = vid_pop[video_index];
-		/*double pop = vid_pop_shuffle.back();
-		vid_pop_shuffle.pop_back();*/
+		//double pop = vid_pop[video_index];
+		double pop = vid_pop_shuffle.back();
+		vid_pop_shuffle.pop_back();
 		_VIDEO_SEGMENT_list[video_index].popularity = pop;
 		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
 
@@ -72,17 +72,17 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		//여기부터 할당
 	}
 	delete[] vid_pop;
-	//vid_pop_shuffle.clear();
-	//vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
+	vid_pop_shuffle.clear();
+	vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 	printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
 }
 
 void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos) {
 	double* vid_pop = set_zipf_pop( _num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
-	/*vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
+	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	std::mt19937 g(SEED + rand_cnt);
 	rand_cnt++;
-	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);*/
+	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 
 	for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
@@ -92,9 +92,9 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 
 	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
 		int video_index = vid;
-		double pop = vid_pop[video_index];
-		/*double pop = vid_pop_shuffle.back();
-		vid_pop_shuffle.pop_back();*/
+		//double pop = vid_pop[video_index];
+		double pop = vid_pop_shuffle.back();
+		vid_pop_shuffle.pop_back();
 
 		if (video_index < _num_of_existed_videos) { // 기존에 있던 영상의 인기도, 밴드윗 갱신
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
@@ -117,8 +117,8 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		}
 	}
 	delete[] vid_pop;
-	//vid_pop_shuffle.clear();
-	//vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
+	vid_pop_shuffle.clear();
+	vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 }
 
 void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_videos) {
@@ -165,7 +165,7 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 	if (fin_video.is_open())
 	{
 		double* vid_pop = NULL;
-		//vector<double>vid_pop_shuffle;
+		vector<double>vid_pop_shuffle;
 		string str;
 		int cnt = -1;
 		while (getline(fin_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
@@ -174,10 +174,10 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 				num_of_videos = stoi(str);
 				_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
 				vid_pop = set_zipf_pop(num_of_videos, ALPHA, BETA);
-				/*vid_pop_shuffle = vector<double>(vid_pop, vid_pop + num_of_videos);
+				vid_pop_shuffle = vector<double>(vid_pop, vid_pop + num_of_videos);
 				std::mt19937 g(SEED + rand_cnt);
 				rand_cnt++;
-				std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);*/
+				std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 			}
 			else {
 				int video_index = cnt;
@@ -187,9 +187,9 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 				_VIDEO_SEGMENT_list[video_index].path = video_info[0];
 				_VIDEO_SEGMENT_list[video_index].size = stod(video_info[1]);
 				_VIDEO_SEGMENT_list[video_index].bandwidth = stod(video_info[2]);
-				//double pop = vid_pop_shuffle.back();
-				//vid_pop_shuffle.pop_back();
-				double pop = vid_pop[video_index];
+				double pop = vid_pop_shuffle.back();
+				vid_pop_shuffle.pop_back();
+				//double pop = vid_pop[video_index];
 				_VIDEO_SEGMENT_list[video_index].popularity = pop;
 				_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * _VIDEO_SEGMENT_list[video_index].bandwidth;
 				if (!strcmp(video_info[3].c_str(), "NONE_ALLOC")) {
@@ -205,15 +205,15 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 			cnt++;
 		}
 		delete[] vid_pop;
-		//vid_pop_shuffle.clear();
-		//vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
+		vid_pop_shuffle.clear();
+		vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 	}
 	fin_video.close(); // 파일 닫기
 }
 
 void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos, int& _num_of_new_videos) {
 	double* vid_pop = NULL;
-	//vector<double>vid_pop_shuffle;
+	vector<double>vid_pop_shuffle;
 
 	ifstream fin_video("new_video_list.in"); // fin 객체 생성(cin 처럼 이용)
 	if (fin_video.is_open())
@@ -226,10 +226,10 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 				_num_of_new_videos = stoi(str);
 				_new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[_num_of_new_videos];
 				vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
-				/*vid_pop_shuffle = vector<double>(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
+				vid_pop_shuffle = vector<double>(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 				std::mt19937 g(SEED + rand_cnt);
 				rand_cnt++;
-				std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);*/
+				std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 			}
 			else {
 				int video_index = _num_of_existed_videos + cnt;
@@ -239,9 +239,9 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 				_new_VIDEO_SEGMENT_list[video_index].path = video_info[0];
 				_new_VIDEO_SEGMENT_list[video_index].size = stod(video_info[1]);
 				_new_VIDEO_SEGMENT_list[video_index].bandwidth = stod(video_info[2]);
-				//double pop = vid_pop_shuffle.back();
-				//vid_pop_shuffle.pop_back();
-				double pop = vid_pop[video_index];
+				double pop = vid_pop_shuffle.back();
+				vid_pop_shuffle.pop_back();
+				//double pop = vid_pop[video_index];
 				_new_VIDEO_SEGMENT_list[video_index].popularity = pop;
 				_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * _new_VIDEO_SEGMENT_list[video_index].bandwidth;
 				_new_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
@@ -251,8 +251,8 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 			cnt++;
 		}
 		delete[] vid_pop;
-		//vid_pop_shuffle.clear();
-		//vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
+		vid_pop_shuffle.clear();
+		vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 	}
 	fin_video.close(); // 파일 닫기
 

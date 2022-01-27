@@ -66,7 +66,7 @@ int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 			else
 				to_vid = NONE_ALLOC;
 			
-			if (get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid, to_vid) != FLAG_DENY) {
+			if (get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, MIGRATION_OURS, from_ssd, to_ssd, from_vid, to_vid) != FLAG_DENY) {
 				break;
 			}
 		}
@@ -83,7 +83,7 @@ int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 		}
 
 		//찾았으면 할당하기.
-		int flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid, to_vid);
+		int flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, MIGRATION_OURS, from_ssd, to_ssd, from_vid, to_vid);
 		switch (flag) {
 		case FLAG_SWAP:
 			swap(_SSD_list, _VIDEO_SEGMENT_list, element, from_ssd, to_ssd, from_vid, to_vid);
@@ -175,7 +175,7 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 		}
 
 		//찾았으면 할당하기.
-		int flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid, to_vid);
+		int flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, MIGRATION_BANDWIDTH_AWARE, from_ssd, to_ssd, from_vid, to_vid);
 		switch (flag) {
 		case FLAG_SWAP:
 			swap(_SSD_list, _VIDEO_SEGMENT_list, element, from_ssd, to_ssd, from_vid, to_vid);
@@ -298,24 +298,37 @@ pair<pair<double, double>, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT*
 	return make_pair(make_pair(ADWD_from, write_MB_from), slope_from);
 }
 
-int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid) {
+int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid) {
+	int flag = FLAG_DENY;
+
 	if (_to_vid != NONE_ALLOC && _to_ssd != NONE_ALLOC) {
-		if ( !is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid) &&
-			(_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth &&
-			( (_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) <= AVR_ADWD_LIMIT ) {
-			return FLAG_REALLOCATE;
+		if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid) &&
+			(_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth) {
+			flag = FLAG_REALLOCATE;
 		}
 		else if ( is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid) &&
-			(_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth &&
-			( (_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_from_ssd].size) / (_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) / _SSD_list[_from_ssd].running_days ) <= AVR_ADWD_LIMIT &&
-			( (_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) <= AVR_ADWD_LIMIT ) { 
-			return FLAG_SWAP;
+			(_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth) {
+			flag = FLAG_SWAP;
 		}
-		else {
-			return FLAG_DENY;
-		}
+		/*else {
+			flag = FLAG_DENY;
+		}*/
 	}
 	else {
-		return FLAG_REALLOCATE;
+		flag = FLAG_REALLOCATE;
 	}
+
+
+	if (flag == FLAG_REALLOCATE && 
+		((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) > AVR_ADWD_LIMIT &&
+		_method == MIGRATION_OURS) {
+		flag = FLAG_DENY;
+	}
+	else if (flag == FLAG_SWAP &&
+		((_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_from_ssd].size) / (_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) / _SSD_list[_from_ssd].running_days) <= AVR_ADWD_LIMIT &&
+		((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) <= AVR_ADWD_LIMIT) {
+		flag = FLAG_DENY;
+	}
+
+	return flag;
 }

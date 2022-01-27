@@ -3,7 +3,7 @@
 #define NUM_OF_TIMEs 4 // for simulation
 
 int placement_method = 1; //2,3으로 바꾸면 비교스킴
-int migration_method = 1; // 2로 바꾸면 비교스킴
+int migration_method = 2; // 2로 바꾸면 비교스킴
 int main(int argc, char* argv[]) {
 	srand(SEED);
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
@@ -78,7 +78,7 @@ void testbed_migration() {
 
 void simulation() {
 	int num_of_SSDs = 20;
-	int num_of_existed_videos = 1700000;
+	int num_of_existed_videos = 1400000;
 
 	SSD* SSD_list = new SSD[num_of_SSDs];
 	VIDEO_SEGMENT* existed_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_existed_videos];
@@ -107,7 +107,7 @@ void simulation() {
 	printf("[Placement] Total bandwidth usage %lf / %lf\n", total_bandwidth_in_placement, 37500.0f);
 	printf("[Placement] 각 SSD의 Average ADWD %lf\n", (sum_for_AVG_in_placement / num_of_SSDs));
 	printf("[Placement] 각 SSD의 Standard deviation ADWD %lf\n", sqrt(sum_for_STD_in_placement / num_of_SSDs));
-	printf("1일차 완료\n\n");
+	printf("1일차 완료\n");
 
 	printf("\n[MIGRATION START]\n\n");
 	for (int day = 2; day <= NUM_OF_DATEs; day++) {
@@ -124,7 +124,7 @@ void simulation() {
 			for (int vid = 0; vid < num_of_existed_videos; vid++) {
 				prev_assigned_SSD[vid] = existed_VIDEO_SEGMENT_list[vid].assigned_SSD;
 			}
-			int num_of_new_videos = 2500;
+			int num_of_new_videos = 5000;
 
 			//아래는 새로운 비디오 추가 과정
 			VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
