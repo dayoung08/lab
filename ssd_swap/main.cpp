@@ -1,9 +1,9 @@
 #include "header.h"
 #define NUM_OF_DATEs 31  // for simulation
-#define NUM_OF_TIMEs 4 // for simulation
+#define NUM_OF_TIMEs 2 // for simulation
 
 int placement_method = 1; //2,3으로 바꾸면 비교스킴
-int migration_method = 2; // 2로 바꾸면 비교스킴
+int migration_method = 1; // 2로 바꾸면 비교스킴
 int main(int argc, char* argv[]) {
 	srand(SEED);
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
@@ -44,7 +44,17 @@ void testbed_placement() {
 	VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = NULL;
 	int num_of_new_videos;
 	update_new_video_for_testbed(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos, num_of_new_videos);
-	placement(SSD_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_new_videos); // 새로 추가한 비디오를 할당함.
+
+	if (new_VIDEO_SEGMENT_list != NULL) {
+		int* prev_assigned_SSD = new int[num_of_existed_videos];
+		for (int vid = 0; vid < num_of_existed_videos; vid++) {
+			prev_assigned_SSD[vid] = existed_VIDEO_SEGMENT_list[vid].assigned_SSD;
+		}
+		migration(SSD_list, existed_VIDEO_SEGMENT_list, migration_method, num_of_SSDs);
+		create_migration_infomation(SSD_list, existed_VIDEO_SEGMENT_list, num_of_existed_videos, prev_assigned_SSD); // 이동 정보 파일 생성
+	}
+
+	placement(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_existed_videos, num_of_new_videos); // 새로 추가한 비디오를 할당함.
 	create_placement_infomation(SSD_list, new_VIDEO_SEGMENT_list, num_of_new_videos);
 	// 배치 정보 파일 생성
 
@@ -78,7 +88,7 @@ void testbed_migration() {
 
 void simulation() {
 	int num_of_SSDs = 20;
-	int num_of_existed_videos = 1400000;
+	int num_of_existed_videos = 2000000;
 
 	SSD* SSD_list = new SSD[num_of_SSDs];
 	VIDEO_SEGMENT* existed_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_existed_videos];
@@ -86,7 +96,7 @@ void simulation() {
 	initalization_for_simulation(SSD_list, existed_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos);
 
 	printf("\n[PLACEMENT START]\n\n");
-	placement(SSD_list, existed_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_existed_videos); // 비디오 하나씩 추가하는 걸로 수정할 것
+	placement(SSD_list, NULL, existed_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, 0, num_of_existed_videos);
 	//create_placement_infomation(SSD_list, VIDEO_SEGMENT_list); // 배치 정보 파일 생성
 
 	double sum_for_AVG_in_placement = 0;
@@ -112,22 +122,23 @@ void simulation() {
 	printf("\n[MIGRATION START]\n\n");
 	for (int day = 2; day <= NUM_OF_DATEs; day++) {
 		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
-			//SSD_list[ssd].ADWD = 0;
-			//SSD_list[ssd].daily_write_MB = 0;
+			SSD_list[ssd].ADWD = 0;
+			SSD_list[ssd].daily_write_MB = 0;
 			SSD_list[ssd].running_days = day;
 		} // 모든 SSD의 러닝 타임 갱신
 		int migration_num = 0;
 
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//cout << time << endl;
-			int num_of_new_videos = 5000;
+			int num_of_new_videos = 50000;
 
 			//아래는 새로운 비디오 추가 과정
 			VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
 			update_new_video_for_simulation(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos, num_of_new_videos); // 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
-			placement(SSD_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_new_videos); // 새로 추가한 비디오를 할당함
 			//비디오 migration
 			migration_num += migration(SSD_list, existed_VIDEO_SEGMENT_list, migration_method, num_of_SSDs);
+			int placement_num = placement(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_existed_videos, num_of_new_videos);  // 새로 추가한 비디오를 할당함
+			printf("placement_num %d\n", placement_num);
 
 			VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_existed_videos + num_of_new_videos];
 			copy(existed_VIDEO_SEGMENT_list, existed_VIDEO_SEGMENT_list + num_of_existed_videos, _VIDEO_SEGMENT_conbined_list);
@@ -148,6 +159,10 @@ void simulation() {
 		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
 			double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / day;
 			sum_for_DAILY_AVG_in_migration += average_ADWD;
+			//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
+			//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
+			//printf("[SSD %d] DWPD/WAF %.2f\n", ssd, SSD_list[ssd].DWPD);
+			//printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 		}
 		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
 			total_bandwidth_in_migration += SSD_list[ssd].bandwidth_usage;
