@@ -63,7 +63,9 @@ void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEG
 			line += to_string(_SSD_list[ssd_index].WAF) + "\t";
 			line += to_string(_SSD_list[ssd_index].storage_usage) + "\t";
 			line += to_string(_SSD_list[ssd_index].bandwidth_usage) + "\t";
-			line += to_string(_SSD_list[ssd_index].number_of_write_MB) + "\t";
+			line += to_string(_SSD_list[ssd_index].daily_write_MB) + "\t";
+			line += to_string(_SSD_list[ssd_index].total_write_MB) + "\t";
+			line += to_string(_SSD_list[ssd_index].running_days);
 
 			if (ssd != _num_of_SSDs - 1) {
 				line += "\n";

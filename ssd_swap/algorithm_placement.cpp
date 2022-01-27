@@ -1,5 +1,6 @@
 #include "header.h"
 
+double average_ADWD_limit = 1;
 int rand_cnt_for_placement = 0; //for generation seed in placement_random
 int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_videos) {
 	int placement_num = 0;
@@ -32,14 +33,15 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 
 		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
-				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
+				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth &&
+				((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= average_ADWD_limit) {
+
 				double ADWD_placement = _SSD_list[ssd_temp].ADWD + (_VIDEO_SEGMENT_list[video_index].size / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD));
-				//낮을수록 좋아야함 분명히....
 				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
 				//double ss = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size)); 
-				//bb / ss =남은 밴드윗/공간
+				//remained_bandwidth / ss =남은 밴드윗/공간
 				
-				double remained_write_MB = (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) - (_SSD_list[ssd_temp].number_of_write_MB + _VIDEO_SEGMENT_list[video_index].size);
+				double remained_write_MB = (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) - (_SSD_list[ssd_temp].daily_write_MB + _VIDEO_SEGMENT_list[video_index].size);
 				//double slope = bb / (ss * _SSD_list[ssd_temp].DWPD); //  남은 수명 대비 남은 밴드윗
 				double slope = remained_bandwidth / remained_write_MB; //  남은 수명 대비 남은 밴드윗
 				target_ssd_list_with_ratio_sort.insert(make_pair(slope, ssd_temp));
@@ -51,17 +53,15 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 			allocate(_SSD_list, _VIDEO_SEGMENT_list, video_index, ssd_index);
 			placement_num++;
 		}
-		else {
-			/*for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
+		/*else {
+			for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
-				printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
-				printf("[SSD %d] ADWD %lf\n", ssd, _SSD_list[ssd].ADWD);
-			}*/
+				printf("[SSD %d] storage %.2f  / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
+				printf("[SSD %d] Average ADWD %.2f \n", ssd, (_SSD_list[ssd].total_write_MB) / (_SSD_list[ssd].storage_capacity * _SSD_list[ssd].DWPD) / _SSD_list[ssd].running_days);
+			}
 			//printf("%lf\n", _VIDEO_SEGMENT_list[video_index].requested_bandwidth);
    			printf("video %d 를 저장할 만한 SSD가 없음\n", video_index);
-			//_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-			//_VIDEO_SEGMENT_list[video_index].is_alloc = false;
-		}
+		}*/
 	}
 	return placement_num;
 }
@@ -79,7 +79,9 @@ int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 		set<pair<double, int>, greater<pair<double, int>>> target_ssd_list_with_bandwidth_sort;
 		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
-				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
+				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth &&
+				((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= average_ADWD_limit) {
+				
 				double slope = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
 				//	/ (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
 				target_ssd_list_with_bandwidth_sort.insert(make_pair(slope, ssd_temp));
@@ -92,11 +94,11 @@ int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 			allocate(_SSD_list, _VIDEO_SEGMENT_list, video_index, ssd_index);
 			placement_num++;
 		}
-		else {
+		/*else {
 			printf("video %d 를 저장할 만한 SSD가 없음\n", video_index);
 			//_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 			//_VIDEO_SEGMENT_list[video_index].is_alloc = false;
-		}
+		}*/
 	}
 	return placement_num;
 }
@@ -112,7 +114,9 @@ int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _nu
 		vector<int> target_ssd_list;
 		for (int ssd_temp = 0; ssd_temp < _num_of_SSDs; ssd_temp++) {
 			if (!is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
-				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
+				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth &&
+				((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= average_ADWD_limit) {
+				
 				target_ssd_list.push_back(ssd_temp);
 			}
 		}
@@ -171,6 +175,8 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _video_ind
 	_VIDEO_SEGMENT_list[_video_index].is_alloc = true;
 
 	//220120
-	_SSD_list[_ssd_index].number_of_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
+	_SSD_list[_ssd_index].daily_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
 	_SSD_list[_ssd_index].ADWD += _VIDEO_SEGMENT_list[_video_index].size / (_SSD_list[_ssd_index].storage_capacity * _SSD_list[_ssd_index].DWPD);
+
+	_SSD_list[_ssd_index].total_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
 }

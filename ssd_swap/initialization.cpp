@@ -13,8 +13,8 @@
 #define MIN_SSD_BANDWIDTH 400 // for simulation
 
 double video_bandwidth_once_usage = 1.25; //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-int number_of_requast_per_second = 30000; // 1초에 30000번의 제공 요청이 클라이언트들에게서 온다고 가정.
-double size_of_video = 10; //세그먼트가 10초짜리라고 가정하면, 1MB/s x 10s = 10MB
+int number_of_requast_per_second = 30000; // 1초에 20000번의 제공 요청이 클라이언트들에게서 온다고 가정.
+double size_of_video = 6; //세그먼트가 6초짜리라고 가정하면, 1MB/s x 6s = 6MB
 
 int rand_cnt = 0;
 void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
@@ -32,10 +32,13 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
 
-		_SSD_list[ssd_index].ADWD = 0;
-		_SSD_list[ssd_index].number_of_write_MB = 0;
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].bandwidth_usage = 0;
+		_SSD_list[ssd_index].ADWD = 0;
+		_SSD_list[ssd_index].daily_write_MB = 0;
+
+		_SSD_list[ssd_index].total_write_MB = 0;
+		_SSD_list[ssd_index].running_days = 1; // 첫 날 = 1이니까
 
 		_SSD_list[ssd_index].node_hostname = "datanode" + to_string(ssd+1);
 	}
@@ -61,7 +64,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		/*double pop = vid_pop_shuffle.back();
 		vid_pop_shuffle.pop_back();*/
 		_VIDEO_SEGMENT_list[video_index].popularity = pop;
-		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * number_of_requast_per_second * video_bandwidth_once_usage; //220124
+		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) number_of_requast_per_second * video_bandwidth_once_usage; //220124
 
 		_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 		_VIDEO_SEGMENT_list[video_index].is_alloc = false;
@@ -96,7 +99,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 
 		if (video_index < _num_of_existed_videos) { // 기존에 있던 영상의 인기도, 밴드윗 갱신
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
-			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * number_of_requast_per_second * video_bandwidth_once_usage; //220124
+			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) number_of_requast_per_second * video_bandwidth_once_usage; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
 			if (SSD_index != NONE_ALLOC) {
 				_SSD_list[SSD_index].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
@@ -149,8 +152,10 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 
 				_SSD_list[ssd_index].storage_usage = stod(ssd_info[5]);
 				_SSD_list[ssd_index].bandwidth_usage = stod(ssd_info[6]);
-				_SSD_list[ssd_index].number_of_write_MB = stod(ssd_info[7]);
-				_SSD_list[ssd_index].ADWD = _SSD_list[ssd_index].number_of_write_MB / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD);
+				_SSD_list[ssd_index].daily_write_MB = stod(ssd_info[7]);
+				_SSD_list[ssd_index].ADWD = _SSD_list[ssd_index].daily_write_MB / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD);
+				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[8]);
+				_SSD_list[ssd_index].running_days = stod(ssd_info[9]);
 			}
 			cnt++;
 		}
