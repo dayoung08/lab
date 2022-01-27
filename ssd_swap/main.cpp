@@ -174,6 +174,7 @@ void simulation() {
 		printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_DAILY_STD_in_migration / num_of_SSDs));
 		//}
 	}
+	printf("비디오 총 갯수 %d\n", num_of_existed_videos);
 	delete[](SSD_list);
 	delete[](existed_VIDEO_SEGMENT_list);
 }
