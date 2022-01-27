@@ -52,7 +52,7 @@ struct VIDEO_SEGMENT {
 	string path;  // for hadoop file path
 
 	double size;
-	double bandwidth; // once
+	double once_bandwidth; // once
 
 	double requested_bandwidth;
 	double popularity;

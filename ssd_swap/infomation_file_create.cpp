@@ -83,7 +83,7 @@ void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEG
 			string line = "";
 			line += _existed_VIDEO_SEGMENT_list[video_index].path + "\t";
 			line += to_string(_existed_VIDEO_SEGMENT_list[video_index].size) + "\t";
-			line += to_string(_existed_VIDEO_SEGMENT_list[video_index].bandwidth) + "\t";
+			line += to_string(_existed_VIDEO_SEGMENT_list[video_index].once_bandwidth) + "\t";
 			line += to_string(_existed_VIDEO_SEGMENT_list[video_index].assigned_SSD);
 
 			if (vid != _num_of_existed_videos - 1) {

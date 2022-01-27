@@ -3,7 +3,7 @@
 #define NUM_OF_TIMEs 4 // for simulation
 
 int placement_method = 1; //2,3으로 바꾸면 비교스킴
-int migration_method = 2; // 2로 바꾸면 비교스킴
+int migration_method = 1; // 2로 바꾸면 비교스킴
 int main(int argc, char* argv[]) {
 	srand(SEED);
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
@@ -120,21 +120,14 @@ void simulation() {
 
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//cout << time << endl;
-			int* prev_assigned_SSD = new int[num_of_existed_videos];
-			for (int vid = 0; vid < num_of_existed_videos; vid++) {
-				prev_assigned_SSD[vid] = existed_VIDEO_SEGMENT_list[vid].assigned_SSD;
-			}
 			int num_of_new_videos = 5000;
 
 			//아래는 새로운 비디오 추가 과정
 			VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
 			update_new_video_for_simulation(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos, num_of_new_videos); // 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
-			placement(SSD_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_new_videos); // 새로 추가한 비디오를 할당함.
-
+			placement(SSD_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_new_videos); // 새로 추가한 비디오를 할당함
 			//비디오 migration
 			migration_num += migration(SSD_list, existed_VIDEO_SEGMENT_list, migration_method, num_of_SSDs);
-			//create_migration_infomation(SSD_list, existed_VIDEO_SEGMENT_list, num_of_existed_videos, prev_assigned_SSD); // 이동 정보 파일 생성
-			delete[] prev_assigned_SSD;
 
 			VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_existed_videos + num_of_new_videos];
 			copy(existed_VIDEO_SEGMENT_list, existed_VIDEO_SEGMENT_list + num_of_existed_videos, _VIDEO_SEGMENT_conbined_list);
@@ -144,7 +137,6 @@ void simulation() {
 			existed_VIDEO_SEGMENT_list = _VIDEO_SEGMENT_conbined_list;
 
 			num_of_existed_videos += num_of_new_videos; // 기존의 비디오 + 새로운 비디오 리스트를 합침
-
 		}
 
 		// 결과 출력 : SSD의 평균, 표준편차 ADWD 출력

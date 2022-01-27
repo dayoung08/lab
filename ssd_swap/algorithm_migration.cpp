@@ -73,12 +73,21 @@ int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 
 		//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
 		if (ADWD_after_list.empty()) {
-			//나라면 element 삭제하고 해당 SSD만 따로 어디에 모아두겠음.
-			for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
+			while (_SSD_list[from_ssd].bandwidth_usage <= _SSD_list[from_ssd].maximum_bandwidth) {
+				int curr_vid = (*_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
+				_SSD_list[from_ssd].bandwidth_usage -= _VIDEO_SEGMENT_list[curr_vid].requested_bandwidth;
+				_SSD_list[from_ssd].storage_usage -= _VIDEO_SEGMENT_list[curr_vid].size;
+				_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.erase(*_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.begin());
+				_VIDEO_SEGMENT_list[curr_vid].assigned_SSD = NONE_ALLOC;
+			}
+			update_infomation(_SSD_list, is_over_load, &bandwidth_usage_of_SSDs, _num_of_SSDs);
+			continue;
+			/*for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
 				printf("[SSD %d] storage %d / %d (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
 			}
-			exit(0);
+			exit(0);*/
+
 			//여기를 어떻게 할 지가 고민이야ㅠㅠ
 		}
 
@@ -166,11 +175,20 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 
 		//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
 		if (under_load_list.empty()) {
-			for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
+			while (_SSD_list[from_ssd].bandwidth_usage <= _SSD_list[from_ssd].maximum_bandwidth) {
+				int curr_vid = (*_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
+				_SSD_list[from_ssd].bandwidth_usage -= _VIDEO_SEGMENT_list[curr_vid].requested_bandwidth;
+				_SSD_list[from_ssd].storage_usage -= _VIDEO_SEGMENT_list[curr_vid].size;
+				_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.erase(*_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.begin());
+				_VIDEO_SEGMENT_list[curr_vid].assigned_SSD = NONE_ALLOC;
+			}
+			update_infomation(_SSD_list, is_over_load, &bandwidth_usage_of_SSDs, _num_of_SSDs);
+			continue;
+			/*for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 				printf("[SSD %d] %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
 				printf("[SSD %d] %d / %d (%.2f%%)\n\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
 			}
-			exit(0);
+			exit(0);*/
 			//여기를 어떻게 할 지가 고민이야ㅠㅠ
 		}
 
@@ -320,13 +338,14 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 
 
 	if (flag == FLAG_REALLOCATE && 
-		((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) > AVR_ADWD_LIMIT &&
+		((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) > AVR_ADWD_LIMIT &&
 		_method == MIGRATION_OURS) {
 		flag = FLAG_DENY;
 	}
 	else if (flag == FLAG_SWAP &&
-		((_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_from_ssd].size) / (_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) / _SSD_list[_from_ssd].running_days) <= AVR_ADWD_LIMIT &&
-		((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) <= AVR_ADWD_LIMIT) {
+		((_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_from_vid].size) / (_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) / _SSD_list[_from_ssd].running_days) > AVR_ADWD_LIMIT &&
+		((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) > AVR_ADWD_LIMIT &&
+		_method == MIGRATION_OURS) {
 		flag = FLAG_DENY;
 	}
 
