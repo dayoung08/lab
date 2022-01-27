@@ -45,9 +45,6 @@ void testbed_placement() {
 	int num_of_new_videos;
 	update_new_video_for_testbed(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos, num_of_new_videos);
 
-	placement(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_existed_videos, num_of_new_videos); // 새로 추가한 비디오를 할당함.
-	create_placement_infomation(SSD_list, new_VIDEO_SEGMENT_list, num_of_new_videos);
-	// 배치 정보 파일 생성
 	if (new_VIDEO_SEGMENT_list != NULL) {
 		int* prev_assigned_SSD = new int[num_of_existed_videos];
 		for (int vid = 0; vid < num_of_existed_videos; vid++) {
@@ -57,6 +54,9 @@ void testbed_placement() {
 		create_migration_infomation(SSD_list, existed_VIDEO_SEGMENT_list, num_of_existed_videos, prev_assigned_SSD); // 이동 정보 파일 생성
 	}
 
+	placement(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_existed_videos, num_of_new_videos); // 새로 추가한 비디오를 할당함.
+	create_placement_infomation(SSD_list, new_VIDEO_SEGMENT_list, num_of_new_videos);
+	// 배치 정보 파일 생성
 
 	VIDEO_SEGMENT* _VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_existed_videos + num_of_new_videos];
 	copy(existed_VIDEO_SEGMENT_list, existed_VIDEO_SEGMENT_list + num_of_existed_videos, _VIDEO_SEGMENT_list);
@@ -136,9 +136,9 @@ void simulation() {
 			VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
 			update_new_video_for_simulation(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos, num_of_new_videos); // 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 			//비디오 migration
+			migration_num += migration(SSD_list, existed_VIDEO_SEGMENT_list, migration_method, num_of_SSDs);
 			int placement_num = placement(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_existed_videos, num_of_new_videos);  // 새로 추가한 비디오를 할당함
 			printf("placement_num %d\n", placement_num);
-			migration_num += migration(SSD_list, existed_VIDEO_SEGMENT_list, migration_method, num_of_SSDs);
 
 			VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_existed_videos + num_of_new_videos];
 			copy(existed_VIDEO_SEGMENT_list, existed_VIDEO_SEGMENT_list + num_of_existed_videos, _VIDEO_SEGMENT_conbined_list);
