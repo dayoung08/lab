@@ -22,6 +22,9 @@ using namespace std;
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
+#define AVR_ADWD_LIMIT 1
+#define NUM_OF_REQUEST_PER_SEC 30000 // 1초에 20000번의 제공 요청이 클라이언트들에게서 온다고 가정.
+
 struct SSD {
 	int index;
 

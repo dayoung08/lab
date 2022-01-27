@@ -300,13 +300,16 @@ pair<pair<double, double>, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT*
 
 int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid) {
 	if (_to_vid != NONE_ALLOC && _to_ssd != NONE_ALLOC) {
-		if ( is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid) &&
-			( (_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth)) {
-			return FLAG_SWAP;
-		}
-		else if ( !is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid) &&
-			(_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth ) {
+		if ( !is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid) &&
+			(_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth &&
+			( (_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) <= AVR_ADWD_LIMIT ) {
 			return FLAG_REALLOCATE;
+		}
+		else if ( is_not_enough_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid) &&
+			(_SSD_list[_to_ssd].bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth &&
+			( (_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_from_ssd].size) / (_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) / _SSD_list[_from_ssd].running_days ) <= AVR_ADWD_LIMIT &&
+			( (_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_ssd].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) <= AVR_ADWD_LIMIT ) { 
+			return FLAG_SWAP;
 		}
 		else {
 			return FLAG_DENY;

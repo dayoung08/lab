@@ -13,7 +13,6 @@
 #define MIN_SSD_BANDWIDTH 400 // for simulation
 
 double video_bandwidth_once_usage = 1.25; //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-int number_of_requast_per_second = 30000; // 1초에 20000번의 제공 요청이 클라이언트들에게서 온다고 가정.
 double size_of_video = 6; //세그먼트가 6초짜리라고 가정하면, 1MB/s x 6s = 6MB
 
 int rand_cnt = 0;
@@ -64,7 +63,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		/*double pop = vid_pop_shuffle.back();
 		vid_pop_shuffle.pop_back();*/
 		_VIDEO_SEGMENT_list[video_index].popularity = pop;
-		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) number_of_requast_per_second * video_bandwidth_once_usage; //220124
+		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
 
 		_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 		_VIDEO_SEGMENT_list[video_index].is_alloc = false;
@@ -99,7 +98,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 
 		if (video_index < _num_of_existed_videos) { // 기존에 있던 영상의 인기도, 밴드윗 갱신
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
-			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) number_of_requast_per_second * video_bandwidth_once_usage; //220124
+			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
 			if (SSD_index != NONE_ALLOC) {
 				_SSD_list[SSD_index].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
@@ -111,7 +110,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size = size_of_video;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].bandwidth = video_bandwidth_once_usage;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].popularity = pop;
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * number_of_requast_per_second * video_bandwidth_once_usage; //220124
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].assigned_SSD = NONE_ALLOC;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_alloc = false;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].path = "/segment_" + to_string(video_index) + ".mp4";
@@ -192,7 +191,7 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 				//vid_pop_shuffle.pop_back();
 				double pop = vid_pop[video_index];
 				_VIDEO_SEGMENT_list[video_index].popularity = pop;
-				_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * number_of_requast_per_second * _VIDEO_SEGMENT_list[video_index].bandwidth;
+				_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * _VIDEO_SEGMENT_list[video_index].bandwidth;
 				if (!strcmp(video_info[3].c_str(), "NONE_ALLOC")) {
 					_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 					_VIDEO_SEGMENT_list[video_index].is_alloc = false;
@@ -244,7 +243,7 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 				//vid_pop_shuffle.pop_back();
 				double pop = vid_pop[video_index];
 				_new_VIDEO_SEGMENT_list[video_index].popularity = pop;
-				_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * number_of_requast_per_second * _new_VIDEO_SEGMENT_list[video_index].bandwidth;
+				_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * _new_VIDEO_SEGMENT_list[video_index].bandwidth;
 				_new_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 				_new_VIDEO_SEGMENT_list[video_index].is_alloc = false;
 				//여기부터 할당
@@ -271,7 +270,7 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 		vid_pop_shuffle.pop_back();*/
 
 		_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
-		_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * number_of_requast_per_second * video_bandwidth_once_usage; //220124
+		_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
 		int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
 		if (SSD_index != NONE_ALLOC) {
 			_SSD_list[SSD_index].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
