@@ -180,8 +180,8 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_
 		int curr_vid = (*_SSD_list[_ssd_index].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		_SSD_list[_ssd_index].bandwidth_usage += (_new_VIDEO_SEGMENT_list[_video_index].requested_bandwidth - _existed_VIDEO_SEGMENT_list[curr_vid].requested_bandwidth);
 		_SSD_list[_ssd_index].assigned_VIDEOs_low_bandwidth_first.erase(*_SSD_list[_ssd_index].assigned_VIDEOs_low_bandwidth_first.begin());
-		_new_VIDEO_SEGMENT_list[curr_vid].assigned_SSD = NONE_ALLOC;
-		_new_VIDEO_SEGMENT_list[curr_vid].is_alloc = false;
+		_existed_VIDEO_SEGMENT_list[curr_vid].assigned_SSD = NONE_ALLOC;
+		_existed_VIDEO_SEGMENT_list[curr_vid].is_alloc = false;
 	}
 	else {
 		_SSD_list[_ssd_index].storage_usage += _new_VIDEO_SEGMENT_list[_video_index].size;
