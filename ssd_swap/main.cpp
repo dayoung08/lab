@@ -2,8 +2,8 @@
 #define NUM_OF_DATEs 31  // for simulation
 #define NUM_OF_TIMEs 2 // for simulation
 
-int placement_method = 1; //2,3으로 바꾸면 비교스킴
-int migration_method = 1; // 2로 바꾸면 비교스킴
+int placement_method = 3; //2,3으로 바꾸면 비교스킴
+int migration_method = 2; // 2로 바꾸면 비교스킴
 int main(int argc, char* argv[]) {
 	srand(SEED);
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
@@ -107,14 +107,13 @@ void simulation() {
 		sum_for_AVG_in_placement += SSD_list[ssd].ADWD;
 		printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
-		//printf("[SSD %d] DWPD/WAF %.2f\n", ssd, SSD_list[ssd].DWPD);
 		printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 	}
 	for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
 		total_bandwidth_in_placement += SSD_list[ssd].bandwidth_usage;
 		sum_for_STD_in_placement += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_placement / num_of_SSDs), 2);
 	}
-	printf("[Placement] Total bandwidth usage %lf / %lf\n", total_bandwidth_in_placement, 37500.0f);
+	printf("[Placement] Total bandwidth usage %lf / %lf\n", total_bandwidth_in_placement, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC) );
 	printf("[Placement] 각 SSD의 Average ADWD %lf\n", (sum_for_AVG_in_placement / num_of_SSDs));
 	printf("[Placement] 각 SSD의 Standard deviation ADWD %lf\n", sqrt(sum_for_STD_in_placement / num_of_SSDs));
 	printf("1일차 완료\n");
@@ -161,7 +160,6 @@ void simulation() {
 			sum_for_DAILY_AVG_in_migration += average_ADWD;
 			//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 			//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
-			//printf("[SSD %d] DWPD/WAF %.2f\n", ssd, SSD_list[ssd].DWPD);
 			//printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 		}
 		for (int ssd = 0; ssd < num_of_SSDs; ssd++) {
@@ -169,7 +167,7 @@ void simulation() {
 			double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / day;
 			sum_for_DAILY_STD_in_migration += pow((average_ADWD - (sum_for_DAILY_AVG_in_migration / num_of_SSDs)), 2);
 		}
-		printf("현재 Total bandwidth usage %lf / %lf\n", total_bandwidth_in_migration, 37500.0f);
+		printf("현재 Total bandwidth usage %lf / %lf\n", total_bandwidth_in_migration, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC));
 		printf("각 SSD의 %d일 동안의 Average ADWD %lf\n", day, (sum_for_DAILY_AVG_in_migration / num_of_SSDs));
 		printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_DAILY_STD_in_migration / num_of_SSDs));
 		//}

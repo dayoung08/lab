@@ -5,15 +5,13 @@
 #define MAX_DWPD 150 //1.50  // for simulation
 #define MIN_DWPD 4   //0.04  // for simulation
 
-#define MAX_WAF 40 // 4.0  // for simulation
+#define MAX_WAF 32 // 3.2  // for simulation
 #define MIN_WAF 10 // 1.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
 //https://www.samsung.com/semiconductor/global.semi.static/Multi-stream_Cassandra_Whitepaper_Final-0.pdf 이건 1~3.2. 1이면 그냥 가비지 콜렉션으로 인한 쓰기 증폭이 없는것
 
 #define MAX_SSD_BANDWIDTH 5000 // for simulation
 #define MIN_SSD_BANDWIDTH 400 // for simulation
 
-double video_bandwidth_once_usage = 1.25; //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-double size_of_video = 10; //세그먼트가 10초짜리라고 가정하면, 1MB/s x 10s = 10MB
 int rand_cnt = 0;
 void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
@@ -55,14 +53,14 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		_VIDEO_SEGMENT_list[video_index].index = video_index;
-		_VIDEO_SEGMENT_list[video_index].size = size_of_video;
-		_VIDEO_SEGMENT_list[video_index].once_bandwidth = video_bandwidth_once_usage;
+		_VIDEO_SEGMENT_list[video_index].size = VIDEO_SIZE;
+		_VIDEO_SEGMENT_list[video_index].once_bandwidth = VIDEO_BANDWIDTH;
 
 		//double pop = vid_pop[video_index];
 		double pop = vid_pop_shuffle.back();
 		vid_pop_shuffle.pop_back();
 		_VIDEO_SEGMENT_list[video_index].popularity = pop;
-		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
+		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
 
 		_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 		_VIDEO_SEGMENT_list[video_index].is_alloc = false;
@@ -77,11 +75,13 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 }
 
 void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos) {
-	double* vid_pop = set_zipf_pop( _num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
+	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	std::mt19937 g(SEED + rand_cnt);
 	rand_cnt++;
-	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
+	vector<double>::iterator it = vid_pop_shuffle.begin() + _num_of_existed_videos;
+	std::shuffle(vid_pop_shuffle.begin(), it, g);
+	std::shuffle(it, vid_pop_shuffle.end(), g);
 
 	for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
@@ -97,7 +97,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 
 		if (video_index < _num_of_existed_videos) { // 기존에 있던 영상의 인기도, 밴드윗 갱신
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
-			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
+			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
 			if (SSD_index != NONE_ALLOC) {
 				_SSD_list[SSD_index].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
@@ -106,10 +106,10 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		}
 		else { // 새로운 영상
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].index = video_index;
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size = size_of_video;
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth = video_bandwidth_once_usage;
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size = VIDEO_SIZE;
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth = VIDEO_BANDWIDTH;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].popularity = pop;
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].assigned_SSD = NONE_ALLOC;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_alloc = false;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].path = "/segment_" + to_string(video_index) + ".mp4";
@@ -228,7 +228,9 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 				vid_pop_shuffle = vector<double>(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 				std::mt19937 g(SEED + rand_cnt);
 				rand_cnt++;
-				std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
+				vector<double>::iterator it = vid_pop_shuffle.begin() + _num_of_existed_videos;
+				std::shuffle(vid_pop_shuffle.begin(), it, g);
+				std::shuffle(it, vid_pop_shuffle.end(), g);
 			}
 			else {
 				int video_index = _num_of_existed_videos + cnt;
@@ -269,7 +271,7 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 		vid_pop_shuffle.pop_back();*/
 
 		_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
-		_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * video_bandwidth_once_usage; //220124
+		_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
 		int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
 		if (SSD_index != NONE_ALLOC) {
 			_SSD_list[SSD_index].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
