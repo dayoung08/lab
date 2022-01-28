@@ -34,6 +34,10 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_
 			double removed_bandwidth = 0; 
 			bool priority = true;
 			if (is_not_enough_storage_space(_SSD_list, _new_VIDEO_SEGMENT_list, ssd_temp, video_index)) {
+				if (_num_of_existed_videos == 0) {
+					continue;
+				}
+
 				int curr_vid = (*_SSD_list[ssd_temp].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				removed_bandwidth = _existed_VIDEO_SEGMENT_list[curr_vid].requested_bandwidth;
 				priority = false;

@@ -2,7 +2,7 @@
 #define NUM_OF_DATEs 31  // for simulation
 #define NUM_OF_TIMEs 2 // for simulation
 
-int placement_method = 3; //2,3으로 바꾸면 비교스킴
+int placement_method = 1; //2,3으로 바꾸면 비교스킴
 int migration_method = 1; // 2로 바꾸면 비교스킴
 int main(int argc, char* argv[]) {
 	srand(SEED);
@@ -87,8 +87,8 @@ void testbed_migration() {
 }
 
 void simulation() {
-	int num_of_SSDs = 20;
-	int num_of_existed_videos = 1000000;
+	int num_of_SSDs = 25;
+	int num_of_existed_videos = 2000000;
 
 	SSD* SSD_list = new SSD[num_of_SSDs];
 	VIDEO_SEGMENT* existed_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_existed_videos];
@@ -132,7 +132,7 @@ void simulation() {
 
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//cout << time << endl;
-			int num_of_new_videos = 50000;
+			int num_of_new_videos = 100000;
 
 			//아래는 새로운 비디오 추가 과정
 			VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
