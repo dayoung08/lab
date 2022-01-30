@@ -80,7 +80,6 @@ int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 				_SSD_list[from_ssd].bandwidth_usage -= _VIDEO_SEGMENT_list[curr_vid].requested_bandwidth;
 				_SSD_list[from_ssd].storage_usage -= _VIDEO_SEGMENT_list[curr_vid].size;
 				_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.erase(*_SSD_list[from_ssd].assigned_VIDEOs_low_bandwidth_first.begin());
-
 				_VIDEO_SEGMENT_list[curr_vid].assigned_SSD = NONE_ALLOC;
 			}
 			update_infomation(_SSD_list, is_over_load, &bandwidth_usage_of_SSDs, _num_of_SSDs);
@@ -355,7 +354,7 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 		flag = FLAG_REALLOCATE;
 	}
 
-
+	//만약 AVR_ADWD_LIMIT를 지정할 경우 사용되는 IF문.
 	if (flag == FLAG_REALLOCATE && 
 		((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size) / (_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) / _SSD_list[_to_ssd].running_days) > AVR_ADWD_LIMIT &&
 		_method == MIGRATION_OURS) {

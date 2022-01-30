@@ -88,7 +88,7 @@ void testbed_migration() {
 
 void simulation() {
 	int num_of_SSDs = 25;
-	int num_of_videos = 500000;
+	int num_of_videos = 1000000;
 
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
