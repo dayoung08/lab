@@ -12,6 +12,7 @@ using namespace std;
 //#define INFINITY 987654321
 
 #define NONE_ALLOC -1
+#define VIRTUAL_SSD 0
 
 #define PLACEMENT_OURS 1
 #define PLACEMENT_BANDWIDTH_AWARE 2
@@ -22,10 +23,10 @@ using namespace std;
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
-#define AVR_ADWD_LIMIT 1.0f
-#define NUM_OF_REQUEST_PER_SEC 30000 // 1초에 20000번의 제공 요청이 클라이언트들에게서 온다고 가정.
+#define AVR_ADWD_LIMIT 100.0f
+#define NUM_OF_REQUEST_PER_SEC 40000 // 1초에 40000번의 제공 요청이 클라이언트들에게서 온다고 가정.
 #define VIDEO_BANDWIDTH 1.25f //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-#define VIDEO_SIZE 7.5f //세그먼트가 6초짜리라고 가정하면, 1.25MB/s x 6s = 7.5MB
+#define VIDEO_SIZE 10.0f //세그먼트가 8초짜리라고 가정하면, 1.25MB/s x 8s = 10.0MB
 
 struct SSD {
 	int index;
@@ -78,11 +79,11 @@ double* set_zipf_pop(int length, double alpha, double beta);
 bool is_not_enough_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid);
 string* split(string str, char Delimiter);
 
-int placement(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos);
-	int placement_myAlgorithm(SSD * _SSD_list, VIDEO_SEGMENT * _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT * _new_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos);
+int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_videos);
+int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos);
 int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos);
 int placement_random(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos);
-void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _method, int _ssd_index, int _video_index);
+void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _ssd_index, int _video_index);
 
 int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs);
 int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs);

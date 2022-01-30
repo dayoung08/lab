@@ -52,7 +52,7 @@ void create_migration_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_S
 void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos) {
 	ofstream fout_ssd("SSD_list.in", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
 	if (fout_ssd.is_open()) {
-		for (int ssd = 0; ssd < _num_of_SSDs; ssd++) {
+		for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 			int ssd_index = ssd;
 
 			string line = "";
