@@ -1,0 +1,444 @@
+초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것
+
+[PLACEMENT START]
+
+[SSD 1] bandwidth 1251.99 / 1252.00 (100.00%)
+[SSD 1] storage 916780.00/ 1000000.00 (91.68%)
+[SSD 1] ADWD 1.44
+[SSD 2] bandwidth 997.69 / 2670.00 (37.37%)
+[SSD 2] storage 357140.00/ 1000000.00 (35.71%)
+[SSD 2] ADWD 1.00
+[SSD 3] bandwidth 621.99 / 622.00 (100.00%)
+[SSD 3] storage 379590.00/ 1000000.00 (37.96%)
+[SSD 3] ADWD 8.54
+[SSD 4] bandwidth 2936.00 / 2936.00 (100.00%)
+[SSD 4] storage 142990.00/ 2000000.00 (7.15%)
+[SSD 4] ADWD 3.31
+[SSD 5] bandwidth 1872.48 / 4878.00 (38.39%)
+[SSD 5] storage 466660.00/ 2000000.00 (23.33%)
+[SSD 5] ADWD 1.00
+[SSD 6] bandwidth 3593.69 / 4691.00 (76.61%)
+[SSD 6] storage 451690.00/ 1000000.00 (45.17%)
+[SSD 6] ADWD 3.37
+[SSD 7] bandwidth 950.31 / 1595.00 (59.58%)
+[SSD 7] storage 500000.00/ 500000.00 (100.00%)
+[SSD 7] ADWD 2.35
+[SSD 8] bandwidth 1191.85 / 2236.00 (53.30%)
+[SSD 8] storage 118910.00/ 500000.00 (23.78%)
+[SSD 8] ADWD 1.00
+[SSD 9] bandwidth 645.57 / 1098.00 (58.79%)
+[SSD 9] storage 371420.00/ 1000000.00 (37.14%)
+[SSD 9] ADWD 1.00
+[SSD 10] bandwidth 880.13 / 1824.00 (48.25%)
+[SSD 10] storage 127020.00/ 500000.00 (25.40%)
+[SSD 10] ADWD 1.00
+[SSD 11] bandwidth 629.99 / 630.00 (100.00%)
+[SSD 11] storage 467590.00/ 1000000.00 (46.76%)
+[SSD 11] ADWD 1.24
+[SSD 12] bandwidth 1579.05 / 4375.00 (36.09%)
+[SSD 12] storage 482750.00/ 1000000.00 (48.27%)
+[SSD 12] ADWD 1.00
+[SSD 13] bandwidth 3454.00 / 3454.00 (100.00%)
+[SSD 13] storage 2676180.00/ 4000000.00 (66.90%)
+[SSD 13] ADWD 2.06
+[SSD 14] bandwidth 1290.16 / 1487.00 (86.76%)
+[SSD 14] storage 1000000.00/ 1000000.00 (100.00%)
+[SSD 14] ADWD 4.29
+[SSD 15] bandwidth 1718.65 / 4457.00 (38.56%)
+[SSD 15] storage 866660.00/ 2000000.00 (43.33%)
+[SSD 15] ADWD 1.00
+[SSD 16] bandwidth 2048.79 / 4274.00 (47.94%)
+[SSD 16] storage 250000.00/ 2000000.00 (12.50%)
+[SSD 16] ADWD 1.00
+[SSD 17] bandwidth 1184.66 / 2962.00 (40.00%)
+[SSD 17] storage 462060.00/ 1000000.00 (46.21%)
+[SSD 17] ADWD 1.00
+[SSD 18] bandwidth 430.00 / 430.00 (100.00%)
+[SSD 18] storage 303450.00/ 4000000.00 (7.59%)
+[SSD 18] ADWD 3.16
+[SSD 19] bandwidth 2360.00 / 2360.00 (100.00%)
+[SSD 19] storage 7590.00/ 500000.00 (1.52%)
+[SSD 19] ADWD 1.15
+[SSD 20] bandwidth 1024.00 / 1024.00 (100.00%)
+[SSD 20] storage 794380.00/ 4000000.00 (19.86%)
+[SSD 20] ADWD 0.41
+[SSD 21] bandwidth 2691.26 / 4635.00 (58.06%)
+[SSD 21] storage 207350.00/ 500000.00 (41.47%)
+[SSD 21] ADWD 1.00
+[SSD 22] bandwidth 602.99 / 603.00 (100.00%)
+[SSD 22] storage 461840.00/ 2000000.00 (23.09%)
+[SSD 22] ADWD 0.49
+[SSD 23] bandwidth 1156.79 / 2699.00 (42.86%)
+[SSD 23] storage 250000.00/ 2000000.00 (12.50%)
+[SSD 23] ADWD 1.00
+[SSD 24] bandwidth 1471.17 / 3438.00 (42.79%)
+[SSD 24] storage 661530.00/ 2000000.00 (33.08%)
+[SSD 24] ADWD 1.00
+[SSD 25] bandwidth 4317.00 / 4317.00 (100.00%)
+[SSD 25] storage 72230.00/ 1000000.00 (7.22%)
+[SSD 25] ADWD 1.93
+[SSD 26] bandwidth 4394.00 / 4394.00 (100.00%)
+[SSD 26] storage 419980.00/ 500000.00 (84.00%)
+[SSD 26] ADWD 5.25
+[SSD 27] bandwidth 775.47 / 1101.00 (70.43%)
+[SSD 27] storage 500000.00/ 500000.00 (100.00%)
+[SSD 27] ADWD 1.60
+[SSD 28] bandwidth 960.17 / 1600.00 (60.01%)
+[SSD 28] storage 500000.00/ 500000.00 (100.00%)
+[SSD 28] ADWD 2.99
+[SSD 29] bandwidth 1709.06 / 3994.00 (42.79%)
+[SSD 29] storage 284210.00/ 1000000.00 (28.42%)
+[SSD 29] ADWD 1.00
+[SSD 30] bandwidth 1261.08 / 2227.00 (56.63%)
+[SSD 30] storage 500000.00/ 500000.00 (100.00%)
+[SSD 30] ADWD 2.78
+placement_num 1500000
+[Placement] Total bandwidth usage 50000.000000 / 50000.000000
+[Placement] 각 SSD의 Average ADWD 1.978339
+[Placement] 각 SSD의 Standard deviation ADWD 1.680898
+
+[MIGRATION START]
+
+migration_num 115576
+migration_num 65425
+migration_num 45024
+migration_num 40104
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 1일 동안의 Average ADWD 0.718198 / 각 SSD의 그 날의 Average ADWD 0.229645
+각 SSD의 1일 동안의 Standard deviation ADWD 0.936915 / 각 SSD의 그 날의 Standard deviation ADWD 0.623743 
+
+migration_num 38348
+migration_num 34323
+migration_num 29593
+migration_num 28773
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 2일 동안의 Average ADWD 0.459690 / 각 SSD의 그 날의 Average ADWD 0.153268
+각 SSD의 2일 동안의 Standard deviation ADWD 0.638905 / 각 SSD의 그 날의 Standard deviation ADWD 0.451590 
+
+migration_num 24990
+migration_num 25792
+migration_num 24691
+migration_num 23749
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 3일 동안의 Average ADWD 0.342321 / 각 SSD의 그 날의 Average ADWD 0.066270
+각 SSD의 3일 동안의 Standard deviation ADWD 0.477625 / 각 SSD의 그 날의 Standard deviation ADWD 0.144437 
+
+migration_num 22940
+migration_num 22515
+migration_num 22045
+migration_num 21679
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 4일 동안의 Average ADWD 0.279271 / 각 SSD의 그 날의 Average ADWD 0.060473
+각 SSD의 4일 동안의 Standard deviation ADWD 0.395105 / 각 SSD의 그 날의 Standard deviation ADWD 0.127476 
+
+migration_num 22188
+migration_num 19176
+migration_num 20575
+migration_num 20349
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 5일 동안의 Average ADWD 0.239410 / 각 SSD의 그 날의 Average ADWD 0.064267
+각 SSD의 5일 동안의 Standard deviation ADWD 0.341048 / 각 SSD의 그 날의 Standard deviation ADWD 0.152232 
+
+migration_num 20122
+migration_num 23413
+migration_num 23365
+migration_num 23151
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 6일 동안의 Average ADWD 0.213375 / 각 SSD의 그 날의 Average ADWD 0.062657
+각 SSD의 6일 동안의 Standard deviation ADWD 0.306616 / 각 SSD의 그 날의 Standard deviation ADWD 0.142397 
+
+migration_num 19559
+migration_num 19415
+migration_num 19357
+migration_num 19149
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 7일 동안의 Average ADWD 0.196111 / 각 SSD의 그 날의 Average ADWD 0.060642
+각 SSD의 7일 동안의 Standard deviation ADWD 0.295769 / 각 SSD의 그 날의 Standard deviation ADWD 0.173390 
+
+migration_num 22669
+migration_num 21086
+migration_num 22461
+migration_num 22477
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 8일 동안의 Average ADWD 0.179023 / 각 SSD의 그 날의 Average ADWD 0.049172
+각 SSD의 8일 동안의 Standard deviation ADWD 0.265555 / 각 SSD의 그 날의 Standard deviation ADWD 0.127029 
+
+migration_num 22250
+migration_num 22186
+migration_num 22122
+migration_num 22044
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 9일 동안의 Average ADWD 0.165784 / 각 SSD의 그 날의 Average ADWD 0.099055
+각 SSD의 9일 동안의 Standard deviation ADWD 0.246634 / 각 SSD의 그 날의 Standard deviation ADWD 0.275991 
+
+migration_num 20872
+migration_num 22133
+migration_num 24303
+migration_num 21913
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 10일 동안의 Average ADWD 0.161059 / 각 SSD의 그 날의 Average ADWD 0.174786
+각 SSD의 10일 동안의 Standard deviation ADWD 0.250797 / 각 SSD의 그 날의 Standard deviation ADWD 0.719528 
+
+migration_num 23684
+migration_num 26163
+migration_num 24624
+migration_num 25996
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 11일 동안의 Average ADWD 0.154172 / 각 SSD의 그 날의 Average ADWD 0.178395
+각 SSD의 11일 동안의 Standard deviation ADWD 0.244680 / 각 SSD의 그 날의 Standard deviation ADWD 0.644336 
+
+migration_num 25822
+migration_num 26020
+migration_num 25733
+migration_num 25938
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 12일 동안의 Average ADWD 0.147612 / 각 SSD의 그 날의 Average ADWD 0.105969
+각 SSD의 12일 동안의 Standard deviation ADWD 0.232922 / 각 SSD의 그 날의 Standard deviation ADWD 0.204057 
+
+migration_num 22831
+migration_num 25704
+migration_num 25761
+migration_num 25744
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 13일 동안의 Average ADWD 0.143870 / 각 SSD의 그 날의 Average ADWD 0.055989
+각 SSD의 13일 동안의 Standard deviation ADWD 0.230978 / 각 SSD의 그 날의 Standard deviation ADWD 0.133712 
+
+migration_num 26947
+migration_num 23714
+migration_num 27131
+migration_num 25308
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 14일 동안의 Average ADWD 0.140785 / 각 SSD의 그 날의 Average ADWD 0.057184
+각 SSD의 14일 동안의 Standard deviation ADWD 0.230843 / 각 SSD의 그 날의 Standard deviation ADWD 0.132589 
+
+migration_num 25714
+migration_num 26945
+migration_num 24790
+migration_num 26065
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 15일 동안의 Average ADWD 0.137902 / 각 SSD의 그 날의 Average ADWD 0.074805
+각 SSD의 15일 동안의 Standard deviation ADWD 0.227644 / 각 SSD의 그 날의 Standard deviation ADWD 0.164505 
+
+migration_num 27097
+migration_num 26953
+migration_num 26972
+migration_num 26888
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 16일 동안의 Average ADWD 0.133322 / 각 SSD의 그 날의 Average ADWD 0.056379
+각 SSD의 16일 동안의 Standard deviation ADWD 0.218686 / 각 SSD의 그 날의 Standard deviation ADWD 0.130325 
+
+migration_num 26976
+migration_num 24310
+migration_num 26917
+migration_num 25372
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 17일 동안의 Average ADWD 0.134847 / 각 SSD의 그 날의 Average ADWD 0.431311
+각 SSD의 17일 동안의 Standard deviation ADWD 0.232254 / 각 SSD의 그 날의 Standard deviation ADWD 2.040935 
+
+migration_num 26972
+migration_num 25399
+migration_num 26882
+migration_num 26940
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 18일 동안의 Average ADWD 0.131005 / 각 SSD의 그 날의 Average ADWD 0.060683
+각 SSD의 18일 동안의 Standard deviation ADWD 0.223673 / 각 SSD의 그 날의 Standard deviation ADWD 0.130900 
+
+migration_num 26722
+migration_num 26910
+migration_num 27253
+migration_num 27646
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 19일 동안의 Average ADWD 0.129507 / 각 SSD의 그 날의 Average ADWD 0.103109
+각 SSD의 19일 동안의 Standard deviation ADWD 0.221713 / 각 SSD의 그 날의 Standard deviation ADWD 0.231512 
+
+migration_num 26941
+migration_num 24388
+migration_num 26705
+migration_num 24265
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 20일 동안의 Average ADWD 0.126813 / 각 SSD의 그 날의 Average ADWD 0.068252
+각 SSD의 20일 동안의 Standard deviation ADWD 0.216495 / 각 SSD의 그 날의 Standard deviation ADWD 0.131422 
+
+migration_num 27463
+migration_num 27526
+migration_num 24745
+migration_num 27682
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 21일 동안의 Average ADWD 0.125500 / 각 SSD의 그 날의 Average ADWD 0.100691
+각 SSD의 21일 동안의 Standard deviation ADWD 0.216332 / 각 SSD의 그 날의 Standard deviation ADWD 0.224212 
+
+migration_num 27511
+migration_num 28085
+migration_num 27447
+migration_num 28092
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 22일 동안의 Average ADWD 0.124087 / 각 SSD의 그 날의 Average ADWD 0.090019
+각 SSD의 22일 동안의 Standard deviation ADWD 0.215768 / 각 SSD의 그 날의 Standard deviation ADWD 0.206938 
+
+migration_num 24652
+migration_num 27680
+migration_num 28756
+migration_num 27899
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 23일 동안의 Average ADWD 0.123478 / 각 SSD의 그 날의 Average ADWD 0.094186
+각 SSD의 23일 동안의 Standard deviation ADWD 0.215720 / 각 SSD의 그 날의 Standard deviation ADWD 0.212016 
+
+migration_num 27502
+migration_num 28183
+migration_num 28695
+migration_num 28836
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 24일 동안의 Average ADWD 0.122261 / 각 SSD의 그 날의 Average ADWD 0.120724
+각 SSD의 24일 동안의 Standard deviation ADWD 0.214555 / 각 SSD의 그 날의 Standard deviation ADWD 0.245912 
+
+migration_num 28722
+migration_num 28782
+migration_num 28739
+migration_num 28682
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 25일 동안의 Average ADWD 0.121538 / 각 SSD의 그 날의 Average ADWD 0.104849
+각 SSD의 25일 동안의 Standard deviation ADWD 0.214355 / 각 SSD의 그 날의 Standard deviation ADWD 0.225668 
+
+migration_num 28838
+migration_num 28859
+migration_num 28867
+migration_num 28748
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 26일 동안의 Average ADWD 0.121073 / 각 SSD의 그 날의 Average ADWD 0.094771
+각 SSD의 26일 동안의 Standard deviation ADWD 0.214338 / 각 SSD의 그 날의 Standard deviation ADWD 0.210398 
+
+migration_num 28702
+migration_num 28675
+migration_num 26596
+migration_num 29227
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 27일 동안의 Average ADWD 0.120375 / 각 SSD의 그 날의 Average ADWD 0.105428
+각 SSD의 27일 동안의 Standard deviation ADWD 0.214532 / 각 SSD의 그 날의 Standard deviation ADWD 0.228544 
+
+migration_num 28840
+migration_num 29589
+migration_num 28774
+migration_num 28661
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 28일 동안의 Average ADWD 0.119993 / 각 SSD의 그 날의 Average ADWD 0.140963
+각 SSD의 28일 동안의 Standard deviation ADWD 0.214795 / 각 SSD의 그 날의 Standard deviation ADWD 0.318075 
+
+migration_num 29694
+migration_num 30101
+migration_num 29853
+migration_num 28753
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 29일 동안의 Average ADWD 0.119817 / 각 SSD의 그 날의 Average ADWD 0.102199
+각 SSD의 29일 동안의 Standard deviation ADWD 0.215094 / 각 SSD의 그 날의 Standard deviation ADWD 0.234610 
+
+migration_num 29757
+migration_num 29720
+migration_num 31450
+migration_num 32073
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 30일 동안의 Average ADWD 0.119220 / 각 SSD의 그 날의 Average ADWD 0.104483
+각 SSD의 30일 동안의 Standard deviation ADWD 0.215137 / 각 SSD의 그 날의 Standard deviation ADWD 0.221896 
+
+migration_num 27634
+migration_num 31641
+migration_num 32076
+migration_num 29202
+현재 Total bandwidth usage 50000.000000 / 50000.000000
+각 SSD의 31일 동안의 Average ADWD 0.118811 / 각 SSD의 그 날의 Average ADWD 0.092346
+각 SSD의 31일 동안의 Standard deviation ADWD 0.215003 / 각 SSD의 그 날의 Standard deviation ADWD 0.206407 
+
+저장된 비디오 총 갯수 2430000/2430000
+저장된 비디오의 Total requested bandwidth 50000.000000 / 50000.000000
+[SSD 1] bandwidth 1038.09 / 1252.00 (82.91%)
+[SSD 1] storage 532230.00/ 1000000.00 (53.22%)
+[SSD 1] ADWD 0.00
+[SSD 2] bandwidth 2027.84 / 2670.00 (75.95%)
+[SSD 2] storage 1000000.00/ 1000000.00 (100.00%)
+[SSD 2] ADWD 0.00
+[SSD 3] bandwidth 531.76 / 622.00 (85.49%)
+[SSD 3] storage 258770.00/ 1000000.00 (25.88%)
+[SSD 3] ADWD 0.00
+[SSD 4] bandwidth 2483.91 / 2936.00 (84.60%)
+[SSD 4] storage 1181070.00/ 2000000.00 (59.05%)
+[SSD 4] ADWD 0.00
+[SSD 5] bandwidth 4116.25 / 4878.00 (84.38%)
+[SSD 5] storage 2000000.00/ 2000000.00 (100.00%)
+[SSD 5] ADWD 0.03
+[SSD 6] bandwidth 1958.23 / 4691.00 (41.74%)
+[SSD 6] storage 1000000.00/ 1000000.00 (100.00%)
+[SSD 6] ADWD 0.27
+[SSD 7] bandwidth 1007.63 / 1595.00 (63.17%)
+[SSD 7] storage 499810.00/ 500000.00 (99.96%)
+[SSD 7] ADWD 0.00
+[SSD 8] bandwidth 979.77 / 2236.00 (43.82%)
+[SSD 8] storage 500000.00/ 500000.00 (100.00%)
+[SSD 8] ADWD 0.05
+[SSD 9] bandwidth 743.62 / 1098.00 (67.72%)
+[SSD 9] storage 370120.00/ 1000000.00 (37.01%)
+[SSD 9] ADWD 0.00
+[SSD 10] bandwidth 996.03 / 1824.00 (54.61%)
+[SSD 10] storage 500000.00/ 500000.00 (100.00%)
+[SSD 10] ADWD 0.04
+[SSD 11] bandwidth 530.07 / 630.00 (84.14%)
+[SSD 11] storage 265610.00/ 1000000.00 (26.56%)
+[SSD 11] ADWD 0.00
+[SSD 12] bandwidth 1994.24 / 4375.00 (45.58%)
+[SSD 12] storage 1000000.00/ 1000000.00 (100.00%)
+[SSD 12] ADWD 0.05
+[SSD 13] bandwidth 3097.46 / 3454.00 (89.68%)
+[SSD 13] storage 1534240.00/ 4000000.00 (38.36%)
+[SSD 13] ADWD 0.00
+[SSD 14] bandwidth 1263.20 / 1487.00 (84.95%)
+[SSD 14] storage 631010.00/ 1000000.00 (63.10%)
+[SSD 14] ADWD 0.00
+[SSD 15] bandwidth 4044.41 / 4457.00 (90.74%)
+[SSD 15] storage 1907740.00/ 2000000.00 (95.39%)
+[SSD 15] ADWD 0.00
+[SSD 16] bandwidth 3709.65 / 4274.00 (86.80%)
+[SSD 16] storage 1782200.00/ 2000000.00 (89.11%)
+[SSD 16] ADWD 0.00
+[SSD 17] bandwidth 2263.36 / 2962.00 (76.41%)
+[SSD 17] storage 1000000.00/ 1000000.00 (100.00%)
+[SSD 17] ADWD 0.02
+[SSD 18] bandwidth 360.61 / 430.00 (83.86%)
+[SSD 18] storage 180690.00/ 4000000.00 (4.52%)
+[SSD 18] ADWD 0.00
+[SSD 19] bandwidth 992.47 / 2360.00 (42.05%)
+[SSD 19] storage 500000.00/ 500000.00 (100.00%)
+[SSD 19] ADWD 0.98
+[SSD 20] bandwidth 870.37 / 1024.00 (85.00%)
+[SSD 20] storage 435250.00/ 4000000.00 (10.88%)
+[SSD 20] ADWD 0.00
+[SSD 21] bandwidth 1276.46 / 4635.00 (27.54%)
+[SSD 21] storage 500000.00/ 500000.00 (100.00%)
+[SSD 21] ADWD 0.20
+[SSD 22] bandwidth 517.24 / 603.00 (85.78%)
+[SSD 22] storage 253870.00/ 2000000.00 (12.69%)
+[SSD 22] ADWD 0.00
+[SSD 23] bandwidth 2286.87 / 2699.00 (84.73%)
+[SSD 23] storage 1097630.00/ 2000000.00 (54.88%)
+[SSD 23] ADWD 0.00
+[SSD 24] bandwidth 2791.09 / 3438.00 (81.18%)
+[SSD 24] storage 1431060.00/ 2000000.00 (71.55%)
+[SSD 24] ADWD 0.11
+[SSD 25] bandwidth 1985.06 / 4317.00 (45.98%)
+[SSD 25] storage 1000000.00/ 1000000.00 (100.00%)
+[SSD 25] ADWD 0.49
+[SSD 26] bandwidth 1035.51 / 4394.00 (23.57%)
+[SSD 26] storage 500000.00/ 500000.00 (100.00%)
+[SSD 26] ADWD 0.44
+[SSD 27] bandwidth 860.69 / 1101.00 (78.17%)
+[SSD 27] storage 438800.00/ 500000.00 (87.76%)
+[SSD 27] ADWD 0.00
+[SSD 28] bandwidth 1077.88 / 1600.00 (67.37%)
+[SSD 28] storage 499900.00/ 500000.00 (99.98%)
+[SSD 28] ADWD 0.00
+[SSD 29] bandwidth 2140.48 / 3994.00 (53.59%)
+[SSD 29] storage 1000000.00/ 1000000.00 (100.00%)
+[SSD 29] ADWD 0.05
+[SSD 30] bandwidth 1019.75 / 2227.00 (45.79%)
+[SSD 30] storage 500000.00/ 500000.00 (100.00%)
+[SSD 30] ADWD 0.03
+
+[END]
+
