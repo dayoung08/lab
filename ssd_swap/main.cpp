@@ -4,12 +4,46 @@
 
 int placement_method = 1; //2,3으로 바꾸면 비교스킴
 int migration_method = 1; // 2로 바꾸면 비교스킴
+int num_of_SSDs = 30;
+int num_of_videos = 1500000;// 50만, 10만, 15만, 20만, 25만, 30만
+int num_of_new_videos = 5000; //2500, 5000, 7500, 10000, 12500, 15000
+
+int main(int argc, char* argv[]) {
+	srand(SEED);
+	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
+
+	switch (argc)
+	{
+	case 1:
+		simulation();
+		break;
+	case 2:
+		if (!strcmp(argv[1], "placement")) {
+			testbed_placement();
+		}
+		else if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
+			testbed_migration();
+		}
+		else
+			printf("argv[1] command가 올바르지 않습니다. 다시 실행해 주세요.\n");
+		break;
+	case 6:
+		placement_method = stoi(argv[1]);
+		migration_method = stoi(argv[2]);
+		num_of_SSDs = stoi(argv[3]);
+		num_of_videos = stoi(argv[4]);
+		num_of_new_videos = stoi(argv[5]);
+		simulation();
+		break;
+	default:
+		printf("argc 갯수는 1이나, 2 혹은 6이어야 합니다. 다시 실행해 주세요.\n");
+		break;
+	}
+	printf("\n[END]\n\n");
+	return 0;
+}
 
 void simulation() {
-	int num_of_SSDs = 30;
-	int num_of_videos = 1500000;// 50만, 10만, 15만, 20만, 25만, 30만
-	int num_of_new_videos = 5000; //2500, 5000, 7500, 10000, 12500, 15000
-
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
 
@@ -168,32 +202,3 @@ void testbed_migration() {
 	create_migration_infomation(SSD_list, existed_VIDEO_SEGMENT_list, num_of_existed_videos, prev_assigned_SSD); // 이동 정보 파일 생성
 }
 
-int main(int argc, char* argv[]) {
-	srand(SEED);
-	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
-
-	switch (argc)
-	{
-	case 1:
-		simulation();
-		break;
-	case 2:
-		if (!strcmp(argv[1], "simulation")) {
-			simulation();
-		}
-		else if (!strcmp(argv[1], "placement")) {
-			testbed_placement();
-		}
-		else if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
-			testbed_migration();
-		}
-		else
-			printf("argv[1] command가 올바르지 않습니다. 다시 실행해 주세요.\n");
-		break;
-	default:
-		printf("argc 갯수는 1이나 2여야 합니다. 다시 실행해 주세요.\n");
-		break;
-	}
-	printf("\n[END]\n\n");
-	return 0;
-}
