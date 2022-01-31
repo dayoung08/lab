@@ -350,7 +350,7 @@ pair<pair<double, double>, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT*
 		int _to_vid = (*_SSD_list[_to_ssd].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		bt_difference = (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth);
 		ADWD_from = _VIDEO_SEGMENT_list[_to_vid].size / (_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD);
-		AVR_ADWD_from = ((_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size) / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity)) / _SSD_list[_from_ssd].running_days;
+		AVR_ADWD_from = ((_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size) / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity)) / _SSD_list[_from_ssd].running_days;
 		write_MB_from = _VIDEO_SEGMENT_list[_to_vid].size;
 	}
 	else {
