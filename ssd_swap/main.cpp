@@ -2,13 +2,13 @@
 #define NUM_OF_DATEs 31  // for simulation
 #define NUM_OF_TIMEs 4 // for simulation
 
-int placement_method = 1; //2,3으로 바꾸면 비교스킴
+int placement_method = 2; //2,3으로 바꾸면 비교스킴
 int migration_method = 1; // 2로 바꾸면 비교스킴
 
 void simulation() {
 	int num_of_SSDs = 30;
-	int num_of_videos = 2000000;
-	int num_of_new_videos = 5000;
+	int num_of_videos = 1500000;// 50만, 10만, 15만, 20만, 25만, 30만
+	int num_of_new_videos = 15000; //2500, 5000, 7500, 10000, 12500, 15000
 
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
@@ -67,12 +67,15 @@ void simulation() {
 		// 결과 출력 : SSD의 평균, 표준편차 ADWD 출력
 		//if (day == 1 || day == 7 || day == 15 || day == 30) {
 			//printf("[DAY%d] Average migration number %lf \n", day, prev_migration_num);
+		double sum_for_AVG_in_migration = 0;
+		double sum_for_STD_in_migration = 0;
 		double sum_for_DAILY_AVG_in_migration = 0;
 		double sum_for_DAILY_STD_in_migration = 0;
 		double total_bandwidth_in_migration = 0;
 		for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 			double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / SSD_list[ssd].running_days;
 			sum_for_DAILY_AVG_in_migration += average_ADWD;
+			sum_for_AVG_in_migration += SSD_list[ssd].ADWD;
 			//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 			//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
 			//printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
@@ -81,10 +84,11 @@ void simulation() {
 			total_bandwidth_in_migration += SSD_list[ssd].bandwidth_usage;
 			double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / SSD_list[ssd].running_days;
 			sum_for_DAILY_STD_in_migration += pow((average_ADWD - (sum_for_DAILY_AVG_in_migration / num_of_SSDs)), 2);
+			sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 		}
 		printf("현재 Total bandwidth usage %lf / %lf\n", total_bandwidth_in_migration, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC));
-		printf("각 SSD의 %d일 동안의 Average ADWD %lf\n", day, (sum_for_DAILY_AVG_in_migration / num_of_SSDs));
-		printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_DAILY_STD_in_migration / num_of_SSDs));
+		printf("각 SSD의 %d일 동안의 Average ADWD %lf / 각 SSD의 그 날의 Average ADWD %lf\n", day, (sum_for_DAILY_AVG_in_migration / num_of_SSDs), (sum_for_AVG_in_migration / num_of_SSDs));
+		printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf / 각 SSD의 그 날의 Standard deviation ADWD %lf \n\n", day, sqrt(sum_for_DAILY_STD_in_migration / num_of_SSDs), sqrt(sum_for_STD_in_migration / num_of_SSDs));
 		//}
 	}
 
@@ -95,12 +99,19 @@ void simulation() {
 			num_of_alloc_videos++;
 			total_bandwidth_of_alloc_videos += VIDEO_SEGMENT_list[vid].requested_bandwidth;
 		}
-		/*if (VIDEO_SEGMENT_list[vid].assigned_SSD == VIRTUAL_SSD) {
-			printf("debug\n");
-		}*/
+		if (VIDEO_SEGMENT_list[vid].assigned_SSD == VIRTUAL_SSD) {
+			printf("error\n");
+		}
 	}
 	printf("저장된 비디오 총 갯수 %d/%d\n", num_of_alloc_videos, num_of_videos);
 	printf("저장된 비디오의 Total requested bandwidth %lf / %lf\n", total_bandwidth_of_alloc_videos, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC));
+	
+	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
+		printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
+		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
+		printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
+	}
+
 	delete[](SSD_list);
 	delete[](VIDEO_SEGMENT_list);
 }
