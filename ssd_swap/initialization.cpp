@@ -37,8 +37,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].bandwidth_usage = 0;
 		_SSD_list[ssd_index].ADWD = 0;
-		_SSD_list[ssd_index].daily_write_MB = 0;
-
+		//_SSD_list[ssd_index].daily_write_MB = 0;
 		_SSD_list[ssd_index].total_write_MB = 0;
 		_SSD_list[ssd_index].running_days = 1; // 첫 날 = 1이니까
 
@@ -91,8 +90,6 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		_SSD_list[ssd_index].assigned_VIDEOs_low_bandwidth_first.clear();
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].bandwidth_usage = 0;
-		_SSD_list[ssd_index].ADWD = 0;
-		_SSD_list[ssd_index].daily_write_MB = 0;
 		_SSD_list[ssd_index].running_days++;
 
 		if (ssd == VIRTUAL_SSD) {
@@ -168,10 +165,9 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 
 				_SSD_list[ssd_index].storage_usage = stod(ssd_info[5]);
 				_SSD_list[ssd_index].bandwidth_usage = stod(ssd_info[6]);
-				_SSD_list[ssd_index].daily_write_MB = stod(ssd_info[7]);
-				_SSD_list[ssd_index].ADWD = _SSD_list[ssd_index].daily_write_MB / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD);
-				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[8]);
-				_SSD_list[ssd_index].running_days = stod(ssd_info[9]);
+				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[7]);
+				_SSD_list[ssd_index].running_days = stod(ssd_info[8]);
+				_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD)) / _SSD_list[ssd_index].running_days;
 			}
 			cnt++;
 		}

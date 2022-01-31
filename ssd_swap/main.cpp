@@ -121,8 +121,8 @@ void simulation() {
 			sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 		}
 		printf("현재 Total bandwidth usage %lf / %lf\n", total_bandwidth_in_migration, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC));
-		printf("각 SSD의 %d일 동안의 Average ADWD %lf / 각 SSD의 그 날의 Average ADWD %lf\n", day, (sum_for_DAILY_AVG_in_migration / num_of_SSDs), (sum_for_AVG_in_migration / num_of_SSDs));
-		printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf / 각 SSD의 그 날의 Standard deviation ADWD %lf \n\n", day, sqrt(sum_for_DAILY_STD_in_migration / num_of_SSDs), sqrt(sum_for_STD_in_migration / num_of_SSDs));
+		printf("각 SSD의 %d일 동안의 Average ADWD %lf\n", day, (sum_for_AVG_in_migration / num_of_SSDs));
+		printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_STD_in_migration / num_of_SSDs));
 		//}
 	}
 
