@@ -41,13 +41,14 @@ int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 		int from_vid = element.second;
 
 		//sort го╠Б
-		set<pair<double, int>, less<pair<double, int>>> ADWD_after_list;
+		set<pair<pair<double, double>, int>, less<pair<pair<double, double>, int>>> ADWD_after_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
 				double slope_to = (get_slope_to(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd_temp, from_vid)).second;
 				double slope_from = (get_slope_from(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd_temp, from_vid)).second;
-				double slope = max(slope_to, slope_from);
-				ADWD_after_list.insert(make_pair(slope, to_ssd_temp));
+				double slope_first = max(slope_to, slope_from);
+				double slope_last = min(slope_to, slope_from);
+				ADWD_after_list.insert(make_pair(make_pair(slope_first, slope_last), to_ssd_temp));
 			}
 		}
 
