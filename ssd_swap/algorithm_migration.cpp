@@ -356,7 +356,7 @@ pair<pair<double, double>, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT*
 	else {
 		bt_difference = _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth;
 		ADWD_from = 0;
-		AVR_ADWD_from = 0;
+		AVR_ADWD_from = (_SSD_list[_from_ssd].total_write_MB / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity)) / _SSD_list[_from_ssd].running_days;
 		write_MB_from = 0;
 	}
 	//slope_from = (_SSD_list[_from_ssd].ADWD + ADWD_from) / bt_difference;
