@@ -2,7 +2,7 @@
 #define NUM_OF_DATEs 31  // for simulation
 #define NUM_OF_TIMEs 4 // for simulation
 
-int placement_method = 2; //2,3으로 바꾸면 비교스킴
+int placement_method = 1; //2,3으로 바꾸면 비교스킴
 int migration_method = 1; // 2로 바꾸면 비교스킴
 int num_of_SSDs = 30;
 int num_of_videos = 1500000;// 50만, 10만, 15만, 20만, 25만, 30만
