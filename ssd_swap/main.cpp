@@ -78,19 +78,22 @@ void simulation() {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//아래는 새로운 비디오 추가 과정
-			VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
-			update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_new_videos); 
-			// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
-			VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
-			copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
-			delete[] VIDEO_SEGMENT_list;
-			copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);
-			delete[] new_VIDEO_SEGMENT_list;
-			VIDEO_SEGMENT_list = _VIDEO_SEGMENT_conbined_list;
-			num_of_videos += num_of_new_videos;  //기존 비디오 리스트에 새로운 비디오 추가
-			
-			//update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, nullptr, num_of_SSDs, num_of_videos, 0); 
-			//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 위의 것들 주석 처리하고 이거 주석 풀면 된다.
+			if (num_of_new_videos > 0) {
+				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
+				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_new_videos);
+				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
+				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
+				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
+				delete[] VIDEO_SEGMENT_list;
+				copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);
+				delete[] new_VIDEO_SEGMENT_list;
+				VIDEO_SEGMENT_list = _VIDEO_SEGMENT_conbined_list;
+				num_of_videos += num_of_new_videos;  //기존 비디오 리스트에 새로운 비디오 추가
+			}
+			else {
+				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, num_of_SSDs, num_of_videos, 0);
+				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
+			}
 
 			//migration 수행
 			//printf("%d일-%d ", day, time);
