@@ -75,7 +75,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
 }
 
-void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos) {
+void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _day) {
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	mt19937 g(SEED + rand_cnt);
@@ -90,7 +90,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		_SSD_list[ssd_index].assigned_VIDEOs_low_bandwidth_first.clear();
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].bandwidth_usage = 0;
-		_SSD_list[ssd_index].running_days++;
+		_SSD_list[ssd_index].running_days = _day;
 
 		if (ssd == VIRTUAL_SSD) {
 			_SSD_list[ssd_index].total_write_MB = 0;

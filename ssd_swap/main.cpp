@@ -1,11 +1,11 @@
 #include "header.h"
-#define NUM_OF_DATEs 31  // for simulation
+#define NUM_OF_DATEs 15  // for simulation
 #define NUM_OF_TIMEs 4 // for simulation
 
-int placement_method = 2; //2,3으로 바꾸면 비교스킴
+int placement_method = 1; //2,3으로 바꾸면 비교스킴
 int migration_method = 1; // 2로 바꾸면 비교스킴
 int num_of_SSDs = 30;
-int num_of_videos = 3000000;// 50만, 10만, 15만, 20만, 25만, 30만
+int num_of_videos = 2500000;// 50만, 10만, 15만, 20만, 25만, 30만
 int num_of_new_videos = 0; //2500, 5000, 7500, 10000, 12500, 15000
 
 int main(int argc, char* argv[]) {
@@ -80,7 +80,7 @@ void simulation() {
 			//아래는 새로운 비디오 추가 과정
 			if (num_of_new_videos > 0) {
 				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
-				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_new_videos);
+				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_new_videos, day);
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
 				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
@@ -91,7 +91,7 @@ void simulation() {
 				num_of_videos += num_of_new_videos;  //기존 비디오 리스트에 새로운 비디오 추가
 			}
 			else {
-				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, num_of_SSDs, num_of_videos, 0);
+				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, num_of_SSDs, num_of_videos, 0, day);
 				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
 			}
 
