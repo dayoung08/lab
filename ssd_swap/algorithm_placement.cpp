@@ -34,7 +34,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index) &&
 				(_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth) {
 
-				double ADWD_placement = _SSD_list[ssd_temp].ADWD + (_VIDEO_SEGMENT_list[video_index].size / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD));
+				double ADWD_placement = (_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD);
 				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
 				double remained_write_MB = ((_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) * _SSD_list[ssd_temp].running_days) - (_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size);
 				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
