@@ -71,7 +71,7 @@ void simulation() {
 	printf("[Placement] 각 SSD의 Average ADWD %lf\n", (sum_for_AVG_in_placement / num_of_SSDs));
 	printf("[Placement] 각 SSD의 Standard deviation ADWD %lf\n", sqrt(sum_for_STD_in_placement / num_of_SSDs));
 	
-	//첫 날은 placement, 이후 31일간 migration
+	//첫 날은 placement, 이후 31일간 migration (첫 날은 placement, migration 둘 다)
 
 	printf("\n[MIGRATION START]\n\n");
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
