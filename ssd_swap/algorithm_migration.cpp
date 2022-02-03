@@ -168,7 +168,7 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 				else {
 					bandwidth_usage = _SSD_list[to_ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
 				}
-				bandwidth_usage /= _SSD_list[to_ssd_temp].storage_capacity;
+				bandwidth_usage /= _SSD_list[to_ssd_temp].maximum_bandwidth;
 				under_load_list.insert(make_pair(bandwidth_usage, to_ssd_temp));
 			}
 		}
@@ -338,7 +338,7 @@ pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		//remained_write_MB = ((_SSD_list[_to_ssd].storage_capacity * _SSD_list[_to_ssd].DWPD) * _SSD_list[_to_ssd].running_days) - (_SSD_list[_to_ssd].total_write_MB + _VIDEO_SEGMENT_list[_from_vid].size);
 		write_MB_to = _VIDEO_SEGMENT_list[_from_vid].size;
 	}
-	///remaining_bt /= remained_storage;
+	remaining_bt /= _SSD_list[_to_ssd].maximum_bandwidth;
 	slope_to = ADWD_to / remaining_bt;
 	if (slope_to == -0 || slope_to < 0) {
 		if (slope_to == -0 &&_from_ssd != VIRTUAL_SSD) {
@@ -376,7 +376,7 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMEN
 		//remained_write_MB = ((_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) * _SSD_list[_from_ssd].running_days) - (_SSD_list[_from_ssd].total_write_MB);
 		write_MB_from = 0;
 	}
-	//remaining_bt /= remained_storage;
+	remaining_bt /= _SSD_list[_from_ssd].maximum_bandwidth;
 	slope_from = ADWD_from / remaining_bt;
 	if (slope_from == -0 || slope_from < 0) {
 		if (slope_from == -0 && _from_ssd != VIRTUAL_SSD) {
