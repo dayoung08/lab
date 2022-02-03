@@ -324,7 +324,8 @@ pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	double slope_to;
 	double ADWD_to;
 	double write_MB_to;
-	double remaining_bt, remained_storage;
+	double remaining_bt;
+	double remained_storage;
 	//double remained_write_MB; //결과가 안 좋다 어째서?
 
 	if (is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
@@ -345,13 +346,15 @@ pair<double, double> get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		write_MB_to = _VIDEO_SEGMENT_list[_from_vid].size;
 	}
 	remaining_bt /= _SSD_list[_to_ssd].maximum_bandwidth;
-	remaining_bt /= remained_storage;
-
 	slope_to = ADWD_to / remaining_bt;
 	if (slope_to == -0) {
-		//if (_from_ssd != VIRTUAL_SSD)
+		if (_from_ssd != VIRTUAL_SSD) {
 			//printf("slope_to error - ssd %d\n", _from_ssd);
+			slope_to = INFINITY;
+		}
 	}
+	remaining_bt /= remained_storage;
+
 	return make_pair(write_MB_to, slope_to);
 }
 
@@ -359,7 +362,8 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMEN
 	double slope_from;
 	double ADWD_from;
 	double write_MB_from;
-	double remaining_bt, remained_storage;
+	double remaining_bt;
+	double remained_storage;
 	//double remained_write_MB;  //결과가 안 좋다 어째서?
 
 	if (is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
@@ -383,10 +387,11 @@ pair<double, double> get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMEN
 	//remaining_bt /= _SSD_list[_from_ssd].maximum_bandwidth;
 	remaining_bt /= remained_storage;
 	slope_from = ADWD_from / remaining_bt;
-
 	if (slope_from == -0) {
-		//if (_from_ssd != VIRTUAL_SSD)
+		if (_from_ssd != VIRTUAL_SSD) {
 			//printf("slope_from error - ssd %d\n", _from_ssd);
+			slope_from = INFINITY;
+		}
 	}
 
 	return make_pair(write_MB_from, slope_from);
