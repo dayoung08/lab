@@ -122,14 +122,14 @@ int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 			break;
 		}
 
-		//_SSD_list[to_ssd].daily_write_MB += (get_slope_to(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
-		_SSD_list[to_ssd].total_write_MB += (get_slope_to(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
+		_SSD_list[to_ssd].total_write_MB += _VIDEO_SEGMENT_list[from_vid].size;
 		_SSD_list[to_ssd].ADWD = (_SSD_list[to_ssd].total_write_MB / (_SSD_list[to_ssd].DWPD * _SSD_list[to_ssd].storage_capacity)) / _SSD_list[to_ssd].running_days;
 
 		if (from_ssd != VIRTUAL_SSD) {
-			_SSD_list[from_ssd].total_write_MB += (get_slope_from(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
-			//_SSD_list[from_ssd].daily_write_MB += (get_slope_from(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
-			_SSD_list[from_ssd].ADWD = (_SSD_list[from_ssd].total_write_MB / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity)) / _SSD_list[from_ssd].running_days;
+			if (flag == FLAG_SWAP) {
+				_SSD_list[from_ssd].total_write_MB += _VIDEO_SEGMENT_list[to_vid].size; 
+				_SSD_list[from_ssd].ADWD = (_SSD_list[from_ssd].total_write_MB / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity)) / _SSD_list[from_ssd].running_days;
+			}
 		}
 
 		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, is_over_load, &bandwidth_usage_of_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list, MIGRATION_OURS);
@@ -168,7 +168,7 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 				else {
 					bandwidth_usage = _SSD_list[to_ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
 				}
-				bandwidth_usage /= _SSD_list[to_ssd_temp].maximum_bandwidth;
+				//bandwidth_usage /= _SSD_list[to_ssd_temp].maximum_bandwidth;
 				under_load_list.insert(make_pair(bandwidth_usage, to_ssd_temp));
 			}
 		}
@@ -228,13 +228,14 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 		}
 
 		//_SSD_list[to_ssd].daily_write_MB += (get_slope_to(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
-		_SSD_list[to_ssd].total_write_MB += (get_slope_to(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
+		_SSD_list[to_ssd].total_write_MB += _VIDEO_SEGMENT_list[from_vid].size;
 		_SSD_list[to_ssd].ADWD = (_SSD_list[to_ssd].total_write_MB / (_SSD_list[to_ssd].DWPD * _SSD_list[to_ssd].storage_capacity)) / _SSD_list[to_ssd].running_days;
 
 		if (from_ssd != VIRTUAL_SSD) {
-			_SSD_list[from_ssd].total_write_MB += (get_slope_from(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
-			//_SSD_list[from_ssd].daily_write_MB += (get_slope_from(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
-			_SSD_list[from_ssd].ADWD = (_SSD_list[from_ssd].total_write_MB / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity)) / _SSD_list[from_ssd].running_days;
+			if (flag == FLAG_SWAP) {
+				_SSD_list[from_ssd].total_write_MB += _VIDEO_SEGMENT_list[to_vid].size;
+				_SSD_list[from_ssd].ADWD = (_SSD_list[from_ssd].total_write_MB / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity)) / _SSD_list[from_ssd].running_days;
+			}
 		}
 
 		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, is_over_load, &bandwidth_usage_of_SSDs, _num_of_SSDs, NULL, NULL, MIGRATION_BANDWIDTH_AWARE);

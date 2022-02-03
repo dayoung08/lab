@@ -78,7 +78,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 }
 
 int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
-	set<pair<double, int>, greater<pair<double, int>>> VIDEO_SEGMENT_list_with_bandwidth_sort;
+	set<pair<double, int>, less<pair<double, int>>> VIDEO_SEGMENT_list_with_bandwidth_sort;
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		VIDEO_SEGMENT_list_with_bandwidth_sort.insert(make_pair(_VIDEO_SEGMENT_list[vid].requested_bandwidth, vid));
 	}
@@ -92,10 +92,13 @@ int placement_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index)
 				&& (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth){
 				//&& ((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / (_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) / _SSD_list[ssd_temp].running_days) <= AVR_ADWD_LIMIT) {
-				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
-				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
+				double bandwidth_usage = (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth);
+				
+				//double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
+				//double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
 
-				double slope = remained_bandwidth / remained_storage;
+				//double slope = remained_bandwidth;// / remained_storage;
+				double slope = bandwidth_usage;
 				target_ssd_list_with_bandwidth_sort.insert(make_pair(slope, ssd_temp));
 			}
 		}
