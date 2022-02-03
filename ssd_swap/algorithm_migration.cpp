@@ -167,13 +167,13 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 				if (is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, to_ssd_temp, from_vid)) {
 					//bandwidth_usage = _SSD_list[to_ssd_temp].bandwidth_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth);
 					remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - (_SSD_list[to_ssd_temp].bandwidth_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth)));
-					remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - (_SSD_list[to_ssd_temp].storage_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth)));
+					remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage);
 
 				}
 				else {
 					//bandwidth_usage = _SSD_list[to_ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
 					remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - (_SSD_list[to_ssd_temp].bandwidth_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth)));
-					remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - (_SSD_list[to_ssd_temp].storage_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth)));
+					remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage + _VIDEO_SEGMENT_list[from_vid].size);
 				}
 				//bandwidth_usage /= _SSD_list[to_ssd_temp].maximum_bandwidth;
 				under_load_list.insert(make_pair(remained_bandwidth/remained_storage, to_ssd_temp));
