@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 15  // for simulation
+#define NUM_OF_DATEs 31  // for simulation
 #define NUM_OF_TIMEs 4 // for simulation
 
 int placement_method = 1; //2,3으로 바꾸면 비교스킴
