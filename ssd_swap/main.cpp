@@ -2,11 +2,11 @@
 #define NUM_OF_DATEs 15  // for simulation
 #define NUM_OF_TIMEs 4 // for simulation
 
-int placement_method = 1; //2,3으로 바꾸면 비교스킴
+int placement_method = 2; //2,3으로 바꾸면 비교스킴
 int migration_method = 1; // 2로 바꾸면 비교스킴
 int num_of_SSDs = 30;
-int num_of_videos = 1500000;// 50만, 10만, 15만, 20만, 25만, 30만
-int num_of_new_videos = 0; //2500, 5000, 7500, 10000, 12500, 15000
+int num_of_videos = 2500000;// 50만, 10만, 15만, 20만, 25만, 30만
+int num_of_new_videos = 10000; //2500, 5000, 7500, 10000, 12500, 15000
 
 int main(int argc, char* argv[]) {
 	srand(SEED);
@@ -106,12 +106,12 @@ void simulation() {
 			//printf("[DAY%d] Average migration number %lf \n", day, prev_migration_num);
 		double sum_for_AVG_in_migration = 0;
 		double sum_for_STD_in_migration = 0;
-		double sum_for_DAILY_AVG_in_migration = 0;
-		double sum_for_DAILY_STD_in_migration = 0;
+		//double sum_for_DAILY_AVG_in_migration = 0;
+		//double sum_for_DAILY_STD_in_migration = 0;
 		double total_bandwidth_in_migration = 0;
 		for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
-			double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / SSD_list[ssd].running_days;
-			sum_for_DAILY_AVG_in_migration += average_ADWD;
+			//double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / SSD_list[ssd].running_days;
+			//sum_for_DAILY_AVG_in_migration += average_ADWD;
 			sum_for_AVG_in_migration += SSD_list[ssd].ADWD;
 			//printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 			//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
@@ -119,8 +119,8 @@ void simulation() {
 		}
 		for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 			total_bandwidth_in_migration += SSD_list[ssd].bandwidth_usage;
-			double average_ADWD = SSD_list[ssd].total_write_MB / (SSD_list[ssd].storage_capacity * SSD_list[ssd].DWPD) / SSD_list[ssd].running_days;
-			sum_for_DAILY_STD_in_migration += pow((average_ADWD - (sum_for_DAILY_AVG_in_migration / num_of_SSDs)), 2);
+			//double average_ADWD = SSD_list[ssd].ADWD;
+			//sum_for_DAILY_STD_in_migration += pow((SSD_list[ssd].ADWD - (sum_for_DAILY_AVG_in_migration / num_of_SSDs)), 2);
 			sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 		}
 		printf("현재 Total bandwidth usage %lf / %lf\n", total_bandwidth_in_migration, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC));

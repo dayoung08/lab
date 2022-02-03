@@ -91,6 +91,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].bandwidth_usage = 0;
 		_SSD_list[ssd_index].running_days = _day;
+		_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].DWPD * _SSD_list[ssd_index].storage_capacity)) / _SSD_list[ssd_index].running_days;
 
 		if (ssd == VIRTUAL_SSD) {
 			_SSD_list[ssd_index].total_write_MB = 0;
