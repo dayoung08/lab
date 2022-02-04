@@ -44,7 +44,7 @@ int placement_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 				if (remained_storage == 0) {
 					remained_storage = 0.00001;
 				}
-				double slope = remained_bandwidth / remained_storage / remained_write_MB; //  남은 수명 대비 남은 밴드윗
+				double slope = (remained_bandwidth / remained_storage) / remained_write_MB; //  남은 수명 대비 남은 밴드윗
 				target_ssd_list_with_ratio_sort.insert(make_pair(slope, ssd_temp));
 			}
 		}

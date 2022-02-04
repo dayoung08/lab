@@ -122,16 +122,6 @@ int migration_myAlgorithm(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, in
 			break;
 		}
 
-		_SSD_list[to_ssd].total_write_MB += _VIDEO_SEGMENT_list[from_vid].size;
-		_SSD_list[to_ssd].ADWD = (_SSD_list[to_ssd].total_write_MB / (_SSD_list[to_ssd].DWPD * _SSD_list[to_ssd].storage_capacity)) / _SSD_list[to_ssd].running_days;
-
-		if (from_ssd != VIRTUAL_SSD) {
-			if (flag == FLAG_SWAP) {
-				_SSD_list[from_ssd].total_write_MB += _VIDEO_SEGMENT_list[to_vid].size; 
-				_SSD_list[from_ssd].ADWD = (_SSD_list[from_ssd].total_write_MB / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity)) / _SSD_list[from_ssd].running_days;
-			}
-		}
-
 		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, is_over_load, &bandwidth_usage_of_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list, MIGRATION_OURS);
 		migration_num++;
 	}
@@ -162,23 +152,24 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 			if (!is_over_load[to_ssd_temp]) {
 				//double bandwidth_usage;
 				double remained_bandwidth;
-				//double remained_storage;
+				double remained_storage;
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				if (is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, to_ssd_temp, from_vid)) {
 					//bandwidth_usage = _SSD_list[to_ssd_temp].bandwidth_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth);
 					remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - (_SSD_list[to_ssd_temp].bandwidth_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth)));
-					//remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
+					remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
 
 				}
 				else {
 					//bandwidth_usage = _SSD_list[to_ssd_temp].bandwidth_usage + _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
 					remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - (_SSD_list[to_ssd_temp].bandwidth_usage + (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth)));
-					//remained_storage = _SSD_list[to_ssd_temp].storage_capacity - (_SSD_list[to_ssd_temp].storage_usage + _VIDEO_SEGMENT_list[from_vid].size);
+					remained_storage = _SSD_list[to_ssd_temp].storage_capacity - (_SSD_list[to_ssd_temp].storage_usage + _VIDEO_SEGMENT_list[from_vid].size);
 				}
-				/*if (remained_storage == 0) {
+				if (remained_storage == 0) {
 					remained_storage = 0.00001;
-				}*/
+				}
 				//bandwidth_usage /= _SSD_list[to_ssd_temp].maximum_bandwidth;
+				remained_storage /= remained_storage;
 				under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
 			}
 		}
@@ -200,6 +191,8 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 				if (flag != FLAG_DENY) {
 					break;
 				}
+				to_ssd = NONE_ALLOC;
+				to_vid = NONE_ALLOC;
 			}
 		}
 
@@ -237,17 +230,6 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list
 			break;
 		}
 
-		//_SSD_list[to_ssd].daily_write_MB += (get_slope_to(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd, from_vid)).first;
-		_SSD_list[to_ssd].total_write_MB += _VIDEO_SEGMENT_list[from_vid].size;
-		_SSD_list[to_ssd].ADWD = (_SSD_list[to_ssd].total_write_MB / (_SSD_list[to_ssd].DWPD * _SSD_list[to_ssd].storage_capacity)) / _SSD_list[to_ssd].running_days;
-
-		if (from_ssd != VIRTUAL_SSD) {
-			if (flag == FLAG_SWAP) {
-				_SSD_list[from_ssd].total_write_MB += _VIDEO_SEGMENT_list[to_vid].size;
-				_SSD_list[from_ssd].ADWD = (_SSD_list[from_ssd].total_write_MB / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity)) / _SSD_list[from_ssd].running_days;
-			}
-		}
-
 		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, is_over_load, &bandwidth_usage_of_SSDs, _num_of_SSDs, NULL, NULL, MIGRATION_BANDWIDTH_AWARE);
 		migration_num++;
 	}
@@ -278,6 +260,13 @@ void swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double, int> 
 	_SSD_list[from_ssd].storage_usage += _VIDEO_SEGMENT_list[to_vid].size;
 	_SSD_list[to_ssd].storage_usage += _VIDEO_SEGMENT_list[from_vid].size;
 	_SSD_list[to_ssd].storage_usage -= _VIDEO_SEGMENT_list[to_vid].size;*/
+
+	_SSD_list[_to_ssd].total_write_MB += _VIDEO_SEGMENT_list[_from_vid].size;
+	_SSD_list[_to_ssd].ADWD = (_SSD_list[_to_ssd].total_write_MB / (_SSD_list[_to_ssd].DWPD * _SSD_list[_to_ssd].storage_capacity)) / _SSD_list[_to_ssd].running_days;
+	if (_from_ssd != VIRTUAL_SSD) {
+		_SSD_list[_from_ssd].total_write_MB += _VIDEO_SEGMENT_list[_to_vid].size;
+		_SSD_list[_from_ssd].ADWD = (_SSD_list[_from_ssd].total_write_MB / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity)) / _SSD_list[_from_ssd].running_days;
+	}
 }
 
 void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid) {
@@ -290,6 +279,10 @@ void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double,
 	_SSD_list[from_ssd].storage_usage -= _VIDEO_SEGMENT_list[from_vid].size;
 	_SSD_list[to_ssd].bandwidth_usage += _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
 	_SSD_list[to_ssd].storage_usage += _VIDEO_SEGMENT_list[from_vid].size;
+
+	_SSD_list[to_ssd].total_write_MB += _VIDEO_SEGMENT_list[from_vid].size;
+	_SSD_list[to_ssd].ADWD = (_SSD_list[to_ssd].total_write_MB / (_SSD_list[to_ssd].DWPD * _SSD_list[to_ssd].storage_capacity)) / _SSD_list[to_ssd].running_days;
+
 }
 
 void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs, int _num_of_SSDs, vector<pair<double, int>>* _eliminated_video_list, bool* _is_inserted_eliminated_video_list, int _method) {
@@ -325,7 +318,7 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, bool*
 }
 
 double get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid) {
-	double difference_bt; 
+	double difference_bt;
 	double slope_to;
 	double ADWD_to;
 	//double write_MB_to;

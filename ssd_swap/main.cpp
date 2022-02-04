@@ -1,12 +1,12 @@
 #include "header.h"
-#define NUM_OF_DATEs 7  // for simulation
+#define NUM_OF_DATEs 7  // for simulation 1, 3, (7), 15, 31
 #define NUM_OF_TIMEs 4 // for simulation
 
-int placement_method = 2; //2,3으로 바꾸면 비교스킴
-int migration_method = 2; // 2로 바꾸면 비교스킴
-int num_of_SSDs = 40;
-int num_of_videos = 1500000;// 50만, 10만, 15만, 20만, 25만, 30만
-int num_of_new_videos = 0; //2500, 5000, 7500, 10000, 12500, 15000
+int placement_method = 1; //2,3으로 바꾸면 비교스킴
+int migration_method = 1; // 2로 바꾸면 비교스킴
+int num_of_SSDs = 20; // 15, 20, (25), 30
+int num_of_videos = 2000000;// 150만, (200만), 250만, 300만
+int num_of_new_videos = 0; //15000, 20000, 25000, 30000
 
 int main(int argc, char* argv[]) {
 	srand(SEED);
@@ -62,7 +62,9 @@ void simulation() {
 		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
 		printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 	}
+	int total_num = 0;
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
+		total_num += SSD_list[ssd].assigned_VIDEOs_low_bandwidth_first.size();
 		total_bandwidth_in_placement += SSD_list[ssd].bandwidth_usage;
 		sum_for_STD_in_placement += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_placement / num_of_SSDs), 2);
 	}
@@ -71,6 +73,8 @@ void simulation() {
 	printf("[Placement] 각 SSD의 Average ADWD %lf\n", (sum_for_AVG_in_placement / num_of_SSDs));
 	printf("[Placement] 각 SSD의 Standard deviation ADWD %lf\n", sqrt(sum_for_STD_in_placement / num_of_SSDs));
 	
+	//double total_bandwidth_of_alloc_videos1 = 0;
+	//int num_of_alloc_videos1 = 0;
 	//첫 날은 placement, 이후 31일간 migration (첫 날은 placement, migration 둘 다)
 
 	printf("\n[MIGRATION START]\n\n");
@@ -79,25 +83,70 @@ void simulation() {
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//아래는 새로운 비디오 추가 과정
 			if (num_of_new_videos > 0) {
+				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
 				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_new_videos, day);
-				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
+				if (migration_method == MIGRATION_OURS) {
+					for (int vid = 0; vid < num_of_videos; vid++) {
+						int video_index = vid;
+						if (VIDEO_SEGMENT_list[video_index].assigned_SSD == NONE_ALLOC) {
+							VIDEO_SEGMENT_list[video_index].assigned_SSD = VIRTUAL_SSD;
+							VIDEO_SEGMENT_list[video_index].is_alloc = true;
+							SSD_list[VIRTUAL_SSD].storage_usage += VIDEO_SEGMENT_list[video_index].size;
+							SSD_list[VIRTUAL_SSD].bandwidth_usage += VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+							SSD_list[VIRTUAL_SSD].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+						}
+					}
+				}
+
 				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
 				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
 				delete[] VIDEO_SEGMENT_list;
 				copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);
 				delete[] new_VIDEO_SEGMENT_list;
 				VIDEO_SEGMENT_list = _VIDEO_SEGMENT_conbined_list;
+
+				/*for (int vid = 0; vid < num_of_videos; vid++) {
+					if (VIDEO_SEGMENT_list[vid].assigned_SSD != NONE_ALLOC) {
+						num_of_alloc_videos++;
+						total_bandwidth_of_alloc_videos += VIDEO_SEGMENT_list[vid].requested_bandwidth;
+					}
+				}
+				printf("저장된 비디오 총 갯수 %d, %d / %d\n", num_of_alloc_videos, total_num, num_of_videos);
+				printf("저장된 비디오의 Total requested bandwidth %lf / %lf\n", total_bandwidth_of_alloc_videos, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC));
+				*/
 				num_of_videos += num_of_new_videos;  //기존 비디오 리스트에 새로운 비디오 추가
 			}
 			else {
-				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, num_of_SSDs, num_of_videos, 0, day);
 				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
+				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, num_of_SSDs, num_of_videos, 0, day);
+				if (migration_method == MIGRATION_OURS) {
+					for (int vid = 0; vid < num_of_videos; vid++) {
+						int video_index = vid;
+						if (VIDEO_SEGMENT_list[video_index].assigned_SSD == NONE_ALLOC) {
+							VIDEO_SEGMENT_list[video_index].assigned_SSD = VIRTUAL_SSD;
+							VIDEO_SEGMENT_list[video_index].is_alloc = true;
+							SSD_list[VIRTUAL_SSD].storage_usage += VIDEO_SEGMENT_list[video_index].size;
+							SSD_list[VIRTUAL_SSD].bandwidth_usage += VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+							SSD_list[VIRTUAL_SSD].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+						}
+					}
+				}
+				/*for (int vid = 0; vid < num_of_videos; vid++) {
+					if (VIDEO_SEGMENT_list[vid].assigned_SSD != VIRTUAL_SSD) {
+						num_of_alloc_videos1++;
+						total_bandwidth_of_alloc_videos1 += VIDEO_SEGMENT_list[vid].requested_bandwidth;
+					}
+				}
+				printf("저장된 비디오 총 갯수 %d, %d / %d\n", num_of_alloc_videos1, total_num, num_of_videos);
+				printf("저장된 비디오의 Total requested bandwidth %lf / %lf\n", total_bandwidth_of_alloc_videos1, ((double)VIDEO_BANDWIDTH * (double)NUM_OF_REQUEST_PER_SEC));
+				*/
 			}
 
 			//migration 수행
 			//printf("%d일-%d ", day, time);
 			int migration_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs);
+			//int migration_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
 			printf("migration_num %d\n", migration_num);
 		}
 
