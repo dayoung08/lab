@@ -9,7 +9,7 @@
 #define MIN_WAF 20 // 2.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
 //https://www.samsung.com/semiconductor/global.semi.static/Multi-stream_Cassandra_Whitepaper_Final-0.pdf 이건 1~3.2. 1이면 그냥 가비지 콜렉션으로 인한 쓰기 증폭이 없는것
 
-#define MAX_SSD_BANDWIDTH 5000 // for simulation
+#define MAX_SSD_BANDWIDTH 3000 // for simulation
 #define MIN_SSD_BANDWIDTH 400 // for simulation
 
 int rand_cnt = 0;
@@ -24,12 +24,12 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			_SSD_list[ssd_index].storage_capacity = 500000 * pow(2, rand() % 4); // 0.5, 1, 2, 4TB
+			_SSD_list[ssd_index].storage_capacity = ((double)500000 * pow(2, rand() % 4)) + 0.00001; // 0.5, 1, 2, 4TB
 			//_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
 			_SSD_list[ssd_index].DWPD = ((double)(rand() % (MAX_DWPD - MIN_DWPD + 1) + MIN_DWPD)) / 100;
 			_SSD_list[ssd_index].WAF = ((double)(rand() % (MAX_WAF - MIN_WAF + 1) + MIN_WAF)) / 10;
 			_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
-			_SSD_list[ssd_index].maximum_bandwidth = rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1) + MIN_SSD_BANDWIDTH;
+			_SSD_list[ssd_index].maximum_bandwidth = ((double)(rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1)) + MIN_SSD_BANDWIDTH) + 0.00001;
 		}
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
@@ -52,13 +52,13 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		_VIDEO_SEGMENT_list[video_index].index = video_index;
-		_VIDEO_SEGMENT_list[video_index].size = VIDEO_SIZE;
-		_VIDEO_SEGMENT_list[video_index].once_bandwidth = VIDEO_BANDWIDTH;
+		_VIDEO_SEGMENT_list[video_index].size = (double)VIDEO_SIZE;
+		_VIDEO_SEGMENT_list[video_index].once_bandwidth = (double) VIDEO_BANDWIDTH;
 
 		double pop = vid_pop_shuffle.back();
 		vid_pop_shuffle.pop_back();
 		_VIDEO_SEGMENT_list[video_index].popularity = pop;
-		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
+		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * _VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 		_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 		_VIDEO_SEGMENT_list[video_index].is_alloc = false;
 		_VIDEO_SEGMENT_list[video_index].path = "/segment_" + to_string(video_index) + ".mp4";
@@ -84,7 +84,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		_SSD_list[ssd_index].assigned_VIDEOs_low_bandwidth_first.clear();
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].bandwidth_usage = 0;
-		_SSD_list[ssd_index].running_days = _day;
+		_SSD_list[ssd_index].running_days += _day;
 		_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].DWPD * _SSD_list[ssd_index].storage_capacity)) / _SSD_list[ssd_index].running_days;
 
 		if (ssd == VIRTUAL_SSD) {
@@ -99,7 +99,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 
 		if (video_index < _num_of_existed_videos) { // 기존에 있던 영상의 인기도, 밴드윗 갱신
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
-			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
+			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * _existed_VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
 			
 			if (_migration_method >= MIGRATION_OURS) {
@@ -119,10 +119,10 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		}
 		else { // 새로운 영상
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].index = video_index;
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size = VIDEO_SIZE;
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth = VIDEO_BANDWIDTH;
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size = (double) VIDEO_SIZE;
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth = (double) VIDEO_BANDWIDTH;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].popularity = pop;
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth; //220124
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].path = "/segment_" + to_string(video_index) + ".mp4";
 
 			//이 아래는 migration scheme 쓸 때 사용함. vitual ssd에 넣어놓음

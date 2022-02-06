@@ -1,18 +1,20 @@
 #include "header.h"
-#define NUM_OF_DATEs 7  // for simulation 1, 3, (7), 15, 31
-#define NUM_OF_TIMEs 2 
+#define NUM_OF_DATEs 30  // for simulation 1, 3, (7), 15, 30
+#define NUM_OF_TIMEs 4
 
-#define MIN_ADWD 10 //1.0
-#define MAX_ADWD 50 // 5.0
+#define MIN_ADWD 10 // 0.5
+#define MAX_ADWD 10 // 20
 #define MIN_RUNNING_DAY 30
-#define MAX_RUNNING_DAY 90
+#define MAX_RUNNING_DAY 30
+//당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 int placement_method = 1; //2,3으로 바꾸면 비교스킴
-int num_of_SSDs = 20; // 10, 15, (20), 25, 30
-int num_of_videos = 2000000;// 100만, 150만, (200만), 250만, 300만
+int num_of_SSDs = 25; // 15, 20, (25), 30, 35
+int num_of_videos = 2500000;// 150만, 200만, (250만), 300만, 350만
 
-int migration_method = MIGRATION_LIFETIME_AWARE; // 2로 바꾸면 비교스킴
-int num_of_new_videos = 20000; //1000, 15000, (20000), 25000, 30000
+int migration_method = 8; // 7~10로 바꾸면 비교스킴
+int num_of_new_videos = 0; //1000, 15000, (20000), 25000, 30000
+//이거 0인게 제일 잘 나온다 왜지
 
 int main(int argc, char* argv[]) {
 	srand(SEED);
@@ -21,7 +23,7 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		simulation_placement();
+		//simulation_placement();
 		simulation_migartion();
 		break;
 	case 2:
@@ -104,25 +106,25 @@ void simulation_migartion() {
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
 	placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
 
-	int num_new_ssd = 0;
-	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
-		int binary = rand() % 20;
-		if (binary) {
-			SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD)) / 10;
-			SSD_list[ssd].running_days = rand() % (MAX_RUNNING_DAY - MIN_RUNNING_DAY + 1) + MIN_RUNNING_DAY;
-			SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * (SSD_list[ssd].DWPD * SSD_list[ssd].storage_usage) * SSD_list[ssd].running_days;
-		}
-		else {
-			SSD_list[ssd].ADWD = 0;
-			SSD_list[ssd].running_days = 0;
-			SSD_list[ssd].total_write_MB = 0;
-			num_new_ssd++;
-		}
-	}
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
+	//int num_new_ssd = 0;
+	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
+		SSD_list[ssd].running_days = (rand() % (MAX_RUNNING_DAY - MIN_RUNNING_DAY + 1)) + MIN_RUNNING_DAY;
+		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD)) / 10;
+		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
 
-	printf("\n[MIGRATION START]");
-	printf("num_new_ssd : %d\n\n", num_new_ssd);
+		printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
+		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
+		printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
+	}
+
+
+	/*for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
+		printf("[SSD %d] ADWD %.2f\n", ssd, (SSD_list[ssd].total_write_MB / (SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity)) / SSD_list[ssd].running_days);
+	}*/
+
+	printf("\n[MIGRATION START]\n\n");
+	//printf("num_new_ssd : %d\n\n", num_new_ssd);
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
