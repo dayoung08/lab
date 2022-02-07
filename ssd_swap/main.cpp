@@ -13,7 +13,7 @@ int num_of_SSDs = 25; // 15, 20, (25), 30, 35
 int num_of_videos = 2500000;// 150만, 200만, (250만), 300만, 350만
 
 int migration_method = 7; // 7~10로 바꾸면 비교스킴
-int num_of_new_videos = 0; //1000, 15000, (20000), 25000, 30000
+int num_of_new_videos = 0; // 15000, (20000), 25000, 30000, 35000
 //이거 0인게 제일 잘 나온다 왜지
 
 int main(int argc, char* argv[]) {
@@ -133,7 +133,7 @@ void simulation_migartion() {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
 				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, day);
-				
+
 				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
 				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
 				delete[] VIDEO_SEGMENT_list;

@@ -32,7 +32,7 @@ using namespace std;
 
 #define NUM_OF_REQUEST_PER_SEC 40000 // 1초에 40000번의 제공 요청이 클라이언트들에게서 온다고 가정.
 #define VIDEO_BANDWIDTH 1.25f //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-#define VIDEO_SIZE 10.0f //세그먼트가 8초짜리라고 가정하면, 1.25MB/s x 8s = 10.0MB
+#define VIDEO_SIZE 12.5f //세그먼트가 10초짜리라고 가정하면, 1.25MB/s x 10s = 12.5MB
 
 struct SSD {
 	int index;

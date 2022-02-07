@@ -5,11 +5,11 @@
 #define MAX_DWPD 150 //1.50  // for simulation
 #define MIN_DWPD 4   //0.04  // for simulation
 
-#define MAX_WAF 40 // 4.0  // for simulation
-#define MIN_WAF 20 // 2.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
+#define MAX_WAF 32 // 3.2 // for simulation
+#define MIN_WAF 10 // 2.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
 //https://www.samsung.com/semiconductor/global.semi.static/Multi-stream_Cassandra_Whitepaper_Final-0.pdf 이건 1~3.2. 1이면 그냥 가비지 콜렉션으로 인한 쓰기 증폭이 없는것
 
-#define MAX_SSD_BANDWIDTH 3000 // for simulation
+#define MAX_SSD_BANDWIDTH 5000 // for simulation
 #define MIN_SSD_BANDWIDTH 400 // for simulation
 
 int rand_cnt = 0;
@@ -24,7 +24,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			_SSD_list[ssd_index].storage_capacity = ((double)500000 * pow(2, rand() % 4)) + 0.00001; // 0.5, 1, 2, 4TB
+			_SSD_list[ssd_index].storage_capacity = ((double)500000 * pow(2, rand() % 3)) + 0.00001; // 0.5, 1, 2, 4TB
 			//_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
 			_SSD_list[ssd_index].DWPD = ((double)(rand() % (MAX_DWPD - MIN_DWPD + 1) + MIN_DWPD)) / 100;
 			_SSD_list[ssd_index].WAF = ((double)(rand() % (MAX_WAF - MIN_WAF + 1) + MIN_WAF)) / 10;
