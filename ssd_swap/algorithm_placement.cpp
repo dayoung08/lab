@@ -5,7 +5,6 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, i
 	int placement_num = 0;
 	switch (_method) {
 	case PLACEMENT_OURS:
-	case PLACEMENT_THROUGHPUT_AWARE:
 	case PLACEMENT_BANDWIDTH_AWARE:
 	case PLACEMENT_STORAGE_SPACE_AWARE:
 	case PLACEMENT_LIFETIME_AWARE:
@@ -44,9 +43,6 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS:
-					slope = (remained_bandwidth / remained_storage) / ADWD;
-					break;
-				case PLACEMENT_THROUGHPUT_AWARE:
 					slope = remained_bandwidth / remained_storage;
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
