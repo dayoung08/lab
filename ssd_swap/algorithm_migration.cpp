@@ -124,12 +124,15 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			if (_SSD_list[to_ssd].total_assigned_VIDEOs_low_bandwidth_first.size()) { // 옮겼을때 할당 가능한 경우들
 				to_vid = (*_SSD_list[to_ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, from_ssd, to_ssd, from_vid, to_vid);
-				if (flag != FLAG_DENY) {
-					break;
-				}
-				to_ssd = NONE_ALLOC;
-				to_vid = NONE_ALLOC;
 			}
+			else {
+				flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, from_ssd, to_ssd, from_vid, NONE_ALLOC);
+			}
+			if (flag != FLAG_DENY) {
+				break;
+			}
+			to_ssd = NONE_ALLOC;
+			to_vid = NONE_ALLOC;
 		}
 
 
@@ -322,7 +325,9 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 
 	if (_to_vid != NONE_ALLOC) {
 		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
-			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth) {
+			if(_from_ssd == VIRTUAL_SSD)
+				flag = FLAG_REALLOCATE;
+			else if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth) {
 				flag = FLAG_REALLOCATE;
 			}
 		}
@@ -332,6 +337,10 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 				flag = FLAG_SWAP;
 			}
 		}
+	}
+	else { // 여기로 오는 경우는 _to_ssd가 빈 경우
+		//if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) // 사실 이것도 필요없을 것...
+		flag = FLAG_REALLOCATE;
 	}
 	//만약 AVR_ADWD_LIMIT를 지정할 경우, flag를 바꾸기 위해 사용되는 IF문이 있었는데 제대로 동작 안하고, Limit 지정도 안하기로 해서 삭제함
 	return flag;
