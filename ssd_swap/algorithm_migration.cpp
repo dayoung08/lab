@@ -15,25 +15,7 @@ int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration
 		break;
 	}
 
-	//이거 placement에 있는 것과 같아서, 따로 함수 빼긴 해야함.
-	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-		vector<pair<double, int>> curr_set(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.size());
-		copy(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin(), _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end(), curr_set.begin());
-		reverse(curr_set.begin(), curr_set.end());
-
-		double curr_bandwidth = _SSD_list[ssd].total_bandwidth_usage;
-		while (curr_bandwidth > _SSD_list[ssd].maximum_bandwidth) {
-			int vid = curr_set.back().second;
-			curr_bandwidth -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
-			_VIDEO_SEGMENT_list[vid].is_serviced = false;
-			curr_set.pop_back();
-			if (curr_set.empty())
-				break;
-		}
-		_SSD_list[ssd].serviced_bandwidth_usage = curr_bandwidth;
-		vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
-	}
-
+	set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 	return migration_num;
 }
 
@@ -301,14 +283,14 @@ double get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _f
 	if (is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
 		int _to_vid = (*_SSD_list[_to_ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 		difference_bt = (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth); 
-		ADWD_from = ((_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size) / _SSD_list[_to_ssd].running_days) / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity);
+		ADWD_from = ((_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size) / _SSD_list[_from_ssd].running_days) / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity);
 		//remained_bandwidth = (_SSD_list[_from_ssd].maximum_bandwidth - (_SSD_list[_from_ssd].bandwidth_usage - (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth)));
 		//remained_storage = _SSD_list[_from_ssd].storage_capacity - _SSD_list[_from_ssd].storage_usage;
 		//remained_write_MB = ((_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) * _SSD_list[_from_ssd].running_days) - (_SSD_list[_from_ssd].total_write_MB + _VIDEO_SEGMENT_list[_to_vid].size);
 	}
 	else {
 		difference_bt = (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth);
-		ADWD_from = (_SSD_list[_from_ssd].total_write_MB / _SSD_list[_to_ssd].running_days) / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity); 
+		ADWD_from = (_SSD_list[_from_ssd].total_write_MB / _SSD_list[_from_ssd].running_days) / (_SSD_list[_from_ssd].DWPD * _SSD_list[_from_ssd].storage_capacity);
 		//remained_bandwidth = (_SSD_list[_from_ssd].maximum_bandwidth - (_SSD_list[_from_ssd].bandwidth_usage - (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth)));
 		//remained_storage = _SSD_list[_from_ssd].storage_capacity - (_SSD_list[_from_ssd].storage_usage - _VIDEO_SEGMENT_list[_from_vid].size);
 		//remained_write_MB = ((_SSD_list[_from_ssd].storage_capacity * _SSD_list[_from_ssd].DWPD) * _SSD_list[_from_ssd].running_days) - (_SSD_list[_from_ssd].total_write_MB);

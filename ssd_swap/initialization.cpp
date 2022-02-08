@@ -332,6 +332,9 @@ bool is_full_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, i
 }
 
 void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
+	for (int vid = 0; vid < _num_of_videos; vid++) {
+		_VIDEO_SEGMENT_list[vid].is_serviced = true;
+	}
 	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 		vector<pair<double, int>> curr_set(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.size());
 		copy(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin(), _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end(), curr_set.begin());

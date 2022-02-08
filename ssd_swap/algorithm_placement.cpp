@@ -5,7 +5,6 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, i
 	int placement_num = 0;
 	switch (_method) {
 	case PLACEMENT_OURS:
-	case PLACEMENT_THROUGHPUT_AWARE:
 	case PLACEMENT_BANDWIDTH_AWARE:
 	case PLACEMENT_STORAGE_SPACE_AWARE:
 	case PLACEMENT_LIFETIME_AWARE:
@@ -17,28 +16,7 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, i
 		break;
 	}
 
-	//이거 migration에 있는 것과 같아서, 따로 함수 빼긴 해야함.
-	for (int vid = 0; vid < _num_of_videos; vid++) {
-		_VIDEO_SEGMENT_list[vid].is_serviced = true;
-	}
-	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-		vector<pair<double, int>> curr_set(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.size());
-		copy(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin(), _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end(), curr_set.begin());
-		reverse(curr_set.begin(), curr_set.end());
-
-		double curr_bandwidth = _SSD_list[ssd].total_bandwidth_usage;
-		while (curr_bandwidth > _SSD_list[ssd].maximum_bandwidth) {
-			int vid = curr_set.back().second;
-			curr_bandwidth -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
-			_VIDEO_SEGMENT_list[vid].is_serviced = false;
-			curr_set.pop_back();
-			if (curr_set.empty())
-				break;
-		}
-		_SSD_list[ssd].serviced_bandwidth_usage = curr_bandwidth;
-		vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
-	}
-
+	set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 	return placement_num;
 }
 
@@ -59,14 +37,12 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index)) {
 				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].total_bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
 				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
-				double remained_write_MB = ((_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) * _SSD_list[ssd_temp].running_days) - (_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size);
+				//double remained_write_MB = ((_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) * _SSD_list[ssd_temp].running_days) - (_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size);
+				double ADWD = ((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / _SSD_list[ssd_temp].running_days) / (_SSD_list[ssd_temp].DWPD * _SSD_list[ssd_temp].storage_capacity);
 
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS:
-					slope = (remained_bandwidth / remained_storage) / remained_write_MB;
-					break;
-				case PLACEMENT_THROUGHPUT_AWARE:
 					slope = remained_bandwidth / remained_storage;
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
@@ -76,7 +52,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					slope = remained_storage;
 					break;
 				case PLACEMENT_LIFETIME_AWARE:
-					slope = remained_write_MB; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
+					slope = ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
 					break;
 				}
 				target_ssd_list_with_ratio_sort.insert(make_pair(make_pair(priority, slope), ssd_temp));
@@ -146,8 +122,12 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 				ssd_index %= _num_of_videos;
 
 			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_index, video_index)) {
+				int prev_SSD = _VIDEO_SEGMENT_list[video_index].assigned_SSD;
+				if (prev_SSD != ssd_index) {
+					placement_num++;
+				}
+
 				allocate(_SSD_list, _VIDEO_SEGMENT_list, ssd_index, video_index);
-				placement_num++;
 			}
 			else {
 				target_ssd_list.pop_back();
@@ -170,7 +150,6 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _ssd_index
 	_SSD_list[_ssd_index].total_bandwidth_usage += _VIDEO_SEGMENT_list[_video_index].requested_bandwidth;
 
 	if (prev_SSD != _ssd_index) {
-		//_SSD_list[_ssd_index].daily_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
 		_SSD_list[_ssd_index].total_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
 		_SSD_list[_ssd_index].ADWD = (_SSD_list[_ssd_index].total_write_MB / (_SSD_list[_ssd_index].DWPD * _SSD_list[_ssd_index].storage_capacity)) / _SSD_list[_ssd_index].running_days;
 	}
