@@ -1,9 +1,9 @@
 #include "header.h"
-#define NUM_OF_DATEs 3  // for simulation 1, 3, (7), 15, 30
+#define NUM_OF_DATEs 7  // for simulation 1, 3, (7), 15, 30
 #define NUM_OF_TIMEs 4
 
-#define MIN_ADWD 10 // 0.1
-#define MAX_ADWD 10 // 20
+#define MIN_ADWD 1 // 0.2
+#define MAX_ADWD 1 // 20
 #define MIN_RUNNING_DAY 30
 #define MAX_RUNNING_DAY 30
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
@@ -12,7 +12,7 @@ int placement_method = 1; //2,3으로 바꾸면 비교스킴
 int num_of_SSDs = 30; // 15, 20, (25), 30, 35
 int num_of_videos = 3000000;// 10만, 20만, 30만, 40만, 50만
 
-int migration_method = 1; // 7~10로 바꾸면 비교스킴
+int migration_method = 7; // 7~10로 바꾸면 비교스킴
 int num_of_new_videos = 30000; // 15000, (20000), 25000, 30000, 35000
 //이거 0인게 제일 잘 나온다 왜지
 
@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		//simulation_placement();
-		simulation_migartion();
+		simulation_placement();
+		//simulation_migartion();
 		break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {

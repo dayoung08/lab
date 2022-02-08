@@ -5,6 +5,7 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, i
 	int placement_num = 0;
 	switch (_method) {
 	case PLACEMENT_OURS:
+	case PLACEMENT_THROUGHPUT_AWARE:
 	case PLACEMENT_BANDWIDTH_AWARE:
 	case PLACEMENT_STORAGE_SPACE_AWARE:
 	case PLACEMENT_LIFETIME_AWARE:
@@ -43,6 +44,9 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS:
+					slope = (remained_bandwidth / remained_storage) / ADWD;
+					break;
+				case PLACEMENT_THROUGHPUT_AWARE:
 					slope = remained_bandwidth / remained_storage;
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
@@ -52,7 +56,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					slope = remained_storage;
 					break;
 				case PLACEMENT_LIFETIME_AWARE:
-					slope = ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
+					slope = 1-ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
 					break;
 				}
 				target_ssd_list_with_ratio_sort.insert(make_pair(make_pair(priority, slope), ssd_temp));
@@ -60,17 +64,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		}
 
 		if (!target_ssd_list_with_ratio_sort.empty()) {
-			int ssd_index = NONE_ALLOC;
-
-			if (_placement_method == PLACEMENT_LIFETIME_AWARE) {
-				set<pair<pair<bool, double>, int>>::iterator pos = target_ssd_list_with_ratio_sort.end();
-				pair<pair<bool, double>, int> element = (*--pos);
-				ssd_index = element.second;
-			}
-			else {
-				ssd_index = (*target_ssd_list_with_ratio_sort.begin()).second;
-			}
-
+			int ssd_index = (*target_ssd_list_with_ratio_sort.begin()).second;
 			int prev_SSD = _VIDEO_SEGMENT_list[video_index].assigned_SSD;
 			if (prev_SSD != ssd_index) {
 				placement_num++;
@@ -151,6 +145,6 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _ssd_index
 
 	if (prev_SSD != _ssd_index) {
 		_SSD_list[_ssd_index].total_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
-		_SSD_list[_ssd_index].ADWD = (_SSD_list[_ssd_index].total_write_MB / (_SSD_list[_ssd_index].DWPD * _SSD_list[_ssd_index].storage_capacity)) / _SSD_list[_ssd_index].running_days;
+		_SSD_list[_ssd_index].ADWD = (_SSD_list[_ssd_index].total_write_MB / _SSD_list[_ssd_index].running_days) / (_SSD_list[_ssd_index].DWPD * _SSD_list[_ssd_index].storage_capacity);
 	}
 }
