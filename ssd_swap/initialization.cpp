@@ -5,9 +5,10 @@
 #define MAX_DWPD 150 //1.50  // for simulation
 #define MIN_DWPD 4   //0.04  // for simulation
 
-#define MAX_WAF 32 // 3.2 // for simulation
-#define MIN_WAF 10 // 2.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
-//https://www.samsung.com/semiconductor/global.semi.static/Multi-stream_Cassandra_Whitepaper_Final-0.pdf 이건 1~3.2. 1이면 그냥 가비지 콜렉션으로 인한 쓰기 증폭이 없는것
+#define MAX_WAF 50 // 4.0 // for simulation
+#define MIN_WAF 10 // 1.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
+//https://news.skhynix.co.kr/post/zns-ssd-existing-ssd-and
+//https://manualzz.com/doc/24659687/title-tahoma-36ft-bold--0-0-204- 이거 보니 5짜리 있긴 있는듯
 
 #define MAX_SSD_BANDWIDTH 5000 // for simulation
 #define MIN_SSD_BANDWIDTH 400 // for simulation
@@ -25,7 +26,6 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		}
 		else {
 			_SSD_list[ssd_index].storage_capacity = ((double)500000 * pow(2, rand() % 3)) + 0.00001; // 0.5, 1, 2, 4TB
-			//_SSD_list[index].storage_space = 2000000 * 0.9095;  //보통 2테라면 약간 더 낮아져서
 			_SSD_list[ssd_index].DWPD = ((double)(rand() % (MAX_DWPD - MIN_DWPD + 1) + MIN_DWPD)) / 100;
 			_SSD_list[ssd_index].WAF = ((double)(rand() % (MAX_WAF - MIN_WAF + 1) + MIN_WAF)) / 10;
 			_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
@@ -35,7 +35,8 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
 
 		_SSD_list[ssd_index].storage_usage = 0;
-		_SSD_list[ssd_index].bandwidth_usage = 0;
+		_SSD_list[ssd_index].total_bandwidth_usage = 0;
+		_SSD_list[ssd_index].serviced_bandwidth_usage = 0;
 		_SSD_list[ssd_index].ADWD = 0;
 		//_SSD_list[ssd_index].daily_write_MB = 0;
 		_SSD_list[ssd_index].total_write_MB = 0;
@@ -60,7 +61,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		_VIDEO_SEGMENT_list[video_index].popularity = pop;
 		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * _VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 		_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-		_VIDEO_SEGMENT_list[video_index].is_alloc = false;
+		_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 		_VIDEO_SEGMENT_list[video_index].path = "/segment_" + to_string(video_index) + ".mp4";
 	}
 	delete[] vid_pop;
@@ -81,9 +82,9 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
-		_SSD_list[ssd_index].assigned_VIDEOs_low_bandwidth_first.clear();
+		_SSD_list[ssd_index].total_assigned_VIDEOs_low_bandwidth_first.clear();
 		_SSD_list[ssd_index].storage_usage = 0;
-		_SSD_list[ssd_index].bandwidth_usage = 0;
+		_SSD_list[ssd_index].total_bandwidth_usage = 0;
 		_SSD_list[ssd_index].running_days += _day;
 		_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].DWPD * _SSD_list[ssd_index].storage_capacity)) / _SSD_list[ssd_index].running_days;
 
@@ -101,19 +102,19 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
 			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * _existed_VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
+			_existed_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 			
 			if (_migration_method >= MIGRATION_OURS) {
 				if (SSD_index != NONE_ALLOC) {
 					_SSD_list[SSD_index].storage_usage += _existed_VIDEO_SEGMENT_list[video_index].size;
-					_SSD_list[SSD_index].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
-					_SSD_list[SSD_index].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+					_SSD_list[SSD_index].total_bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+					_SSD_list[SSD_index].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
 				}
 				else {
 					_existed_VIDEO_SEGMENT_list[video_index].assigned_SSD = VIRTUAL_SSD;
-					_existed_VIDEO_SEGMENT_list[video_index].is_alloc = true;
 					_SSD_list[VIRTUAL_SSD].storage_usage += _existed_VIDEO_SEGMENT_list[video_index].size;
-					_SSD_list[VIRTUAL_SSD].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
-					_SSD_list[VIRTUAL_SSD].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+					_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+					_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
 				}
 			}
 		}
@@ -124,18 +125,17 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].popularity = pop;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth; //220124
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].path = "/segment_" + to_string(video_index) + ".mp4";
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_serviced = false;
 
 			//이 아래는 migration scheme 쓸 때 사용함. vitual ssd에 넣어놓음
 			if (_migration_method >= MIGRATION_OURS) {
 				_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].assigned_SSD = VIRTUAL_SSD;
-				_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_alloc = true;
 				_SSD_list[VIRTUAL_SSD].storage_usage += _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size;
-				_SSD_list[VIRTUAL_SSD].bandwidth_usage += _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth;
-				_SSD_list[VIRTUAL_SSD].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth, video_index));
+				_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth;
+				_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth, video_index));
 			}
 			else {
 				_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].assigned_SSD = NONE_ALLOC;
-				_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_alloc = false;
 			}
 		}
 	}
@@ -173,7 +173,7 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 				_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
 
 				_SSD_list[ssd_index].storage_usage = stod(ssd_info[5]);
-				_SSD_list[ssd_index].bandwidth_usage = stod(ssd_info[6]);
+				_SSD_list[ssd_index].total_bandwidth_usage = stod(ssd_info[6]);
 				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[7]);
 				_SSD_list[ssd_index].running_days = stoi(ssd_info[8]);
 				_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD)) / _SSD_list[ssd_index].running_days;
@@ -216,11 +216,11 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 				_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * _VIDEO_SEGMENT_list[video_index].once_bandwidth;
 				if (!strcmp(video_info[3].c_str(), "NONE_ALLOC")) {
 					_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-					_VIDEO_SEGMENT_list[video_index].is_alloc = false;
+					_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 				}
 				else {
 					_VIDEO_SEGMENT_list[video_index].assigned_SSD = stoi(video_info[3]);
-					_VIDEO_SEGMENT_list[video_index].is_alloc = true;
+					_VIDEO_SEGMENT_list[video_index].is_serviced = true;
 				}
 				//여기부터 할당
 			}
@@ -269,7 +269,7 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 				_new_VIDEO_SEGMENT_list[video_index].popularity = pop;
 				_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * _new_VIDEO_SEGMENT_list[video_index].once_bandwidth;
 				_new_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-				_new_VIDEO_SEGMENT_list[video_index].is_alloc = false;
+				_new_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 				//여기부터 할당
 			}
 			cnt++;
@@ -283,8 +283,8 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 	//기존의 비디오 정보의 인기도, 밴드윗 갱신
 	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
-		_SSD_list[ssd_index].bandwidth_usage = 0;
-		_SSD_list[ssd_index].assigned_VIDEOs_low_bandwidth_first.clear();
+		_SSD_list[ssd_index].total_bandwidth_usage = 0;
+		_SSD_list[ssd_index].total_assigned_VIDEOs_low_bandwidth_first.clear();
 	}
 
 	for (int vid = 0; vid < _num_of_existed_videos; vid++) {
@@ -297,8 +297,8 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 		_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * VIDEO_BANDWIDTH; //220124
 		int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
 		if (SSD_index != NONE_ALLOC) {
-			_SSD_list[SSD_index].bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
-			_SSD_list[SSD_index].assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+			_SSD_list[SSD_index].total_bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+			_SSD_list[SSD_index].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
 		}
 	}
 	delete[] vid_pop;

@@ -14,7 +14,8 @@ using namespace std;
 #define NONE_ALLOC -1
 #define VIRTUAL_SSD 0
 
-#define PLACEMENT_OURS 1
+#define PLACEMENT_OURS 0
+#define PLACEMENT_THROUGHPUT_AWARE 1
 #define PLACEMENT_BANDWIDTH_AWARE 2
 #define PLACEMENT_STORAGE_SPACE_AWARE 3
 #define PLACEMENT_LIFETIME_AWARE 4
@@ -32,7 +33,7 @@ using namespace std;
 
 #define NUM_OF_REQUEST_PER_SEC 40000 // 1초에 40000번의 제공 요청이 클라이언트들에게서 온다고 가정.
 #define VIDEO_BANDWIDTH 1.25f //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-#define VIDEO_SIZE 12.5f //세그먼트가 10초짜리라고 가정하면, 1.25MB/s x 10s = 12.5MB
+#define VIDEO_SIZE 12.5f;
 
 struct SSD {
 	int index;
@@ -44,13 +45,14 @@ struct SSD {
 	double maximum_bandwidth;
 
 	double storage_usage;
-	double bandwidth_usage;
-	//double daily_write_MB;
+	double total_bandwidth_usage;
+	set<pair<double, int>, less<pair<double, int>>> total_assigned_VIDEOs_low_bandwidth_first;
+
 	double ADWD;
 	double total_write_MB;
 	int running_days;
 
-	set<pair<double, int>, less<pair<double, int>>> assigned_VIDEOs_low_bandwidth_first;
+	double serviced_bandwidth_usage;
 
 	string node_hostname; // for hadoop datanode
 };
@@ -66,8 +68,7 @@ struct VIDEO_SEGMENT {
 	double popularity;
 
 	int assigned_SSD;
-
-	bool is_alloc;
+	bool is_serviced;
 };
 
 
@@ -90,11 +91,11 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _placement_method, int _num_of_SSDs, int _num_of_videos);
 void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _ssd_index, int _video_index);
 
-int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs);
-int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs);
+int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_videos);
+int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_videos);
 void swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double, int> _element, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid);
 void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double, int> element, int from_ssd, int to_ssd, int from_vid);
-void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs, int _num_of_SSDs, vector<pair<double, int>>* _eliminated_video_list, bool* _is_inserted_eliminated_video_list);
+void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, bool* _is_imposible, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs, int _num_of_SSDs, vector<pair<double, int>>* _eliminated_video_list, bool* _is_inserted_eliminated_video_list);
 double get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid);
 double get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _from_ssd, int _to_ssd, int _from_vid);
 int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid);
