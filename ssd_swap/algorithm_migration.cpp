@@ -148,7 +148,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					_VIDEO_SEGMENT_list[vid].is_serviced = false;
 					curr_set.pop_back();
 				}
-			}
+			} // 사실 이미 저장된거 굳이 뺄 필요는 없다.... 그래서 굳이 안 뺌
+			//정상적 서비스 여부 자체는 알아서 마지막에 계산 해주니까
 			update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &bandwidth_usage_of_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list);
 			continue;
 			/*for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
@@ -327,12 +328,12 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
 			if(_from_ssd == VIRTUAL_SSD)
 				flag = FLAG_REALLOCATE;
-			else if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth) {
+			else if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) {
 				flag = FLAG_REALLOCATE;
 			}
 		}
 		else if (_to_ssd != NONE_ALLOC) {
-			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) < _SSD_list[_to_ssd].maximum_bandwidth &&
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth &&
 				_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) {
 				flag = FLAG_SWAP;
 			}

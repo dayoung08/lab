@@ -12,7 +12,7 @@ int placement_method = 1; //2,3으로 바꾸면 비교스킴
 int num_of_SSDs = 30; // 15, 20, (25), 30, 35
 int num_of_videos = 3000000;// 10만, 20만, 30만, 40만, 50만
 
-int migration_method = 8; // 7~10로 바꾸면 비교스킴
+int migration_method = 0; // 7~10로 바꾸면 비교스킴
 int num_of_new_videos = 30000; // 15000, (20000), 25000, 30000, 35000
 //이거 0인게 제일 잘 나온다 왜지
 
