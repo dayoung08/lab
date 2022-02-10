@@ -30,10 +30,9 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	while (!VIDEO_SEGMENT_list_with_bandwidth_sort.empty()) {
 		int video_index = (*VIDEO_SEGMENT_list_with_bandwidth_sort.begin()).second;
 		VIDEO_SEGMENT_list_with_bandwidth_sort.erase(*VIDEO_SEGMENT_list_with_bandwidth_sort.begin());
-		set<pair<pair<bool, double>, int>, greater<pair<pair<bool, double>, int>>> target_ssd_list_with_ratio_sort;
+		set<pair<double, int>, greater<pair<double, int>>> target_ssd_list_with_ratio_sort;
 
 		for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
-			bool priority = ((_SSD_list[ssd_temp].total_bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth) <= _SSD_list[ssd_temp].maximum_bandwidth);
 			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index)) {
 				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].total_bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
 				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
@@ -55,7 +54,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					slope = 1-ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
 					break;
 				}
-				target_ssd_list_with_ratio_sort.insert(make_pair(make_pair(priority, slope), ssd_temp));
+				target_ssd_list_with_ratio_sort.insert(make_pair(slope, ssd_temp));
 			}
 		}
 

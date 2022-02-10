@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 7  // for simulation 1, 3, (7), 15, 30
+#define NUM_OF_DATEs 5  // for simulation 5
 #define NUM_OF_TIMEs 4
 
 #define MIN_ADWD 1 // 0.2
@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		simulation_placement();
-		//simulation_migartion();
+		//simulation_placement();
+		simulation_migartion();
 		break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
