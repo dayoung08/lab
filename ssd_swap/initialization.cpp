@@ -1,14 +1,14 @@
 #include "header.h"
-//initalization : ±âÁ¸¿¡ ÀÖ´ø SSD¿Í video Á¤º¸ °¡Á®¿À±â
-//update_new_video: »õ·Î¿î ºñµğ¿À Á¤º¸ °¡Á®¿À¸é¼­, ±âÁ¸¿¡ ÀÖ´ø videoÀÇ ÀÎ±âµµ, ´ë¿ªÆøµµ ÇÔ²² °»½Å
+//initalization : ê¸°ì¡´ì— ìˆë˜ SSDì™€ video ì •ë³´ ê°€ì ¸ì˜¤ê¸°
+//update_new_video: ìƒˆë¡œìš´ ë¹„ë””ì˜¤ ì •ë³´ ê°€ì ¸ì˜¤ë©´ì„œ, ê¸°ì¡´ì— ìˆë˜ videoì˜ ì¸ê¸°ë„, ëŒ€ì—­í­ë„ í•¨ê»˜ ê°±ì‹ 
 
 #define MAX_DWPD 150 //1.50  // for simulation
 #define MIN_DWPD 4   //0.04  // for simulation
 
-#define MAX_WAF 50 // 4.0 // for simulation
+#define MAX_WAF 50 // 5.0 // for simulation
 #define MIN_WAF 10 // 1.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
 //https://news.skhynix.co.kr/post/zns-ssd-existing-ssd-and
-//https://manualzz.com/doc/24659687/title-tahoma-36ft-bold--0-0-204- ÀÌ°Å º¸´Ï 5Â¥¸® ÀÖ±ä ÀÖ´Âµí
+//https://manualzz.com/doc/24659687/title-tahoma-36ft-bold--0-0-204- ì´ê±° ë³´ë‹ˆ 5ì§œë¦¬ ìˆê¸´ ìˆëŠ”ë“¯
 
 #define MAX_SSD_BANDWIDTH 5000 // for simulation
 #define MIN_SSD_BANDWIDTH 400 // for simulation
@@ -40,7 +40,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		_SSD_list[ssd_index].ADWD = 0;
 		//_SSD_list[ssd_index].daily_write_MB = 0;
 		_SSD_list[ssd_index].total_write_MB = 0;
-		_SSD_list[ssd_index].running_days = 1; // Ã¹ ³¯ = 1ÀÌ´Ï±î
+		_SSD_list[ssd_index].running_days = 1; // ì²« ë‚  = 1ì´ë‹ˆê¹Œ
 
 		_SSD_list[ssd_index].node_hostname = "datanode" + to_string(ssd);
 	}
@@ -66,8 +66,8 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	}
 	delete[] vid_pop;
 	vid_pop_shuffle.clear();
-	vector<double>().swap(vid_pop_shuffle); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
-	printf("ÃÊ±âÈ­ ¿Ï·á. ÀÌ ¹®±¸°¡ »¡¸® ¾È ¶ß¸é SSD ¼ıÀÚ¸¦ ´Ã¸®°Å³ª ºñµğ¿À ¼¼±×¸ÕÆ® ¼ö¸¦ ÁÙÀÏ °Í\n");
+	vector<double>().swap(vid_pop_shuffle); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
+	printf("ì´ˆê¸°í™” ì™„ë£Œ. ì´ ë¬¸êµ¬ê°€ ë¹¨ë¦¬ ì•ˆ ëœ¨ë©´ SSD ìˆ«ìë¥¼ ëŠ˜ë¦¬ê±°ë‚˜ ë¹„ë””ì˜¤ ì„¸ê·¸ë¨¼íŠ¸ ìˆ˜ë¥¼ ì¤„ì¼ ê²ƒ\n");
 }
 
 void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _day) {
@@ -98,7 +98,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		double pop = vid_pop_shuffle.back();
 		vid_pop_shuffle.pop_back();
 
-		if (video_index < _num_of_existed_videos) { // ±âÁ¸¿¡ ÀÖ´ø ¿µ»óÀÇ ÀÎ±âµµ, ¹êµåÀ­ °»½Å
+		if (video_index < _num_of_existed_videos) { // ê¸°ì¡´ì— ìˆë˜ ì˜ìƒì˜ ì¸ê¸°ë„, ë°´ë“œìœ— ê°±ì‹ 
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
 			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double) NUM_OF_REQUEST_PER_SEC * _existed_VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
@@ -118,7 +118,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 				}
 			}
 		}
-		else { // »õ·Î¿î ¿µ»ó
+		else { // ìƒˆë¡œìš´ ì˜ìƒ
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].index = video_index;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size = (double) VIDEO_SIZE;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth = (double) VIDEO_BANDWIDTH;
@@ -127,7 +127,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].path = "/segment_" + to_string(video_index) + ".mp4";
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_serviced = false;
 
-			//ÀÌ ¾Æ·¡´Â migration scheme ¾µ ¶§ »ç¿ëÇÔ. vitual ssd¿¡ ³Ö¾î³õÀ½
+			//ì´ ì•„ë˜ëŠ” migration scheme ì“¸ ë•Œ ì‚¬ìš©í•¨. vitual ssdì— ë„£ì–´ë†“ìŒ
 			if (_migration_method >= MIGRATION_OURS) {
 				_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].assigned_SSD = VIRTUAL_SSD;
 				_SSD_list[VIRTUAL_SSD].storage_usage += _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].size;
@@ -141,18 +141,18 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 	}
 	delete[] vid_pop;
 	vid_pop_shuffle.clear();
-	vector<double>().swap(vid_pop_shuffle); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
+	vector<double>().swap(vid_pop_shuffle); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
 }
 
 void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_videos) {
-	//ÆÄÀÏ ÀĞ¾î¿À´Â ÇüÅÂ·Î ÇÒ ¿¹Á¤ÀÓ.
+	//íŒŒì¼ ì½ì–´ì˜¤ëŠ” í˜•íƒœë¡œ í•  ì˜ˆì •ì„.
 	//https://tang2.tistory.com/335
-	ifstream fin_ssd("SSD_list.in"); // fin °´Ã¼ »ı¼º(cin Ã³·³ ÀÌ¿ë!) -> ¼Ğ ÇÁ·Î±×·¡¹Ö ÆÄÀÏ ½ÇÇà½Ã, ÀÌ ÆÄÀÏÀÌ ¾øÀ¸¸é »ı¼ºÇÏ°í(°¡º±°Ô ¹Ì¸® ¸¸µç µğÆúÆ® ÆÄÀÏ copyÇÏÀÚ), storage_usage, bandwidth_usage, write_MB°¡ 0ÀÌµµ·Ï ÇÔ
+	ifstream fin_ssd("SSD_list.in"); // fin ê°ì²´ ìƒì„±(cin ì²˜ëŸ¼ ì´ìš©!) -> ì…¸ í”„ë¡œê·¸ë˜ë° íŒŒì¼ ì‹¤í–‰ì‹œ, ì´ íŒŒì¼ì´ ì—†ìœ¼ë©´ ìƒì„±í•˜ê³ (ê°€ë³ê²Œ ë¯¸ë¦¬ ë§Œë“  ë””í´íŠ¸ íŒŒì¼ copyí•˜ì), storage_usage, bandwidth_usage, write_MBê°€ 0ì´ë„ë¡ í•¨
 	if (fin_ssd.is_open())
 	{
 		string str;
 		int cnt = 0;
-		while (getline(fin_ssd, str)) // ÆÄÀÏÀÌ ³¡³¯¶§±îÁö ÇÑ ÁÙ¾¿ ÀĞ¾î¿À±â
+		while (getline(fin_ssd, str)) // íŒŒì¼ì´ ëë‚ ë•Œê¹Œì§€ í•œ ì¤„ì”© ì½ì–´ì˜¤ê¸°
 		{
 			if (cnt == 0) {
 				num_of_SSDs = stoi(str);
@@ -168,8 +168,8 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 				_SSD_list[ssd_index].maximum_bandwidth = stod(ssd_info[2]);
 				_SSD_list[ssd_index].DWPD = stod(ssd_info[3]);
 				_SSD_list[ssd_index].WAF = stod(ssd_info[4]);
-				// WAF = (Attrib_247 + Attrib_248) / Attrib_247·Î °è»êÇÏ°í,
-				//À§ÀÇ °ªµéÀº smartctl -a /dev/sda À¸·Î ÀĞ¾î¿À±â °¡´ÉÇÔ. https://community.ui.com/questions/Using-an-SSD-for-CloudKey-Gen2-Protect/b91b418f-ab93-42ba-8d0d-31b568f50bd9
+				// WAF = (Attrib_247 + Attrib_248) / Attrib_247ë¡œ ê³„ì‚°í•˜ê³ ,
+				//ìœ„ì˜ ê°’ë“¤ì€ smartctl -a /dev/sda ìœ¼ë¡œ ì½ì–´ì˜¤ê¸° ê°€ëŠ¥í•¨. https://community.ui.com/questions/Using-an-SSD-for-CloudKey-Gen2-Protect/b91b418f-ab93-42ba-8d0d-31b568f50bd9
 				_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
 
 				_SSD_list[ssd_index].storage_usage = stod(ssd_info[5]);
@@ -181,16 +181,16 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 			cnt++;
 		}
 	}
-	fin_ssd.close(); // ÆÄÀÏ ´İ±â
+	fin_ssd.close(); // íŒŒì¼ ë‹«ê¸°
 
-	ifstream fin_video("existed_video_list.in"); // fin °´Ã¼ »ı¼º(cin Ã³·³ ÀÌ¿ë!)
+	ifstream fin_video("existed_video_list.in"); // fin ê°ì²´ ìƒì„±(cin ì²˜ëŸ¼ ì´ìš©!)
 	if (fin_video.is_open())
 	{
 		double* vid_pop = NULL;
 		vector<double>vid_pop_shuffle;
 		string str;
 		int cnt = -1;
-		while (getline(fin_video, str)) // ÆÄÀÏÀÌ ³¡³¯¶§±îÁö ÇÑ ÁÙ¾¿ ÀĞ¾î¿À±â
+		while (getline(fin_video, str)) // íŒŒì¼ì´ ëë‚ ë•Œê¹Œì§€ í•œ ì¤„ì”© ì½ì–´ì˜¤ê¸°
 		{
 			if (cnt == -1) {
 				num_of_videos = stoi(str);
@@ -222,27 +222,27 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 					_VIDEO_SEGMENT_list[video_index].assigned_SSD = stoi(video_info[3]);
 					_VIDEO_SEGMENT_list[video_index].is_serviced = true;
 				}
-				//¿©±âºÎÅÍ ÇÒ´ç
+				//ì—¬ê¸°ë¶€í„° í• ë‹¹
 			}
 			cnt++;
 		}
 		delete[] vid_pop;
 		vid_pop_shuffle.clear();
-		vector<double>().swap(vid_pop_shuffle); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
+		vector<double>().swap(vid_pop_shuffle); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
 	}
-	fin_video.close(); // ÆÄÀÏ ´İ±â
+	fin_video.close(); // íŒŒì¼ ë‹«ê¸°
 }
 
 void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int& _num_of_new_videos) {
 	double* vid_pop = NULL;
 	vector<double>vid_pop_shuffle;
 
-	ifstream fin_video("new_video_list.in"); // fin °´Ã¼ »ı¼º(cin Ã³·³ ÀÌ¿ë)
+	ifstream fin_video("new_video_list.in"); // fin ê°ì²´ ìƒì„±(cin ì²˜ëŸ¼ ì´ìš©)
 	if (fin_video.is_open())
 	{
 		string str;
 		int cnt = -1;
-		while (getline(fin_video, str)) // ÆÄÀÏÀÌ ³¡³¯¶§±îÁö ÇÑ ÁÙ¾¿ ÀĞ¾î¿À±â
+		while (getline(fin_video, str)) // íŒŒì¼ì´ ëë‚ ë•Œê¹Œì§€ í•œ ì¤„ì”© ì½ì–´ì˜¤ê¸°
 		{
 			if (cnt == -1) {
 				_num_of_new_videos = stoi(str);
@@ -270,17 +270,17 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 				_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * NUM_OF_REQUEST_PER_SEC * _new_VIDEO_SEGMENT_list[video_index].once_bandwidth;
 				_new_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 				_new_VIDEO_SEGMENT_list[video_index].is_serviced = false;
-				//¿©±âºÎÅÍ ÇÒ´ç
+				//ì—¬ê¸°ë¶€í„° í• ë‹¹
 			}
 			cnt++;
 		}
 		delete[] vid_pop;
 		vid_pop_shuffle.clear();
-		vector<double>().swap(vid_pop_shuffle); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
+		vector<double>().swap(vid_pop_shuffle); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
 	}
-	fin_video.close(); // ÆÄÀÏ ´İ±â
+	fin_video.close(); // íŒŒì¼ ë‹«ê¸°
 
-	//±âÁ¸ÀÇ ºñµğ¿À Á¤º¸ÀÇ ÀÎ±âµµ, ¹êµåÀ­ °»½Å
+	//ê¸°ì¡´ì˜ ë¹„ë””ì˜¤ ì •ë³´ì˜ ì¸ê¸°ë„, ë°´ë“œìœ— ê°±ì‹ 
 	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].total_bandwidth_usage = 0;
@@ -303,7 +303,7 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 	}
 	delete[] vid_pop;
 	//vid_pop_shuffle.clear();
-	//vector<double>().swap(vid_pop_shuffle); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
+	//vector<double>().swap(vid_pop_shuffle); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
 }
 
 double* set_zipf_pop(int length, double alpha, double beta) {
@@ -350,24 +350,24 @@ void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 				break;
 		}
 		_SSD_list[ssd].serviced_bandwidth_usage = curr_bandwidth;
-		vector<pair<double, int>>().swap(curr_set); //¸Ş¸ğ¸® »èÁ¦¿ë
+		vector<pair<double, int>>().swap(curr_set); //ë©”ëª¨ë¦¬ ì‚­ì œìš©
 	}
 }
 
-//c++Àº split ¾ø¾î¼­ ÀÎÅÍ³İ¿¡¼­ º¹ºÙÇß´Ù ¤»¤»¤»¤»....
+//c++ì€ split ì—†ì–´ì„œ ì¸í„°ë„·ì—ì„œ ë³µë¶™í–ˆë‹¤ ã…‹ã…‹ã…‹ã…‹....
 string* split(string str, char Delimiter) {
-	istringstream iss(str);             // istringstream¿¡ strÀ» ´ã´Â´Ù.
-	string buffer;                      // ±¸ºĞÀÚ¸¦ ±âÁØÀ¸·Î Àı»èµÈ ¹®ÀÚ¿­ÀÌ ´ã°ÜÁö´Â ¹öÆÛ
+	istringstream iss(str);             // istringstreamì— strì„ ë‹´ëŠ”ë‹¤.
+	string buffer;                      // êµ¬ë¶„ìë¥¼ ê¸°ì¤€ìœ¼ë¡œ ì ˆì‚­ëœ ë¬¸ìì—´ì´ ë‹´ê²¨ì§€ëŠ” ë²„í¼
 	vector<string> result;
 
-	// istringstreamÀº istreamÀ» »ó¼Ó¹ŞÀ¸¹Ç·Î getlineÀ» »ç¿ëÇÒ ¼ö ÀÖ´Ù.
+	// istringstreamì€ istreamì„ ìƒì†ë°›ìœ¼ë¯€ë¡œ getlineì„ ì‚¬ìš©í•  ìˆ˜ ìˆë‹¤.
 	while (getline(iss, buffer, Delimiter)) {
-		result.push_back(buffer);               // Àı»èµÈ ¹®ÀÚ¿­À» vector¿¡ ÀúÀå
+		result.push_back(buffer);               // ì ˆì‚­ëœ ë¬¸ìì—´ì„ vectorì— ì €ì¥
 	}
 	
 	string* result_array = new string[result.size()];
 	copy(result.begin(), result.end(), result_array);
 	result.clear();
-	vector<string>().swap(result); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
+	vector<string>().swap(result); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
 	return result_array;
 }
