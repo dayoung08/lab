@@ -25,7 +25,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			_SSD_list[ssd_index].storage_capacity = ((double)500000 * pow(2, rand() % 3)) + 0.00001; // 0.5, 1, 2, 4TB
+			_SSD_list[ssd_index].storage_capacity = ((double)500000 * pow(2, rand() % 3)) + 0.00001; // 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = ((double)(rand() % (MAX_DWPD - MIN_DWPD + 1) + MIN_DWPD)) / 100;
 			_SSD_list[ssd_index].WAF = ((double)(rand() % (MAX_WAF - MIN_WAF + 1) + MIN_WAF)) / 10;
 			_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
