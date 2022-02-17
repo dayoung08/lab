@@ -31,7 +31,7 @@ using namespace std;
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
-#define NUM_OF_REQUEST_PER_SEC 40000 // 1초에 40000번의 제공 요청이 클라이언트들에게서 온다고 가정.
+//#define NUM_OF_REQUEST_PER_SEC 40000 // 1초에 40000번의 제공 요청이 클라이언트들에게서 온다고 가정.
 #define VIDEO_BANDWIDTH 1.25f //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
 #define VIDEO_SIZE 12.5f;
 
@@ -77,10 +77,10 @@ void simulation_migartion();
 void testbed_placement();
 void testbed_migration();
 
-void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos); 
-void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _day);
-void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_videos);
-void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int& _num_of_new_videos);
+void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_video, int _num_of_request_per_secs);
+void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _day);
+void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_videos, int _num_of_request_per_sec);
+void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int& _num_of_new_videos, int _num_of_request_per_sec);
 
 double* set_zipf_pop(int length, double alpha, double beta);
 bool is_full_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid);
