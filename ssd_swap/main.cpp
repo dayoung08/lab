@@ -8,11 +8,11 @@
 #define MAX_RUNNING_DAY 30
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
-int placement_method = 1; //2,3으로 바꾸면 비교스킴
+int placement_method = 6; //2~6으로 바꾸면 비교스킴
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
-int num_of_videos = 1000000;// 100만, 200만, (300만), 400만, 500만, 600만
+int num_of_videos = 5000000;// 100만, 200만, (300만), 400만, 500만, 600만
 
-int migration_method = 7; // 7~11로 바꾸면 비교스킴
+int migration_method = 7; // 8~11로 바꾸면 비교스킴
 int num_of_new_videos = 30000; // 10000, 20000, (30000), 40000, 50000
 int num_of_request_per_sec = 40000; // 24000, 32000, (40000), 48000, 56000, 64000
 //이거 0인게 제일 잘 나온다 왜지
@@ -24,8 +24,8 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		//simulation_placement();
-		simulation_migartion();
+		simulation_placement();
+		//simulation_migartion();
 		break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
@@ -187,8 +187,10 @@ void simulation_migartion() {
 	int num_of_alloc_videos = 0;
 	for (int vid = 0; vid < num_of_videos; vid++) {
 		if (VIDEO_SEGMENT_list[vid].assigned_SSD != NONE_ALLOC) {
-			num_of_alloc_videos++;
-			total_bandwidth_of_alloc_videos += VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			if (VIDEO_SEGMENT_list[vid].is_serviced) {
+				num_of_alloc_videos++;
+				total_bandwidth_of_alloc_videos += VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			}
 		}
 		if (VIDEO_SEGMENT_list[vid].assigned_SSD == VIRTUAL_SSD) {
 			printf("error\n");
