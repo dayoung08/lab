@@ -113,8 +113,9 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 				std::shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);
 				ssd_index = target_ssd_list.back();
 			}
-			if (_placement_method == PLACEMENT_ROUND_ROBIN)
-				ssd_index = video_index % _num_of_SSDs;
+			if (_placement_method == PLACEMENT_ROUND_ROBIN) {
+				ssd_index = target_ssd_list[vid % target_ssd_list.size()];
+			}
 
 			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_index, video_index)) {
 				int prev_SSD = _VIDEO_SEGMENT_list[video_index].assigned_SSD;
@@ -125,7 +126,10 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 				allocate(_SSD_list, _VIDEO_SEGMENT_list, ssd_index, video_index);
 			}
 			else {
-				target_ssd_list.pop_back();
+				if (_placement_method == PLACEMENT_RANDOM)
+					target_ssd_list.pop_back();
+				if (_placement_method == PLACEMENT_ROUND_ROBIN)
+					target_ssd_list.erase(target_ssd_list.begin() + (vid % target_ssd_list.size()));
 			}
 		}
 		/*else {
