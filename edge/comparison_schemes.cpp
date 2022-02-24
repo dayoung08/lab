@@ -137,7 +137,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
+				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES] / _server_list[ES].processing_capacity, ES));
 		}
 
 		while (!lowest_used_GHz_of_ES.empty()) {
@@ -206,7 +206,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 				set<pair<double, int>> lowest_used_GHz_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES])
-						lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
+						lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES] / _server_list[ES].processing_capacity, ES));
 				}
 
 				while (!lowest_used_GHz_of_ES.empty()) {
@@ -295,7 +295,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
-	
+
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
@@ -311,8 +311,8 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 GHz에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-			if(_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
+			if (_channel_list[ch].available_server_list[ES])
+				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES]/_server_list[ES].processing_capacity, ES));
 		}
 
 		while (!lowest_used_GHz_of_ES.empty()) {
@@ -381,10 +381,10 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		//가장 인기많은 ch를 고름.
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 GHz에 따라 오름차순 정렬. 
-		set<pair<int, int>> lowest_used_GHz_of_ES;
+		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(_server_list[ES].processing_capacity - _used_GHz[ES], ES));
+				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES] / _server_list[ES].processing_capacity, ES));
 		}
 
 		while (!lowest_used_GHz_of_ES.empty()) {
@@ -1495,7 +1495,7 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 		set<pair<double, int>> lowest_used_Mbps_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
 		}
 
 		while (!lowest_used_Mbps_of_ES.empty()) {
@@ -1564,7 +1564,7 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 				set<pair<double, int>> lowest_used_Mbps_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES])
-						lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+						lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
 				}
 
 				while (!lowest_used_Mbps_of_ES.empty()) {
@@ -1670,7 +1670,7 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		set<pair<double, int>> lowest_used_Mbps_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
 		}
 
 		while (!lowest_used_Mbps_of_ES.empty()) {
@@ -1742,7 +1742,7 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		set<pair<double, int>> lowest_used_Mbps_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
 		}
 
 		while (!lowest_used_Mbps_of_ES.empty()) {

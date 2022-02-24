@@ -1,14 +1,14 @@
 #include "head.h"
 int main() {
-	bool bandwidth_model_flag = true;
+	bool bandwidth_model_flag = false;
 	srand(SEED);
 
 	double ratio = 0.5; // 3, 4, 5, 6, 7
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;
-	//int model = LINEAR_MODEL;
-	int model = ONOFF_MODEL;
+	int model = LINEAR_MODEL;
+	//int model = ONOFF_MODEL;
 	int bitrate_set = 0;
 	//이 위의 인자들을 실험 환경에 따라 변경
 
@@ -36,6 +36,9 @@ int main() {
 
 	printf("===== 비교 스킴 =====\n\n");
 
+	comparison_schemes(RD_AP, server_list, channel_list, &version_set, cost_limit, model);
+	comparison_schemes(RD_HPF, server_list, channel_list, &version_set, cost_limit, model);
+
 	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	//if (model == CPU_USAGE_MODEL || model == STEP_MODEL) {
@@ -47,8 +50,6 @@ int main() {
 		comparison_schemes(LPF_AP, server_list, channel_list, &version_set, cost_limit, model);
 		comparison_schemes(LPF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	}
-	comparison_schemes(RD_AP, server_list, channel_list, &version_set, cost_limit, model);
-	comparison_schemes(RD_HPF, server_list, channel_list, &version_set, cost_limit, model);
 
 	comparison_schemes(Mbps_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(Mbps_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);

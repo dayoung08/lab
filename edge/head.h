@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define SEED 6773
+#define SEED 1234
 #define INF 987654321
 
 //#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
@@ -27,7 +27,7 @@ using namespace std;
 #define NUM_OF_MACHINE 5
 
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
-#define NUM_OF_CHANNEL 6000 //2000~10000 사이이고, ((6000이 기준))
+#define NUM_OF_CHANNEL 8000 //2000~10000 사이이고, ((6000이 기준))
 
 //#define VERSION_NUM 7
 //#define VERSION_SET_NUM 32 // 오리지널 버전 제외하고, 마지막 버전은 반드시 저장. 2^(7-2) set 1이 오리지널과 마지막 버전만 들어있는 것.

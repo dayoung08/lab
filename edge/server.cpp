@@ -32,8 +32,8 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 		_server_list[ES].processing_capacity = ES_GHz[rand() % NUM_OF_MACHINE + 1];
 
 		if (_bandwidth_model_flag)
-			//_server_list[ES].maximum_bandwidth = rand() % 100;
-			_server_list[ES].maximum_bandwidth = rand() % 4101 + 650;
+			_server_list[ES].maximum_bandwidth = rand() % 100;
+			//_server_list[ES].maximum_bandwidth = rand() % 4101 + 650;
 		else
 			_server_list[ES].maximum_bandwidth = INF;
 	}
