@@ -1,28 +1,29 @@
 #include "head.h"
 int main() {
+	bool bandwidth_model_flag = true;
 	srand(SEED);
 
 	double ratio = 0.5; // 3, 4, 5, 6, 7
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;
-	int model = CPU_USAGE_MODEL;
-	//int model = ONOFF_MODEL;
+	//int model = LINEAR_MODEL;
+	int model = ONOFF_MODEL;
 	int bitrate_set = 0;
-	//ì´ ìœ„ì˜ ì¸ìë“¤ì„ ì‹¤í—˜ í™˜ê²½ì— ë”°ë¼ ë³€ê²½
+	//ÀÌ À§ÀÇ ÀÎÀÚµéÀ» ½ÇÇè È¯°æ¿¡ µû¶ó º¯°æ
 
 	server server_list[NUM_OF_ES + 1];
 	channel channel_list[NUM_OF_CHANNEL + 1];
 	bitrate_version_set version_set(bitrate_set, metric_type); // default 0, VMAF;
 	channel_initialization(channel_list, &version_set, pop_type, metric_type);
-	server_initalization(server_list, model);
+	server_initalization(server_list, model, bandwidth_model_flag);
 	set_coverage_infomation(channel_list, server_list);
 
 	double cost_limit = get_total_charge(server_list, model) * ratio;
 	printf("===== START =====\n");
-	printf("ë¹„ìš© í•œë„ : %lf\n", cost_limit);
-	printf("ê°ë§ˆ ë¶„í¬ - k ê°’ : %lf, ì„¸íƒ€ ê°’ : %lf\n\n", K_gamma, THETA_gamma);
-	printf("ì—£ì§€ ìˆ˜ : %d, ì±„ë„ ìˆ˜ : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
+	printf("ºñ¿ë ÇÑµµ : %lf\n", cost_limit);
+	printf("°¨¸¶ ºĞÆ÷ - k °ª : %lf, ¼¼Å¸ °ª : %lf\n\n", K_gamma, THETA_gamma);
+	printf("¿§Áö ¼ö : %d, Ã¤³Î ¼ö : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
 
 	clock_t start, end, spent_time;
 	start = clock();
@@ -31,14 +32,14 @@ int main() {
 	spent_time = end - start;
 	printf("%lf second\n\n", (double)spent_time / CLOCKS_PER_SEC);
 
-	//ë¹„êµìŠ¤í‚´ ì•„ì§ ì½”ë”© ëœ í•¨
+	//ºñ±³½ºÅ´ ¾ÆÁ÷ ÄÚµù ´ú ÇÔ
 
-	printf("===== ë¹„êµ ìŠ¤í‚´ =====\n\n");
+	printf("===== ºñ±³ ½ºÅ´ =====\n\n");
 
 	comparison_schemes(GHz_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(GHz_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	//if (model == CPU_USAGE_MODEL || model == STEP_MODEL) {
-	if (model == CPU_USAGE_MODEL) {
+	if (model == LINEAR_MODEL) {
 		comparison_schemes(cost_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
 		comparison_schemes(cost_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	}
@@ -48,6 +49,9 @@ int main() {
 	}
 	comparison_schemes(RD_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(RD_HPF, server_list, channel_list, &version_set, cost_limit, model);
+
+	comparison_schemes(Mbps_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
+	comparison_schemes(Mbps_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 
 	printf("===== FINISH =====\n");
 }

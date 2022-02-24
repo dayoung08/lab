@@ -9,10 +9,12 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 		_channel_list[ch].popularity = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 		_channel_list[ch].video_GHz = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 		_channel_list[ch].pwq = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
+		_channel_list[ch].video_Mbps = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 
 		_channel_list[ch].sum_of_video_quality = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_pwq = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_version_set_GHz = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
+		_channel_list[ch].sum_of_version_set_Mbps = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		
 		_channel_list[ch].version_pop_type = _version_pop_type;
 		double* ver_pop = set_version_pop(_version_set, _channel_list[ch].version_pop_type);
@@ -23,13 +25,18 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].popularity[ver] = channel_pop[ch] * ver_pop[ver];
 			_channel_list[ch].video_GHz[ver] = 0;
 			_channel_list[ch].pwq[ver] = 0;
+			_channel_list[ch].video_Mbps[ver] = 0;
 		}
 		for (int set = 1; set <= _version_set->version_set_num; set++) {
 			_channel_list[ch].sum_of_video_quality[set] = 0;
 			_channel_list[ch].sum_of_pwq[set] = 0;
 			_channel_list[ch].sum_of_version_set_GHz[set] = 0;
+			_channel_list[ch].sum_of_version_set_Mbps[set] = 0;
 		}
 		//위 까지 인기도 계산
+		for (int ver = 1; ver <= _version_set->version_num; ver++) {
+			_channel_list[ch].video_Mbps[ver] = (double)_version_set->bitrate[ver] / 1000;
+		} // bandwidth_requirement;
 		set_video_metric(&(_channel_list[ch]), _version_set, _metric_type); // 비디오 퀄리티 값 계산
 		set_GHz(&(_channel_list[ch]), _version_set); // processing-rate 계산
 		set_PWQ(&(_channel_list[ch]), _version_set); // PWQ 계산
@@ -235,6 +242,7 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 		_channel->sum_of_pwq[set] += _channel->popularity[_version_set->version_num] * _channel->video_quality[_version_set->version_num]; //기본적으로 원본버전은 반드시 포함되므로
 
 		_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[1]; //기본적으로 가장 낮은 버전은 반드시 트랜스코딩 하므로
+		_channel->sum_of_version_set_Mbps[set] += _channel->video_Mbps[1];
 
 		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[1]; //가장 낮은버전은 무조건 들어감
 		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[_version_set->version_num]; //원본
@@ -248,6 +256,7 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 				_channel->sum_of_video_quality[set] += _channel->video_quality[ver];
 				_channel->sum_of_pwq[set] += _channel->popularity[ver] * _channel->video_quality[ver];
 				_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[ver];
+				_channel->sum_of_version_set_Mbps[set] += _channel->video_Mbps[ver];
 				//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[ver];
 
 				prev_ver = ver;

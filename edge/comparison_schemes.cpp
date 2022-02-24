@@ -1,57 +1,65 @@
 #include "head.h"
 
-//ì „ë°˜ì ìœ¼ë¡œ í™•ì¸ í•  í•„ìš”ê°€ ìˆìŒ 20210515
-//ë¹„êµ ìŠ¤í‚´ë“¤ì´ êµ¬í˜„ë˜ì—ˆë‹¤.
+//Àü¹İÀûÀ¸·Î È®ÀÎ ÇÒ ÇÊ¿ä°¡ ÀÖÀ½ 20210515
+//ºñ±³ ½ºÅ´µéÀÌ ±¸ÇöµÇ¾ú´Ù.
 
 void comparison_schemes(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model) {
-	short selected_set[NUM_OF_CHANNEL + 1]; // ê° ì±„ë„ì—ì„œ ì‚¬ìš©í•˜ëŠ” ë¹„íŠ¸ë ˆì´íŠ¸ set
+	short selected_set[NUM_OF_CHANNEL + 1]; // °¢ Ã¤³Î¿¡¼­ »ç¿ëÇÏ´Â ºñÆ®·¹ÀÌÆ® set
 	memset(selected_set, 0, (sizeof(short) * (NUM_OF_ES + 1)));
 
-	short** selected_ES;//[CHANNEL_NUM + 1][VERSION_NUM]; // ê° ì±„ë„ì—ì„œ ì‚¬ìš©í•˜ëŠ” ë¹„íŠ¸ë ˆì´íŠ¸ setì— ì†í•˜ëŠ” ê° ë²„ì „ì´ ì–´ë–¤ esì—ì„œ ì„ íƒë˜ì—ˆëŠ”ê°€.
-	//ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•´ì„œ ë°°ì—´ í¬ê¸°ê°€ ì €ë ‡ë‹¤.
+	short** selected_ES;//[CHANNEL_NUM + 1][VERSION_NUM]; // °¢ Ã¤³Î¿¡¼­ »ç¿ëÇÏ´Â ºñÆ®·¹ÀÌÆ® set¿¡ ¼ÓÇÏ´Â °¢ ¹öÀüÀÌ ¾î¶² es¿¡¼­ ¼±ÅÃµÇ¾ú´Â°¡.
+	//¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇØ¼­ ¹è¿­ Å©±â°¡ Àú·¸´Ù.
 
 	double used_GHz[NUM_OF_ES + 1];
+	double used_Mbps[NUM_OF_ES + 1];
 	int ES_count[NUM_OF_ES + 1];
 	memset(used_GHz, 0, (sizeof(double) * (NUM_OF_ES + 1)));
+	memset(used_Mbps, 0, (sizeof(double) * (NUM_OF_ES + 1)));
 	memset(ES_count, 0, (sizeof(int) * (NUM_OF_ES + 1)));
 
 	selected_ES = (short**)malloc(sizeof(short*) * (NUM_OF_CHANNEL + 1));
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-		selected_ES[ch] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•˜ë‹ˆê¹Œ
-		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {  // ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•˜ë‹ˆê¹Œ
+		selected_ES[ch] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // ¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇÏ´Ï±î
+		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {  // ¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇÏ´Ï±î
 			selected_ES[ch][ver] = -1;
 		}
 	}
 	if (method_index == GHz_WF_AP) {
-		GHz_worst_fit_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		GHz_worst_fit_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 	if (method_index == GHz_WF_HPF) {
-		GHz_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		GHz_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 	if (method_index == cost_WF_AP) {
-		cost_worst_fit_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		cost_worst_fit_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 	if (method_index == cost_WF_HPF) {
-		cost_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		cost_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 	if (method_index == LPF_AP) {
-		lowest_price_first_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		lowest_price_first_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 	if (method_index == LPF_HPF) {
-		lowest_price_first_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		lowest_price_first_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 	if (method_index == RD_AP) {
-		random_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		random_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 	if (method_index == RD_HPF) {
-		random_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+		random_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
+	}
+	if (method_index == Mbps_WF_AP) {
+		Mbps_worst_fit_AP(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
+	}
+	if (method_index == Mbps_WF_HPF) {
+		Mbps_worst_fit_HPF(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 	}
 
 	set_version_set(_version_set, selected_set, selected_ES);
-	print_method(method_index, _server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, ES_count, _model);
+	print_method(method_index, _server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model);
 }
 
-void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
+void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	if (method_index == GHz_WF_AP) {
 		printf("\n<<GHz_worst_fit_AP>>\n");
 	}
@@ -76,29 +84,39 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	if (method_index == RD_HPF) {
 		printf("\n<<random_HPF>>\n");
 	}
+	if (method_index == Mbps_WF_AP) {
+		printf("\n<<Mbps_worst_fit_AP>>\n");
+	}
+	if (method_index == Mbps_WF_HPF) {
+		printf("\n<<Mbps_worst_fit_HPF>>\n");
+	}
 	
 	double total_GHz = 0;
 	double total_pwq = 0;
+	double total_Mbps = 0;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_selected_set[ch]];
 		total_pwq += _channel_list[ch].sum_of_pwq[_selected_set[ch]];
+		total_Mbps += _channel_list[ch].sum_of_version_set_Mbps[_selected_set[ch]];
 	}
 
 	double total_cost = 0; 
-	double remained_GHz[NUM_OF_ES + 1]; // processing capacity[es] - used_GHz[es] í•˜ë©´ remained_GHz[es] í•˜ë©´ ë‚˜ì˜´. ëª¨ë“  ë…¸ë“œì˜ ë‚¨ì€ GHz ê³„ì‚°ì„ ìœ„í•´.
+	double remained_GHz[NUM_OF_ES + 1]; // processing capacity[es] - used_GHz[es] ÇÏ¸é remained_GHz[es] ÇÏ¸é ³ª¿È. ¸ğµç ³ëµåÀÇ ³²Àº GHz °è»êÀ» À§ÇØ.
+	double remained_Mbps[NUM_OF_ES + 1];
 
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-		double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+		double cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 		total_cost += cost;
 		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
+		remained_Mbps[ES] = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
 	}
-	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
-	is_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost >= _cost_limit));
+	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $, total_Mbps : %lf Mbps \n", total_GHz, total_pwq, total_cost, total_Mbps);
+	is_not_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost >= _cost_limit));
 }
 
-void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ GHzê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
-	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ GHz°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -113,9 +131,9 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
-		channel_popularities_set.erase(channel_popularities_set.begin()); //ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		channel_popularities_set.erase(channel_popularities_set.begin()); //°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ GHzì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ GHz¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
@@ -126,31 +144,41 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 			int ES = (*lowest_used_GHz_of_ES.begin()).second;
 			lowest_used_GHz_of_ES.erase(lowest_used_GHz_of_ES.begin());
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) && 
+				(total_cost <= _cost_limit) ) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -171,10 +199,10 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
-			//2~version_num-1ê¹Œì§€
+			//2~version_num-1±îÁö
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
-				//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ GHzì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+				//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ GHz¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 				set<pair<double, int>> lowest_used_GHz_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES])
@@ -185,19 +213,27 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 					int ES = (*lowest_used_GHz_of_ES.begin()).second;
 					lowest_used_GHz_of_ES.erase(lowest_used_GHz_of_ES.begin());
 
-					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
-						if (es == ES)
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						if (es == ES) {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
 						else {
-							//if (get_ES_total_count(es, _version_set))
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
 						}
 					}
 
-					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+						(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+						(total_cost <= _cost_limit)) {
 						_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = ES;
 						_ES_count[ES]++;
@@ -205,14 +241,15 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = 0;
 						_ES_count[0]++;
@@ -229,19 +266,23 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
+			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
+			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
 						_selected_ES[ch][ver] = -1;
 						_ES_count[ES]--;
-						if (_ES_count[ES])
+						if (_ES_count[ES]) {
 							_used_GHz[ES] -= _channel_list[ch].video_GHz[ver];
-						else
+							_used_Mbps[ES] -= _channel_list[ch].video_Mbps[ver];
+						}
+						else {
 							_used_GHz[ES] = 0;
+							_used_Mbps[ES] = 0;
+						}
 					}
 				}
 			}
@@ -249,25 +290,25 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 	}
 }
 
-void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ GHzê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
-	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ GHz°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 	
-	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
+	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
-		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
+		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
 		int ch = (*version_popularities_set.begin()).second.first;
 		version_popularities_set.erase(version_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ GHzì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ GHz¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if(_channel_list[ch].available_server_list[ES])
@@ -278,19 +319,27 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 			int ES = (*lowest_used_GHz_of_ES.begin()).second;
 			lowest_used_GHz_of_ES.erase(lowest_used_GHz_of_ES.begin());
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-				else{
-					//if (get_ES_total_count(es, _version_set))
-						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
+				else {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
@@ -298,14 +347,15 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 				is_allocated = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -314,7 +364,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		}
 	}
 
-	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
+	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -328,9 +378,9 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê·¸ ESì— í• ë‹¹ëœ verë²ˆ ë²„ì „ì˜ ê°¯ìˆ˜ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, ±× ES¿¡ ÇÒ´çµÈ GHz¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<int, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
@@ -341,19 +391,27 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 			int ES = (*lowest_used_GHz_of_ES.begin()).second;
 			lowest_used_GHz_of_ES.erase(lowest_used_GHz_of_ES.begin());
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = ES;
 				_ES_count[ES]++;
@@ -365,10 +423,11 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = 0;
 				_ES_count[0]++;
@@ -380,9 +439,9 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 	}
 }
 
-void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ costê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
-	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ cost°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -398,13 +457,16 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
 		channel_popularities_set.erase(channel_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+				double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+				double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
+
+				double cost = max(cpu_usage_cost, bandwidth_cost);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -413,34 +475,42 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			int ES = (*lowest_cost_of_ES.begin()).second;
 			lowest_cost_of_ES.erase(lowest_cost_of_ES.begin());
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
-				//ES_version_count_in_comparison_schemes[ES][ver]++;
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -462,14 +532,17 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
-			//2~version_num-1ê¹Œì§€
+			//2~version_num-1±îÁö
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
-				//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš©í•œ ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+				//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 				set<pair<double, int>> lowest_cost_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
-						double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
+
+						double cost = max(cpu_usage_cost, bandwidth_cost);
 						lowest_cost_of_ES.insert(make_pair(cost, ES));
 					}
 				}
@@ -478,19 +551,27 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 					int ES = (*lowest_cost_of_ES.begin()).second;
 					lowest_cost_of_ES.erase(lowest_cost_of_ES.begin());
 
-					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
-						if (es == ES)
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						if (es == ES) {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
 						else {
-							//if (get_ES_total_count(es, _version_set))
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
 						}
 					}
 
-					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+						(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+						(total_cost <= _cost_limit)) {
 						_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = ES;
 						_ES_count[ES]++;
@@ -498,14 +579,15 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = 0;
 						_ES_count[0]++;
@@ -522,19 +604,23 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
+			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
+			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
 						_selected_ES[ch][ver] = -1;
 						_ES_count[ES]--;
-						if (_ES_count[ES])
+						if (_ES_count[ES]) {
 							_used_GHz[ES] -= _channel_list[ch].video_GHz[ver];
-						else
+							_used_Mbps[ES] -= _channel_list[ch].video_Mbps[ver];
+						}
+						else {
 							_used_GHz[ES] = 0;
+							_used_Mbps[ES] = 0;
+						}
 					}
 				}
 			}
@@ -546,51 +632,61 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 }
 
 
-void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ì‚¬ìš©í•œ GHzê°€ ê°€ì¥ ì ì€ ESì— í• ë‹¹í•œë‹¤. 
-	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ GHz°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
-	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
+	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
-		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
+		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
 		int ch = (*version_popularities_set.begin()).second.first;
 		version_popularities_set.erase(version_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš© ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ë ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+				double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+				double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
+
+				double cost = max(cpu_usage_cost, bandwidth_cost);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
-
 
 		while (!lowest_cost_of_ES.empty()) {
 			int ES = (*lowest_cost_of_ES.begin()).second;
 			lowest_cost_of_ES.erase(lowest_cost_of_ES.begin());
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
@@ -598,14 +694,15 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 
 				is_allocated = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -614,7 +711,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		}
 	}
 
-	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
+	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -628,13 +725,16 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê·¸ ESì˜ costì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, ±× ESÀÇ cost¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+				double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+				double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
+
+				double cost = max(cpu_usage_cost, bandwidth_cost);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -643,19 +743,27 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 			int ES = (*lowest_cost_of_ES.begin()).second;
 			lowest_cost_of_ES.erase(lowest_cost_of_ES.begin());
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = ES;
 				_ES_count[ES]++;
@@ -667,10 +775,11 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = 0;
 				_ES_count[0]++;
@@ -683,9 +792,9 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 }
 
 
-void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ê°€ì¥ ë‚®ì€ leasing ê¸ˆì•¡ì„ ê°€ì§„ ESì— ìš°ì„ ì ìœ¼ë¡œ í• ë‹¹í•œë‹¤.
-	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, °¡Àå ³·Àº leasing ±İ¾×À» °¡Áø ES¿¡ ¿ì¼±ÀûÀ¸·Î ÇÒ´çÇÑ´Ù.
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -701,13 +810,13 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
 		channel_popularities_set.erase(channel_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê°€ì¥ ë‚®ì€ ì„ëŒ€ ê¸ˆì•¡ì— ë”°ë¼ ì •ë ¬.
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, °¡Àå ³·Àº ÀÓ´ë ±İ¾×¿¡ µû¶ó Á¤·Ä.
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = _server_list[ES].cost_alpha;
+				double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
@@ -715,21 +824,29 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 		while (!lowest_price_of_ES.empty()) {
 			int ES = (*lowest_price_of_ES.begin()).second;
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			lowest_price_of_ES.erase(lowest_price_of_ES.begin());
 
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
@@ -737,14 +854,15 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -766,15 +884,15 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
-			//2~version_num-1ê¹Œì§€
+			//2~version_num-1±îÁö
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
 
-				//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê°€ì¥ ë‚®ì€ ì„ëŒ€ ê¸ˆì•¡ì— ë”°ë¼ ì •ë ¬.
+				//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, °¡Àå ³·Àº ÀÓ´ë ±İ¾×¿¡ µû¶ó Á¤·Ä.
 				set<pair<double, int>> lowest_price_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
-						double cost = _server_list[ES].cost_alpha;
+						double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 						//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 						lowest_price_of_ES.insert(make_pair(cost, ES));
 					}
@@ -782,21 +900,29 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 				while (!lowest_price_of_ES.empty()) {
 					int ES = (*lowest_price_of_ES.begin()).second;
-					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 					lowest_price_of_ES.erase(lowest_price_of_ES.begin());
 
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
-						if (es == ES)
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						if (es == ES) {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
 						else {
-							//if (get_ES_total_count(es, _version_set))
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
 						}
 					}
 
-					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+						(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+						(total_cost <= _cost_limit)) {
 						_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = ES;
 						_ES_count[ES]++;
@@ -804,14 +930,15 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = 0;
 						_ES_count[0]++;
@@ -828,19 +955,23 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
+			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
+			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
 						_selected_ES[ch][ver] = -1;
 						_ES_count[ES]--;
-						if (_ES_count[ES])
+						if (_ES_count[ES]) {
 							_used_GHz[ES] -= _channel_list[ch].video_GHz[ver];
-						else
+							_used_Mbps[ES] -= _channel_list[ch].video_Mbps[ver];
+						}
+						else {
 							_used_GHz[ES] = 0;
+							_used_Mbps[ES] = 0;
+						}
 					}
 				}
 			}
@@ -848,29 +979,29 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 	}
 }
 
-void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - ê° ES serverì˜ coverageë¥¼ í™•ì¸í•˜ê³ , ê°€ì¥ ë‚®ì€ leasing ê¸ˆì•¡ì„ ê°€ì§„ ESì— ìš°ì„ ì ìœ¼ë¡œ í• ë‹¹í•œë‹¤. ê°™ì€ ê¸ˆì•¡ì´ë©´ ì‚¬ìš©í•œ GHzì˜ í•©ì´ ì œì¼ í° ESì— í• ë‹¹í•œë‹¤.
-	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, °¡Àå ³·Àº leasing ±İ¾×À» °¡Áø ES¿¡ ¿ì¼±ÀûÀ¸·Î ÇÒ´çÇÑ´Ù. °°Àº ±İ¾×ÀÌ¸é »ç¿ëÇÑ GHzÀÇ ÇÕÀÌ Á¦ÀÏ Å« ES¿¡ ÇÒ´çÇÑ´Ù.
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
-	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
+	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
 
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
-		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
+		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
 		int ch = (*version_popularities_set.begin()).second.first;
 		version_popularities_set.erase(version_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ì‚¬ìš© ë¹„ìš©ì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ë ºñ¿ë¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = _server_list[ES].cost_alpha;
+				double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
@@ -879,21 +1010,29 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 		while (!lowest_price_of_ES.empty()) {
 			int ES = (*lowest_price_of_ES.begin()).second;
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			lowest_price_of_ES.erase(lowest_price_of_ES.begin());
 
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
@@ -901,14 +1040,15 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 				is_allocated = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -917,7 +1057,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		}
 	}
 
-	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
+	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -931,13 +1071,13 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		int ver = (*version_popularities_set.begin()).second.second;
 
 		version_popularities_set.erase(version_popularities_set.begin());
-		//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ì´ì œ ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESë¥¼ ì°¾ê³ , ê·¸ ESì˜ costì— ë”°ë¼ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬. 
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, ±× ESÀÇ cost¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = _server_list[ES].cost_alpha;
+				double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
@@ -945,22 +1085,29 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 		while (!lowest_price_of_ES.empty()) {
 			int ES = (*lowest_price_of_ES.begin()).second;
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-
 			lowest_price_of_ES.erase(lowest_price_of_ES.begin());
 
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = ES;
 				_ES_count[ES]++;
@@ -972,10 +1119,11 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = 0;
 				_ES_count[0]++;
@@ -988,9 +1136,9 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 }
 
 
-void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - coverageê°€ ë§ëŠ” ES serverë¥¼ ëœë¤ìœ¼ë¡œ ì„ ì •í•œë‹¤.
-	//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ëª¨ë“  versionì„ íŠ¸ëœìŠ¤ì½”ë”©í•˜ê³ , ê° versionì— ëŒ€í•´ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - coverage°¡ ¸Â´Â ES server¸¦ ·£´ıÀ¸·Î ¼±Á¤ÇÑ´Ù.
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
 	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
@@ -1005,9 +1153,9 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
-		channel_popularities_set.erase(channel_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		channel_popularities_set.erase(channel_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
+		//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
 		vector<int> ESs_in_coverage;
 		for (int es = 1; es <= NUM_OF_ES; es++) {
 			if (_channel_list[ch].available_server_list[es]) {
@@ -1020,18 +1168,27 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 			int ES = ESs_in_coverage[pos];
 			ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
@@ -1039,14 +1196,15 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated_for_versions[ch][1]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -1067,12 +1225,12 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 	if (alloc_cnt == NUM_OF_CHANNEL) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
-			channel_popularities_set.erase(channel_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
-			//2~version_num-1ê¹Œì§€
+			channel_popularities_set.erase(channel_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+			//2~version_num-1±îÁö
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
 
-				//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
+				//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
 				vector<int> ESs_in_coverage;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (_channel_list[ch].available_server_list[es]) {
@@ -1085,19 +1243,27 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 					int ES = ESs_in_coverage[pos];
 					ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
 
-					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
-						if (es == ES)
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						if (es == ES) {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
 						else {
-							//if (get_ES_total_count(es, _version_set))
-							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
 						}
 					}
 
-					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+						(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+						(total_cost <= _cost_limit)) {
 						_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = ES;
 						_ES_count[ES]++;
@@ -1105,14 +1271,15 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 
 						is_allocated_for_versions[ch][ver] = true;
 						break;
-					} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
 
-				if (!is_allocated_for_versions[ch][ver]) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 						_selected_ES[ch][ver] = 0;
 						_ES_count[0]++;
@@ -1129,19 +1296,23 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 				if (is_allocated_for_versions[ch][ver])
 					cnt++;
 			}
-			if (cnt < _version_set->version_num - 2) // 1ì´ë‘ ì›ë³¸ ë¹¼ì„œ -2
+			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
 				is_feasible = false;
 
-			if (!is_feasible) { //ì—¬ê¸°ë¶€í„° ìˆ˜ì •í•  ê²ƒ. ì´ì „ì— í• ë‹¹í•œ ê±° ì „ë¶€ í’€ê¸°.
+			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
 						_selected_ES[ch][ver] = -1;
 						_ES_count[ES]--;
-						if (_ES_count[ES])
+						if (_ES_count[ES]) {
 							_used_GHz[ES] -= _channel_list[ch].video_GHz[ver];
-						else
+							_used_Mbps[ES] -= _channel_list[ch].video_Mbps[ver];
+						}
+						else {
 							_used_GHz[ES] = 0;
+							_used_Mbps[ES] = 0;
+						}
 					}
 				}
 			}
@@ -1149,12 +1320,12 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 	}
 }
 
-void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, int* _ES_count, int _model) {
-	//ì—£ì§€ ì„ íƒ - coverageê°€ ë§ëŠ” ES serverë¥¼ ëœë¤ìœ¼ë¡œ ì„ ì •í•œë‹¤.//ë²„ì „ ì„ íƒ - ê°€ì¥ ì¸ê¸°ë„ê°€ ë†’ì€ ì±„ë„-ë²„ì „ì„ ìš°ì„ ì ìœ¼ë¡œ ì„ íƒí•˜ì—¬ ESë¥¼ (ìœ„ì—ì„œ ì„ íƒí•œ ê²ƒ) í• ë‹¹í•œë‹¤.
+void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - coverage°¡ ¸Â´Â ES server¸¦ ·£´ıÀ¸·Î ¼±Á¤ÇÑ´Ù.//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
 
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
 
-	//ì²˜ìŒì—” 1ë²ˆ ë²„ì „ì— ëŒ€í•´ì„œë§Œ setì— ì‚½ì…í•œë‹¤.
+	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
 	}
@@ -1162,11 +1333,11 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 	while (!version_popularities_set.empty()) {
 		bool is_allocated = false;
 
-		//ë¨¼ì € ëª¨ë“  ì±„ë„ì˜ 1ë²ˆ ë²„ì „ì„ í• ë‹¹í•œë‹¤.
+		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
 		int ch = (*version_popularities_set.begin()).second.first;
-		version_popularities_set.erase(version_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		version_popularities_set.erase(version_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
+		//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
 		vector<int> ESs_in_coverage;
 		for (int es = 1; es <= NUM_OF_ES; es++) {
 			if (_channel_list[ch].available_server_list[es]) {
@@ -1179,19 +1350,27 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 			int ES = ESs_in_coverage[pos];
 			ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
@@ -1199,14 +1378,15 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 
 				is_allocated = true;
 				break;
-			} //ì¡°ê±´ì´ ì˜ ë§ì„ ê²½ìš° í• ë‹¹.
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
@@ -1215,7 +1395,7 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 		}
 	}
 
-	//ëª¨ë“  ì±„ë„ì˜ 2~N^ver-1 ë²„ì „ë“¤ì— ëŒ€í•´ í• ë‹¹ì„ ì‹œì‘í•œë‹¤.
+	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -1228,9 +1408,9 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 		int ch = (*version_popularities_set.begin()).second.first;
 		int ver = (*version_popularities_set.begin()).second.second;
 
-		version_popularities_set.erase(version_popularities_set.begin());//ê°€ì¥ ì¸ê¸°ë§ì€ chë¥¼ ê³ ë¦„.
+		version_popularities_set.erase(version_popularities_set.begin());//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
 
-		//ëœë¤ ESë¥¼ ê³ ë¥´ê³ , ì´ ì±„ë„ì˜ ì»¤ë²„ë¦¬ì§€ ë‚´ì˜ ESê°€ ë§ëŠ”ì§€ í™•ì¸í•œë‹¤.
+		//·£´ı ES¸¦ °í¸£°í, ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES°¡ ¸Â´ÂÁö È®ÀÎÇÑ´Ù.
 		vector<int> ESs_in_coverage;
 		for (int es = 1; es <= NUM_OF_ES; es++) {
 			if (_channel_list[ch].available_server_list[es]) {
@@ -1243,20 +1423,27 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 			int ES = ESs_in_coverage[pos];
 			ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES)
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
 				else {
-					//if (get_ES_total_count(es, _version_set))
-					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
 				}
 			}
 
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) && (total_cost <= _cost_limit)) {
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+				(total_cost <= _cost_limit)) {
 				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = ES;
 				_ES_count[ES]++;
@@ -1268,10 +1455,337 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
-		if (!is_allocated) { //ëª¨ë“  ì—£ì§€ì— í• ë‹¹ì´ ë¶ˆê°€ëŠ¥í•œ ìƒíƒœì„
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
 			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
 			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
 				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
+
+				_selected_ES[ch][ver] = 0;
+				_ES_count[0]++;
+				//ES_version_count_in_comparison_schemes[0][ver]++;
+
+				break;
+			}
+		}
+	}
+}
+
+
+void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ Mbps°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³ÎÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ¸ğµç versionÀ» Æ®·£½ºÄÚµùÇÏ°í, °¢ version¿¡ ´ëÇØ ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+
+	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
+	set<pair<double, int>, greater<pair<double, int>> > channel_popularities_set;
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		is_allocated_for_versions[ch] = (bool*)malloc(sizeof(bool) * (_version_set->version_num));
+		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
+
+		for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
+			is_allocated_for_versions[ch][ver] = false;
+		}
+	}
+
+	while (!channel_popularities_set.empty()) {
+		int ch = (*channel_popularities_set.begin()).second;
+		channel_popularities_set.erase(channel_popularities_set.begin()); //°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ Mbps¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		set<pair<double, int>> lowest_used_Mbps_of_ES;
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+			if (_channel_list[ch].available_server_list[ES])
+				lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+		}
+
+		while (!lowest_used_Mbps_of_ES.empty()) {
+			int ES = (*lowest_used_Mbps_of_ES.begin()).second;
+			lowest_used_Mbps_of_ES.erase(lowest_used_Mbps_of_ES.begin());
+
+			double total_cost = 0;
+			for (int es = 1; es <= NUM_OF_ES; es++) {
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
+				else {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
+			}
+
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
+				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
+
+				_selected_ES[ch][1] = ES;
+				_ES_count[ES]++;
+
+				is_allocated_for_versions[ch][1] = true;
+				break;
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+		}
+
+		if (!is_allocated_for_versions[ch][1]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
+				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
+
+				_selected_ES[ch][1] = 0;
+				_ES_count[0]++;
+				//ES_version_count_in_comparison_schemes[0][ver]++;
+
+				is_allocated_for_versions[ch][1] = true;
+			}
+		}
+	}
+	int alloc_cnt = 0;
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
+		if (is_allocated_for_versions[ch][1]) {
+			alloc_cnt++;
+		}
+	}
+	if (alloc_cnt == NUM_OF_CHANNEL) {
+		while (!channel_popularities_set.empty()) {
+			int ch = (*channel_popularities_set.begin()).second;
+			channel_popularities_set.erase(channel_popularities_set.begin());
+			//2~version_num-1±îÁö
+			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+				is_allocated_for_versions[ch][ver] = false;
+				//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ Mbps¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+				set<pair<double, int>> lowest_used_Mbps_of_ES;
+				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+					if (_channel_list[ch].available_server_list[ES])
+						lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+				}
+
+				while (!lowest_used_Mbps_of_ES.empty()) {
+					int ES = (*lowest_used_Mbps_of_ES.begin()).second;
+					lowest_used_Mbps_of_ES.erase(lowest_used_Mbps_of_ES.begin());
+
+					double total_cost = 0;
+					for (int es = 1; es <= NUM_OF_ES; es++) {
+						if (es == ES) {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
+						else {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
+					}
+
+					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+						(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+						(total_cost <= _cost_limit)) {
+						_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+
+						_selected_ES[ch][ver] = ES;
+						_ES_count[ES]++;
+						//ES_version_count_in_comparison_schemes[ES][ver]++;
+
+						is_allocated_for_versions[ch][ver] = true;
+						break;
+					} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
+				}
+
+				if (!is_allocated_for_versions[ch][ver]) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
+						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
+
+						_selected_ES[ch][ver] = 0;
+						_ES_count[0]++;
+						//ES_version_count_in_comparison_schemes[0][ver]++;
+
+						is_allocated_for_versions[ch][ver] = true;
+					}
+				}
+			}
+
+			bool is_feasible = true;
+			int cnt = 0;
+			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+				if (is_allocated_for_versions[ch][ver])
+					cnt++;
+			}
+			if (cnt < _version_set->version_num - 2) // 1ÀÌ¶û ¿øº» »©¼­ -2
+				is_feasible = false;
+
+			if (!is_feasible) { //¿©±âºÎÅÍ ¼öÁ¤ÇÒ °Í. ÀÌÀü¿¡ ÇÒ´çÇÑ °Å ÀüºÎ Ç®±â.
+				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+					if (is_allocated_for_versions[ch][ver]) {
+						int ES = _selected_ES[ch][ver];
+						_selected_ES[ch][ver] = -1;
+						_ES_count[ES]--;
+						if (_ES_count[ES]) {
+							_used_GHz[ES] -= _channel_list[ch].video_GHz[ver];
+							_used_Mbps[ES] -= _channel_list[ch].video_Mbps[ver];
+						}
+						else {
+							_used_GHz[ES] = 0;
+							_used_Mbps[ES] = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
+	//¿§Áö ¼±ÅÃ - °¢ ES serverÀÇ coverage¸¦ È®ÀÎÇÏ°í, »ç¿ëÇÑ Mbps°¡ °¡Àå ÀûÀº ES¿¡ ÇÒ´çÇÑ´Ù. 
+	//¹öÀü ¼±ÅÃ - °¡Àå ÀÎ±âµµ°¡ ³ôÀº Ã¤³Î-¹öÀüÀ» ¿ì¼±ÀûÀ¸·Î ¼±ÅÃÇÏ¿© ES¸¦ (À§¿¡¼­ ¼±ÅÃÇÑ °Í) ÇÒ´çÇÑ´Ù.
+
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
+
+	//Ã³À½¿£ 1¹ø ¹öÀü¿¡ ´ëÇØ¼­¸¸ set¿¡ »ğÀÔÇÑ´Ù.
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		version_popularities_set.insert(make_pair(_channel_list[ch].popularity[1], make_pair(ch, 1)));
+	}
+
+	while (!version_popularities_set.empty()) {
+		bool is_allocated = false;
+		//¸ÕÀú ¸ğµç Ã¤³ÎÀÇ 1¹ø ¹öÀüÀ» ÇÒ´çÇÑ´Ù.
+		int ch = (*version_popularities_set.begin()).second.first;
+		version_popularities_set.erase(version_popularities_set.begin());
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, »ç¿ëÇÑ Mbps¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		set<pair<double, int>> lowest_used_Mbps_of_ES;
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+			if (_channel_list[ch].available_server_list[ES])
+				lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+		}
+
+		while (!lowest_used_Mbps_of_ES.empty()) {
+			int ES = (*lowest_used_Mbps_of_ES.begin()).second;
+			lowest_used_Mbps_of_ES.erase(lowest_used_Mbps_of_ES.begin());
+
+			double total_cost = 0;
+			for (int es = 1; es <= NUM_OF_ES; es++) {
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
+				else {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
+			}
+
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[1] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[1] >= 0) &&
+				(total_cost <= _cost_limit)) {
+				_used_GHz[ES] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[1];
+
+				_selected_ES[ch][1] = ES;
+				_ES_count[ES]++;
+				//ES_version_count_in_comparison_schemes[ES][1]++;
+
+				is_allocated = true;
+				break;
+			} //Á¶°ÇÀÌ Àß ¸ÂÀ» °æ¿ì ÇÒ´ç.
+			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][1], ES));
+		}
+
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+			if (GHz - _channel_list[ch].video_GHz[1] >= 0) {
+				_used_GHz[0] += _channel_list[ch].video_GHz[1];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[1];
+
+				_selected_ES[ch][1] = 0;
+				_ES_count[0]++;
+				//ES_version_count_in_comparison_schemes[0][1]++;
+			}
+		}
+	}
+
+	//¸ğµç Ã¤³ÎÀÇ 2~N^ver-1 ¹öÀüµé¿¡ ´ëÇØ ÇÒ´çÀ» ½ÃÀÛÇÑ´Ù.
+	version_popularities_set.clear();
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
+		}
+	}
+
+	while (!version_popularities_set.empty()) {
+		bool is_allocated = false;
+		int ch = (*version_popularities_set.begin()).second.first;
+		int ver = (*version_popularities_set.begin()).second.second;
+
+		version_popularities_set.erase(version_popularities_set.begin());
+		//°¡Àå ÀÎ±â¸¹Àº ch¸¦ °í¸§.
+
+		//ÀÌÁ¦ ÀÌ Ã¤³ÎÀÇ Ä¿¹ö¸®Áö ³»ÀÇ ES¸¦ Ã£°í, ±× ES¿¡ ÇÒ´çµÈ Mbps¿¡ µû¶ó ¿À¸§Â÷¼ø Á¤·Ä. 
+		set<pair<double, int>> lowest_used_Mbps_of_ES;
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+			if (_channel_list[ch].available_server_list[ES])
+				lowest_used_Mbps_of_ES.insert(make_pair(_server_list[ES].maximum_bandwidth - _used_Mbps[ES], ES));
+		}
+
+		while (!lowest_used_Mbps_of_ES.empty()) {
+			int ES = (*lowest_used_Mbps_of_ES.begin()).second;
+			lowest_used_Mbps_of_ES.erase(lowest_used_Mbps_of_ES.begin());
+
+			double total_cost = 0;
+			for (int es = 1; es <= NUM_OF_ES; es++) {
+				if (es == ES) {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
+				else {
+					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				}
+			}
+
+			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+				(total_cost <= _cost_limit)) {
+				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+
+				_selected_ES[ch][ver] = ES;
+				_ES_count[ES]++;
+				//ES_version_count_in_comparison_schemes[ES][ver]++;
+
+				is_allocated = true;
+				break;
+			}
+			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
+		}
+
+		if (!is_allocated) { //¸ğµç ¿§Áö¿¡ ÇÒ´çÀÌ ºÒ°¡´ÉÇÑ »óÅÂÀÓ
+			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
+				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
 				_selected_ES[ch][ver] = 0;
 				_ES_count[0]++;

@@ -11,31 +11,43 @@ double ES_GHz[NUM_OF_MACHINE + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6 };
 //4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html -> vcpu: 224개
 //5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html -> vcpu: 256개
 
-void server_initalization(server* _server_list, int _model) {
+void server_initalization(server* _server_list, int _model, bool _bandwidth_model_flag) {
 	_server_list[0].index = 0;
 	//_server_list[0].machine_type = 0;
 	_server_list[0].cost_model_type = 0;
 	
 	_server_list[0].processing_capacity = 1814.4;
-	_server_list[0].cost_alpha = 0;
+	_server_list[0].maximum_bandwidth = INF;
+	_server_list[0].cpu_usage_cost_alpha = 0;
+	_server_list[0].bandwidth_cost_alpha = 0;
 
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		_server_list[ES].index = ES;
-		_server_list[ES].cost_alpha = ((double)(rand() % 37 + 63)) / 100;
+		_server_list[ES].cpu_usage_cost_alpha = ((double)(rand() % 38 + 63)) / 100;
+		if (_bandwidth_model_flag)
+			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 88) + 13) / 100;
+		else
+			_server_list[ES].bandwidth_cost_alpha = 0;
 		//_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
 		_server_list[ES].processing_capacity = ES_GHz[rand() % NUM_OF_MACHINE + 1];
+
+		if (_bandwidth_model_flag)
+			//_server_list[ES].maximum_bandwidth = rand() % 100;
+			_server_list[ES].maximum_bandwidth = rand() % 4101 + 650;
+		else
+			_server_list[ES].maximum_bandwidth = INF;
 	}
 }
 
 //비용 관련
-double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초당 cost
+double calculate_ES_cpu_usage_cost(server* _server, double _used_GHz, int _model) { //초당 cost
 	double cost = 0;
-	if (_model == CPU_USAGE_MODEL) {
-		cost = _server->cost_alpha * (_used_GHz / _server->processing_capacity);
+	if (_model == LINEAR_MODEL) {
+		cost = _server->cpu_usage_cost_alpha * (_used_GHz / _server->processing_capacity);
 	}
 	else if (_model == ONOFF_MODEL) {
 		if (_used_GHz)
-			cost = _server->cost_alpha;
+			cost = _server->cpu_usage_cost_alpha;
 		else
 			cost = 0;
 	}
@@ -55,10 +67,25 @@ double calculate_ES_cost(server* _server, double _used_GHz, int _model) { //초�
 	return cost;
 }
 
+
+double calculate_ES_bandwidth_cost(server* _server, double _used_Mbps, int _model) { //초당 cost
+	double cost = 0;
+	if (_model == LINEAR_MODEL) {
+		cost = _server->bandwidth_cost_alpha * (_used_Mbps / _server->maximum_bandwidth);
+	}
+	else if (_model == ONOFF_MODEL) {
+		if (_used_Mbps)
+			cost = _server->bandwidth_cost_alpha;
+		else
+			cost = 0;
+	}
+	return cost;
+}
+
 double get_total_charge(server* _server_list, int _cost_model) {
 	double full_total_charge = 0;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-		full_total_charge += _server_list[ES].cost_alpha;
+		full_total_charge += _server_list[ES].cpu_usage_cost_alpha;
 	}
 	return full_total_charge;
 }
