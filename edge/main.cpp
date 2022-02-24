@@ -1,6 +1,6 @@
 #include "head.h"
 int main() {
-	bool bandwidth_model_flag = false;
+	bool bandwidth_apply_flag = true;
 	srand(SEED);
 
 	double ratio = 0.5; // 3, 4, 5, 6, 7
@@ -16,7 +16,7 @@ int main() {
 	channel channel_list[NUM_OF_CHANNEL + 1];
 	bitrate_version_set version_set(bitrate_set, metric_type); // default 0, VMAF;
 	channel_initialization(channel_list, &version_set, pop_type, metric_type);
-	server_initalization(server_list, model, bandwidth_model_flag);
+	server_initalization(server_list, model, bandwidth_apply_flag);
 	set_coverage_infomation(channel_list, server_list);
 
 	double cost_limit = get_total_charge(server_list, model) * ratio;
@@ -51,8 +51,10 @@ int main() {
 		comparison_schemes(LPF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	}
 
-	comparison_schemes(Mbps_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
-	comparison_schemes(Mbps_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
+	if (bandwidth_apply_flag) {
+		comparison_schemes(Mbps_WF_AP, server_list, channel_list, &version_set, cost_limit, model);
+		comparison_schemes(Mbps_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
+	}
 
 	printf("===== FINISH =====\n");
 }
