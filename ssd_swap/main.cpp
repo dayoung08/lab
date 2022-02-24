@@ -1,6 +1,6 @@
 #include "head.h"
 int main() {
-	bool bandwidth_apply_flag = false;
+	bool bandwidth_apply_flag = true;
 	srand(SEED);
 
 	double ratio = 0.5; // 3, 4, 5, 6, 7
