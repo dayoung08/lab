@@ -34,7 +34,7 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		if (_bandwidth_model_flag) {
 			_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
-			while (_server_list[ES].maximum_bandwidth >= 650 && _server_list[ES].maximum_bandwidth <= 11105) {
+			while (_server_list[ES].maximum_bandwidth <= 650 && _server_list[ES].maximum_bandwidth >= 11105) {
 				_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
 			}
 			_server_list[ES].bandwidth_cost_alpha = (((double)(rand() % 993) + 8) / 1000) * _server_list[ES].maximum_bandwidth;
