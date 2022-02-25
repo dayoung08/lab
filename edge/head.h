@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define SEED 1111
+#define SEED 1234
 #define INF 987654321
 
 //#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자

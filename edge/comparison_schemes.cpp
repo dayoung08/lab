@@ -105,8 +105,10 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	double remained_Mbps[NUM_OF_ES + 1];
 
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-		double cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-		total_cost += cost;
+		double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+		double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
+		total_cost += max(cpu_usage_cost, bandwidth_cost);
+
 		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 		remained_Mbps[ES] = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
 	}
@@ -137,7 +139,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES] / _server_list[ES].processing_capacity, ES));
+				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES], ES));
 		}
 
 		while (!lowest_used_GHz_of_ES.empty()) {
@@ -206,7 +208,7 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 				set<pair<double, int>> lowest_used_GHz_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES])
-						lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES] / _server_list[ES].processing_capacity, ES));
+						lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES], ES));
 				}
 
 				while (!lowest_used_GHz_of_ES.empty()) {

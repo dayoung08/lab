@@ -21,21 +21,29 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 	_server_list[0].cpu_usage_cost_alpha = 0;
 	_server_list[0].bandwidth_cost_alpha = 0;
 
+
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		_server_list[ES].index = ES;
-		_server_list[ES].cpu_usage_cost_alpha = ((double)(rand() % 38 + 63)) / 100;
-		if (_bandwidth_model_flag)
-			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 88) + 13) / 100;
-		else
-			_server_list[ES].bandwidth_cost_alpha = 0;
 		//_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
 		_server_list[ES].processing_capacity = ES_GHz[rand() % NUM_OF_MACHINE + 1];
-
-		if (_bandwidth_model_flag)
-			//_server_list[ES].maximum_bandwidth = rand() % 100;
-		    _server_list[ES].maximum_bandwidth = rand() % 4101 + 650;
-		else
+		_server_list[ES].cpu_usage_cost_alpha = (((double)(rand() % 38 + 63)) / 100) * _server_list[ES].processing_capacity;
+	}	
+	//220225
+	mt19937 random_generation(SEED);
+	normal_distribution<double> normal_distribution_for_maximum_bandwidth(22248.14815, 22614.44549);
+	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+		if (_bandwidth_model_flag) {
+			_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
+			while (_server_list[ES].maximum_bandwidth >= 650 && _server_list[ES].maximum_bandwidth <= 11105) {
+				_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
+			}
+			_server_list[ES].bandwidth_cost_alpha = (((double)(rand() % 993) + 8) / 1000) * _server_list[ES].maximum_bandwidth;
+		}
+		else {
 			_server_list[ES].maximum_bandwidth = INF;
+			_server_list[ES].bandwidth_cost_alpha = 0;
+		}
+
 	}
 }
 
