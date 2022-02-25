@@ -22,14 +22,22 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 	_server_list[0].bandwidth_cost_alpha = 0;
 
 
+	mt19937 random_generation(SEED);
+	normal_distribution<double> normal_distribution_for_cpu_usage_cost_alpha(0.791339, 0.11053275); 
+	normal_distribution<double> normal_distribution_for_bandwidth_cost_alpha(0.352295981, 0.308087043);
+
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		_server_list[ES].index = ES;
 		//_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
 		_server_list[ES].processing_capacity = ES_GHz[rand() % NUM_OF_MACHINE + 1];
-		_server_list[ES].cpu_usage_cost_alpha = (((double)(rand() % 38 + 63)) / 100) * _server_list[ES].processing_capacity;
+		_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
+		
+		while (_server_list[ES].cpu_usage_cost_alpha < 0.63 && _server_list[ES].cpu_usage_cost_alpha > 1) {
+			_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
+		}
+		_server_list[ES].cpu_usage_cost_alpha *= _server_list[ES].processing_capacity; //1GHz¥Á ∫ÒøÎ¿Ãπ«∑Œ ∞ˆ«ÿ¡‹
 	}	
 	//220225
-	mt19937 random_generation(SEED);
 	normal_distribution<double> normal_distribution_for_maximum_bandwidth(22248.14815, 22614.44549);
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		if (_bandwidth_model_flag) {
@@ -37,7 +45,11 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 			while (_server_list[ES].maximum_bandwidth < 650 && _server_list[ES].maximum_bandwidth > 11105) {
 				_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
 			}
-			_server_list[ES].bandwidth_cost_alpha = (((double)(rand() % 993) + 8) / 1000) * _server_list[ES].maximum_bandwidth;
+			_server_list[ES].bandwidth_cost_alpha = normal_distribution_for_bandwidth_cost_alpha(random_generation);
+			while (_server_list[ES].bandwidth_cost_alpha < 0.008 && _server_list[ES].bandwidth_cost_alpha > 1) {
+				_server_list[ES].bandwidth_cost_alpha = normal_distribution_for_bandwidth_cost_alpha(random_generation);
+			}
+			_server_list[ES].bandwidth_cost_alpha *= (_server_list[ES].maximum_bandwidth / 1000); //1Mbps¥Á ∫ÒøÎ¿Ãπ«∑Œ ∞ˆ«ÿ¡‹
 		}
 		else {
 			_server_list[ES].maximum_bandwidth = INF;
@@ -91,7 +103,7 @@ double calculate_ES_bandwidth_cost(server* _server, double _used_Mbps, int _mode
 double get_total_charge(server* _server_list, int _cost_model) {
 	double full_total_charge = 0;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-		full_total_charge += _server_list[ES].cpu_usage_cost_alpha;
+		full_total_charge += max(_server_list[ES].cpu_usage_cost_alpha, _server_list[ES].bandwidth_cost_alpha);
 	}
 	return full_total_charge;
 }

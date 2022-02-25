@@ -72,7 +72,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		//TA_phase 
 		TDA_phase(_server_list, _channel_list, _version_set, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
 		total_cost = 0;
-		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), used_GHz[ES], _model);
 			double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), used_Mbps[ES], _model);
 
@@ -90,7 +90,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		std::printf("=TA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $, total_Mbps : %lf Mbps\n", total_GHz, total_pwq, total_cost, total_Mbps);
 
 		if (is_lowest_only_mode) {
-			is_not_success_for_lowest_allocation(selected_ES, ES_count, (total_cost >= _cost_limit));
+			is_not_success_for_lowest_allocation(selected_ES, ES_count, (total_cost > _cost_limit));
 			if (total_cost >= _cost_limit)
 				exit(0);
 

@@ -222,7 +222,11 @@ void is_not_success_for_lowest_allocation(short** _selected_ES, int* _ES_count, 
 		alloc_cnt += _ES_count[ES];
 	}
 
-	if (alloc_cnt < NUM_OF_CHANNEL || is_not_satisfied_cost_constraints) {
+	if (alloc_cnt < NUM_OF_CHANNEL) {
+		std::printf("alloc_cnt < NUM_OF_CHANNEL.\n");
+	}
+
+	if (is_not_satisfied_cost_constraints) {
 		std::printf("모든 채널의 lowest version이 cost budget 내에 할당되지 않는 문제 발생.\n");
 	}
 }
