@@ -37,12 +37,12 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 
 	printf("lowest version만 트랜스코딩 했을 때 pwq 총 합 %lf\n", total_first_pwq);
-	printf("lowest version만 트랜스코딩 했을 때 %lf GHz / GHz 총 합 %lf GHz\n", (_server_list[0].processing_capacity + total_ES_GHz_limit), total_ES_required_GHz);
+	printf("lowest version만 트랜스코딩 했을 때 %lf GHz / GHz 총 합 %lf GHz\n", total_ES_required_GHz, (_server_list[0].processing_capacity + total_ES_GHz_limit));
 	if ((_server_list[0].processing_capacity + total_ES_GHz_limit) < total_ES_required_GHz) {
 		printf("GHz가 모자란 상황/Channel 수를 줄이거나, 엣지 수를 늘릴 것\n");
 		exit(0);
 	}
-	printf("lowest version만 트랜스코딩 했을 때 %lf Mbps / Mbps 총 합 %lf Mbps\n", (_server_list[0].maximum_bandwidth + total_ES_Mbps_limit), total_ES_required_GHz);
+	printf("lowest version만 트랜스코딩 했을 때 %lf Mbps / Mbps 총 합 %lf Mbps\n", total_ES_required_Mbps, (_server_list[0].maximum_bandwidth + total_ES_Mbps_limit));
 	if ((_server_list[0].maximum_bandwidth + total_ES_Mbps_limit) < total_ES_required_Mbps) {
 		printf("Mbps가 모자란 상황/Channel 수를 줄이거나, 엣지 수를 늘릴 것\n");
 		exit(0);
@@ -69,7 +69,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		//TDA_phase 
 		double GHz_rate = total_ES_required_GHz / total_ES_GHz_limit;
 		double Mbps_rate = total_ES_required_Mbps / total_ES_Mbps_limit;
-		TDA_phase(_server_list, _channel_list, _version_set, GHz_rate, Mbps_rate, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
+		TDA_phase(_server_list, _channel_list, _version_set, _cost_limit, GHz_rate, Mbps_rate, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
 		total_cost = 0;
 		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 			double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), used_GHz[ES], _model);
@@ -127,7 +127,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 }
 
-void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_rate, double _Mbps_rate, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode) {
+void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, double _GHz_rate, double _Mbps_rate, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode) {
 	// 2. TDA phase
 	set<pair<double, int>, greater<pair<double, int>>> ES_sort;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
@@ -202,6 +202,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			if ((_channel_list[ch].available_server_list[ES]) && 
 				(_used_GHz[ES] + _channel_list[ch].video_GHz[ver] <= _server_list[ES].processing_capacity) &&
 				(_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver] <= _server_list[ES].maximum_bandwidth)) {
+
 				is_allocated_ES = true;
 				break;
 			}
@@ -358,7 +359,9 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			int ES = (*list_CR.begin()).second; // slope가 가장 큰 것은 어떤 엣지인가?
 			list_CR.erase(list_CR.begin());//맨 앞 삭제함
 
-			double cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+			double GHz_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+			double Mbps_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
+			double cost = max(GHz_cost, Mbps_cost);
 			_ES_count[0] += _ES_count[ES];
 			_ES_count[ES] = 0;
 			_used_GHz[0] += _used_GHz[ES];
@@ -371,12 +374,14 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 			//뺐던 엣지 안에 있는 버전들 CTS에 할당하기
 			for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+				for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
 					if (_selected_ES[ch][ver] == ES) {
-						int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
-						double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
-						//CTS의 밴드윗 제한은 없으므로
-						versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver))); //CTS에 임시 할당
+						if (ver > 1) {
+							int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
+							double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
+							//CTS의 밴드윗 제한은 없으므로
+							versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver))); //CTS에 임시 할당
+						}
 						_selected_ES[ch][ver] = 0; //CTS에 임시 할당
 					}
 				}

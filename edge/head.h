@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define SEED 1234
+#define SEED 123
 #define INF 987654321
 
 //#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
@@ -27,7 +27,7 @@ using namespace std;
 #define NUM_OF_MACHINE 5
 
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
-#define NUM_OF_CHANNEL 6000 //2000~10000 사이이고, ((6000이 기준))
+#define NUM_OF_CHANNEL 6000 //4000~12000 사이이고, ((6000이 기준))
 
 //#define VERSION_NUM 7
 //#define VERSION_SET_NUM 32 // 오리지널 버전 제외하고, 마지막 버전은 반드시 저장. 2^(7-2) set 1이 오리지널과 마지막 버전만 들어있는 것.
@@ -47,8 +47,6 @@ using namespace std;
 
 //#define ALPHA 2.0 // 인기도 - 지프 분포에 사용하는 알파 베타 값
 //#define BETA 1.0
-
-#define SIGMA 1 // 버전 인기도 - 노멀 분포에 사용하는 값
  //0.25 0.5 0.75 <Default 1> 1.25 1.5 1.75 2 사이의 값.
 
 #define K_gamma 0.399 // 인기도 - 감마 분포에 사용하는 k, 세타값
@@ -165,7 +163,7 @@ void is_not_success_for_lowest_allocation(short** _selected_ES, int* _ES_count, 
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);
 //void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_limit, short* _selected_set);
-void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_rate, double _Mbps_rate, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode);
+void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, double _GHz_rate, double _Mbps_rate, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode);
 void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool* _turn_on_at_lowest);
 
 /* comparison_schemes*/

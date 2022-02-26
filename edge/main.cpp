@@ -3,7 +3,7 @@ int main() {
 	bool bandwidth_apply_flag = false;
 	srand(SEED);
 
-	double ratio = 0.5; // 3, 4, 5, 6, 7
+	double ratio = 0.3; // 3, 4, 5, 6,
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;

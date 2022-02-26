@@ -3,6 +3,7 @@
 void channel_initialization(channel* _channel_list, bitrate_version_set* _version_set, int _version_pop_type, int _metric_type) {
 	srand(SEED);
 	double* channel_pop = set_gamma_pop(NUM_OF_CHANNEL, K_gamma, THETA_gamma);
+
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		_channel_list[ch].index = ch;
 		_channel_list[ch].video_quality = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
@@ -15,10 +16,10 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 		_channel_list[ch].sum_of_pwq = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_version_set_GHz = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_version_set_Mbps = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
-		
+
 		_channel_list[ch].version_pop_type = _version_pop_type;
 		double* ver_pop = set_version_pop(_version_set, _channel_list[ch].version_pop_type);
-		
+
 		_channel_list[ch].popularity[0] = channel_pop[ch];
 		for (int ver = 1; ver <= _version_set->version_num; ver++) {
 			_channel_list[ch].video_quality[ver] = 0;
@@ -33,31 +34,31 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].sum_of_version_set_GHz[set] = 0;
 			_channel_list[ch].sum_of_version_set_Mbps[set] = 0;
 		}
-		//ìœ„ ê¹Œì§€ ì¸ê¸°ë„ ê³„ì‚°
+		//À§ ±îÁö ÀÎ±âµµ °è»ê
 		for (int ver = 1; ver <= _version_set->version_num; ver++) {
 			_channel_list[ch].video_Mbps[ver] = (double)_version_set->bitrate[ver] / 1000;
 		} // bandwidth_requirement;
-		set_video_metric(&(_channel_list[ch]), _version_set, _metric_type); // ë¹„ë””ì˜¤ í€„ë¦¬í‹° ê°’ ê³„ì‚°
-		set_GHz(&(_channel_list[ch]), _version_set); // processing-rate ê³„ì‚°
-		set_PWQ(&(_channel_list[ch]), _version_set); // PWQ ê³„ì‚°
+		set_video_metric(&(_channel_list[ch]), _version_set, _metric_type); // ºñµğ¿À Ä÷¸®Æ¼ °ª °è»ê
+		set_GHz(&(_channel_list[ch]), _version_set); // processing-rate °è»ê
+		set_PWQ(&(_channel_list[ch]), _version_set); // PWQ °è»ê
 	}
 }
 
 void set_video_metric(channel* _channel, bitrate_version_set* _version_set, int _metric_type) {
-	//Qin, MMsys, Quality-aware Stategies for Optimizing ABR Video Streaming QoE and Reducing Data Usage, https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 ì´ ë…¼ë¬¸ ê¸°ë°˜ì„.
-	//CBR ê¸°ì¤€ì„
+	//Qin, MMsys, Quality-aware Stategies for Optimizing ABR Video Streaming QoE and Reducing Data Usage, https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 ÀÌ ³í¹® ±â¹İÀÓ.
+	//CBR ±âÁØÀÓ
 	mt19937 random_generation(SEED);
 
 	int SD = 0;
 	if (_metric_type == VMAF) {
-		SD = rand() % 13 + 2; // ê° ë¹„ë””ì˜¤ì˜ í‘œì¤€ í¸ì°¨ëŠ” 2~14ì˜ ê°’ì„ ê°€ì§
+		SD = rand() % 13 + 2; // °¢ ºñµğ¿ÀÀÇ Ç¥ÁØ ÆíÂ÷´Â 2~14ÀÇ °ªÀ» °¡Áü
 	}
 	else if (_metric_type == PSNR || _metric_type == MOS) {
 		SD = rand() % 14 + 41; //  4.1~5.4
 		SD /= 10;
 	} // https://doi.org/10.3390/s21061949
 	else if (_metric_type == SSIM) {
-		SD = rand() % 23 + 4; // 0.004~0.026 vmaf ê°’ ê¸°ë°˜ìœ¼ë¡œ scailingí•¨. ë„ì €íˆ ì—†ì–´ì„œ...
+		SD = rand() % 23 + 4; // 0.004~0.026 vmaf °ª ±â¹İÀ¸·Î scailingÇÔ. µµÀúÈ÷ ¾ø¾î¼­...
 		SD /= 1000;
 	}
 	bool is_finished = false;
@@ -109,7 +110,7 @@ void set_video_metric(channel* _channel, bitrate_version_set* _version_set, int 
 					_channel->video_quality[_version_set->version_num] = 100;
 				}
 				else if (_metric_type == PSNR || _metric_type == MOS) { // https://stackoverflow.com/questions/39615894/handling-infinite-value-of-psnr-when-calculating-psnr-value-of-video
-					_channel->video_quality[_version_set->version_num] = 43; // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 ì´ ë…¼ë¬¸ ê¸°ë°˜ì„
+					_channel->video_quality[_version_set->version_num] = 43; // https://dl.acm.org/doi/pdf/10.1145/3304109.3306231 ÀÌ ³í¹® ±â¹İÀÓ
 				}
 				else if (_metric_type == SSIM) {
 					_channel->video_quality[_version_set->version_num] = 1;
@@ -140,19 +141,19 @@ void set_video_metric(channel* _channel, bitrate_version_set* _version_set, int 
 }
 
 void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
-	//ì±„ë„ ë³„ë¡œ GHzë¥¼ ì¢€ ë‹¤ë¥´ê²Œ ì¤˜ë³´ì.
-	//MMsys Aparicio-Pardoì˜ Transcoding Live Adaptive Video Streams at a Massive Scale in the Cloud
-	//CPU cycle ì¸¡ì •ì„ í†µí•œ GHz ê³„ì‚°í•œ ê²°ê³¼ë¥¼ í…Œì´ë¸”ë¡œ ì˜¬ë ¤ ë‘ . zecoder bitrate set ì¡°í•©ë„ ì—¬ê¸°ì— ìˆìŒ.
+	//Ã¤³Î º°·Î GHz¸¦ Á» ´Ù¸£°Ô Áàº¸ÀÚ.
+	//MMsys Aparicio-PardoÀÇ Transcoding Live Adaptive Video Streams at a Massive Scale in the Cloud
+	//CPU cycle ÃøÁ¤À» ÅëÇÑ GHz °è»êÇÑ °á°ú¸¦ Å×ÀÌºí·Î ¿Ã·Á µÒ. zecoder bitrate set Á¶ÇÕµµ ¿©±â¿¡ ÀÖÀ½.
 	double* a = (double*)malloc(sizeof(double) * (_version_set->version_num));
-	double* b = (double*)malloc(sizeof(double) * (_version_set->version_num)); // ë§¨ ìœ„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì›ë³¸ìœ¼ë¡œ ì“°ë¯€ë¡œ ë¹ ì§„ ê²ƒì— ìœ ì˜í•  ê²ƒ
+	double* b = (double*)malloc(sizeof(double) * (_version_set->version_num)); // ¸Ç À§ ¹öÀüÀº Æ®·£½ºÄÚµù ¿øº»À¸·Î ¾²¹Ç·Î ºüÁø °Í¿¡ À¯ÀÇÇÒ °Í
 	//int r[] = { 0, 200, 400, 600, 1000, 1500, 2000 };
 
 	for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
-		if (_version_set->resolution[ver] == 38402160) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		if (_version_set->resolution[ver] == 38402160) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 2.597554426;
 			b[ver] = 0.184597645;
 		}
-		else if (_version_set->resolution[ver] == 25601440) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 25601440) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 1.819367444;
 			b[ver] = 0.10754013;
 		}
@@ -164,19 +165,19 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 			a[ver] = 1.341512;
 			b[ver] = 0.060222;
 		}
-		else if (_version_set->resolution[ver] == 960540) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 960540) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 1.041912;
 			b[ver] = 0.044521;
 		}
-		else if (_version_set->resolution[ver] == 854480) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 854480) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.961305333;
 			b[ver] = 0.040296683;
 		}
-		else if (_version_set->resolution[ver] == 720480) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 720480) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.913512;
 			b[ver] = 0.037792;
 		}
-		else if (_version_set->resolution[ver] == 640480) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 640480) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.884978667;
 			b[ver] = 0.036296667;
 		}
@@ -184,19 +185,19 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 			a[ver] = 0.827912;
 			b[ver] = 0.033306;
 		}
-		else if (_version_set->resolution[ver] == 512384) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 512384) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.79075496;
 			b[ver] = 0.03122664;
 		}
-		else if (_version_set->resolution[ver] == 480270) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 480270) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.717074239;
 			b[ver] = 0.027103364;
 		}
-		else if (_version_set->resolution[ver] == 384288) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 384288) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.696173404;
 			b[ver] = 0.025933724;
 		}
-		else if (_version_set->resolution[ver] == 426240) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 426240) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.686989703;
 			b[ver] = 0.025419791;
 		}
@@ -204,20 +205,20 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 			a[ver] = 0.673091;
 			b[ver] = 0.024642;
 		}
-		else if (_version_set->resolution[ver] == 320240) { //ìŠ¤ì¼€ì¼ë§í•´ì„œ êµ¬í•¨
+		else if (_version_set->resolution[ver] == 320240) { //½ºÄÉÀÏ¸µÇØ¼­ ±¸ÇÔ
 			a[ver] = 0.659016364;
 			b[ver] = 0.023854364;
 		}
 
-		double GHz = a[ver] * pow((double)_version_set->bitrate[ver]/1000, b[ver]);
+		double GHz = a[ver] * pow((double)_version_set->bitrate[ver] / 1000, b[ver]);
 		//double GHz = a[version] + pow(r[version], b[version]);
-		GHz += ((GHz * ((double)(rand() % 1001) / 10000)) - (GHz * 0.05)); // += 10% ì •ë„ë¡œ í•´ì„œ GHzë§Œë“¦.
-		GHz *= 4; // ë…¼ë¬¸ì´ 4 core ì„. perfì˜ cycle ë³´ë‹ˆ ì €ê±´ ê° ì½”ì–´ì˜ í‰ê· ì„. 
+		GHz += ((GHz * ((double)(rand() % 1001) / 10000)) - (GHz * 0.05)); // += 10% Á¤µµ·Î ÇØ¼­ GHz¸¸µê.
+		GHz *= 4; // ³í¹®ÀÌ 4 core ÀÓ. perfÀÇ cycle º¸´Ï Àú°Ç °¢ ÄÚ¾îÀÇ Æò±ÕÀÓ. 
 		/*if (GHz <= 0) {
-			cout << "ë²„ê·¸";
+			cout << "¹ö±×";
 		}*/
 		/*if (GHz <= 0) {
-			cout << "ë²„ê·¸";
+			cout << "¹ö±×";
 		}*/
 		_channel->video_GHz[ver] = GHz;
 	}
@@ -227,32 +228,32 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 	//number_for_bit_opration = pow(2, info->version_num - 3);
 	//set_versions_number = info->version_num - 2;
 
-	_channel->pwq[1] = _channel->popularity[1] * _channel->video_quality[1]; //ê¸°ë³¸ì ìœ¼ë¡œ ê°€ì¥ ë‚®ì€ ë²„ì „ì€ ë°˜ë“œì‹œ í¬í•¨ë˜ë¯€ë¡œ
-	_channel->pwq[_version_set->version_num] = _channel->popularity[_version_set->version_num] * _channel->video_quality[_version_set->version_num]; //ê¸°ë³¸ì ìœ¼ë¡œ ì›ë³¸ë²„ì „ì€ ë°˜ë“œì‹œ í¬í•¨ë˜ë¯€ë¡œ
+	_channel->pwq[1] = _channel->popularity[1] * _channel->video_quality[1]; //±âº»ÀûÀ¸·Î °¡Àå ³·Àº ¹öÀüÀº ¹İµå½Ã Æ÷ÇÔµÇ¹Ç·Î
+	_channel->pwq[_version_set->version_num] = _channel->popularity[_version_set->version_num] * _channel->video_quality[_version_set->version_num]; //±âº»ÀûÀ¸·Î ¿øº»¹öÀüÀº ¹İµå½Ã Æ÷ÇÔµÇ¹Ç·Î
 
 	for (int ver = 1; ver <= _version_set->version_num; ver++) {
 		_channel->pwq[ver] = _channel->popularity[ver] * _channel->video_quality[ver];
 	}
 
-	for (int set = 1; set <= _version_set->version_set_num; set++) { //ì†ŒìŠ¤ëŠ” ì „ë¶€ 1080p
-		_channel->sum_of_video_quality[set] += _channel->video_quality[1];//ê¸°ë³¸ì ìœ¼ë¡œ ê°€ì¥ ë‚®ì€ ë²„ì „ì€ ë°˜ë“œì‹œ í¬í•¨ë˜ë¯€ë¡œ
-		_channel->sum_of_video_quality[set] += _channel->video_quality[_version_set->version_num];//ê¸°ë³¸ì ìœ¼ë¡œ ì›ë³¸ë²„ì „ì€ ë°˜ë“œì‹œ í¬í•¨ë˜ë¯€ë¡œ
+	for (int set = 1; set <= _version_set->version_set_num; set++) { //¼Ò½º´Â ÀüºÎ 1080p
+		_channel->sum_of_video_quality[set] += _channel->video_quality[1];//±âº»ÀûÀ¸·Î °¡Àå ³·Àº ¹öÀüÀº ¹İµå½Ã Æ÷ÇÔµÇ¹Ç·Î
+		_channel->sum_of_video_quality[set] += _channel->video_quality[_version_set->version_num];//±âº»ÀûÀ¸·Î ¿øº»¹öÀüÀº ¹İµå½Ã Æ÷ÇÔµÇ¹Ç·Î
 
-		_channel->sum_of_pwq[set] += _channel->popularity[1] * _channel->video_quality[1]; //ê¸°ë³¸ì ìœ¼ë¡œ ê°€ì¥ ë‚®ì€ ë²„ì „ì€ ë°˜ë“œì‹œ í¬í•¨ë˜ë¯€ë¡œ
-		_channel->sum_of_pwq[set] += _channel->popularity[_version_set->version_num] * _channel->video_quality[_version_set->version_num]; //ê¸°ë³¸ì ìœ¼ë¡œ ì›ë³¸ë²„ì „ì€ ë°˜ë“œì‹œ í¬í•¨ë˜ë¯€ë¡œ
+		_channel->sum_of_pwq[set] += _channel->popularity[1] * _channel->video_quality[1]; //±âº»ÀûÀ¸·Î °¡Àå ³·Àº ¹öÀüÀº ¹İµå½Ã Æ÷ÇÔµÇ¹Ç·Î
+		_channel->sum_of_pwq[set] += _channel->popularity[_version_set->version_num] * _channel->video_quality[_version_set->version_num]; //±âº»ÀûÀ¸·Î ¿øº»¹öÀüÀº ¹İµå½Ã Æ÷ÇÔµÇ¹Ç·Î
 
-		_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[1]; //ê¸°ë³¸ì ìœ¼ë¡œ ê°€ì¥ ë‚®ì€ ë²„ì „ì€ ë°˜ë“œì‹œ íŠ¸ëœìŠ¤ì½”ë”© í•˜ë¯€ë¡œ
+		_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[1]; //±âº»ÀûÀ¸·Î °¡Àå ³·Àº ¹öÀüÀº ¹İµå½Ã Æ®·£½ºÄÚµù ÇÏ¹Ç·Î
 		_channel->sum_of_version_set_Mbps[set] += _channel->video_Mbps[1];
 
-		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[1]; //ê°€ì¥ ë‚®ì€ë²„ì „ì€ ë¬´ì¡°ê±´ ë“¤ì–´ê°
-		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[_version_set->version_num]; //ì›ë³¸
+		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[1]; //°¡Àå ³·Àº¹öÀüÀº ¹«Á¶°Ç µé¾î°¨
+		//_channel->sum_of_transfer_data_size[set] += _version_set->data_size[_version_set->version_num]; //¿øº»
 
-		int prev_ver = 1; // setì— í•´ë‹¹ ë²„ì „ì´ ì—†ìœ¼ë©´ ê·¸ ì•„ë˜ ìˆëŠ” ë²„ì „ì„ ìŠ¤íŠ¸ë¦¬ë°í•˜ë¯€ë¡œ
+		int prev_ver = 1; // set¿¡ ÇØ´ç ¹öÀüÀÌ ¾øÀ¸¸é ±× ¾Æ·¡ ÀÖ´Â ¹öÀüÀ» ½ºÆ®¸®¹ÖÇÏ¹Ç·Î
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
-			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { //setì— í•´ë‹¹ ë²„ì „ì´ ìˆëŠ” ê²½ìš°
+			if ((set - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { //set¿¡ ÇØ´ç ¹öÀüÀÌ ÀÖ´Â °æ¿ì
 
-			// 16 >> ((info->version_num - 2) curr_ver) : curr_verëŠ” 5~1ì´ë¯€ë¡œ, ì¦‰ 10000ì„ 0~4ë²ˆ ë§Œí¼ >> ìª½ìœ¼ë¡œ ì‹œí”„íŠ¸
-			// ì¦‰ (1)00001(1) (1)00010(1) (1)00100(1) (1)01000(1) (1)10000(1) ìˆœ
+			// 16 >> ((info->version_num - 2) curr_ver) : curr_ver´Â 5~1ÀÌ¹Ç·Î, Áï 10000À» 0~4¹ø ¸¸Å­ >> ÂÊÀ¸·Î ½ÃÇÁÆ®
+			// Áï (1)00001(1) (1)00010(1) (1)00100(1) (1)01000(1) (1)10000(1) ¼ø
 				_channel->sum_of_video_quality[set] += _channel->video_quality[ver];
 				_channel->sum_of_pwq[set] += _channel->popularity[ver] * _channel->video_quality[ver];
 				_channel->sum_of_version_set_GHz[set] += _channel->video_GHz[ver];
@@ -261,7 +262,7 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 
 				prev_ver = ver;
 			}
-			else {  //setì— í•´ë‹¹ ë²„ì „ì´ ì—†ëŠ” ê²½ìš°
+			else {  //set¿¡ ÇØ´ç ¹öÀüÀÌ ¾ø´Â °æ¿ì
 				_channel->sum_of_video_quality[set] += _channel->video_quality[prev_ver];
 				_channel->sum_of_pwq[set] += _channel->popularity[ver] * _channel->video_quality[prev_ver];
 			}
@@ -272,7 +273,7 @@ void set_PWQ(channel* _channel, bitrate_version_set* _version_set) {
 //https://en.wikipedia.org/wiki/Gamma_distribution
 double* set_gamma_pop(int length, double k, double theta) {
 	double sum = 0;
-	double* gamma_pdf = (double*)malloc(sizeof(double) * (length + 1));
+	vector<double> gamma_pdf(length + 1);
 	for (int value = 1; value <= length; value++) {
 		double result = (pow(value, (k - 1)) * std::pow(M_E, (-value / theta))) / (tgamma(k) * pow(theta, k));
 		gamma_pdf[value] = result;
@@ -283,52 +284,54 @@ double* set_gamma_pop(int length, double k, double theta) {
 		gamma_pdf[value] /= sum;
 		//cout << gamma_pdf[value] << " ";
 	}
-	//ì±„ë„ ê°¯ìˆ˜ ì¤„ì´ê¸°ê°€ í˜ë“œë‹ˆê¹Œ ë…¸ë“œ ê°¯ìˆ˜ë¡œ ë¡œë“œ ê²°ì •í•˜ì
-	return gamma_pdf;
+	//Ã¤³Î °¹¼ö ÁÙÀÌ±â°¡ Èûµå´Ï±î ³ëµå °¹¼ö·Î ·Îµå °áÁ¤ÇÏÀÚ
+	double* arr = (double*)malloc(sizeof(double) * (length + 1));
+	copy(gamma_pdf.begin(), gamma_pdf.end(), arr);
+	return arr;
 }
 
-double* set_version_pop(bitrate_version_set* __version_set, int _version_pop_type) {
+double* set_version_pop(bitrate_version_set* _version_set, int _version_pop_type) {
 	//Caching Strategies in Transcoding-enabled Proxy Systems for Streaming Media Distribution Networks
-	//https://www.hpl.hp.com/techreports/2003/HPL-2003-261.pdf ê¸°ë°˜ì„
-	double* ver_pop = (double*)malloc(sizeof(double) * (__version_set->version_num + 1));
+	//https://www.hpl.hp.com/techreports/2003/HPL-2003-261.pdf ±â¹İÀÓ
+	double* ver_pop = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 	double mean;
 
 	if (_version_pop_type == HVP) {
-		mean = __version_set->version_num;
+		mean = _version_set->version_num;
 	}
 	else if (_version_pop_type == MVP) {
-		mean = (1 + __version_set->version_num) / 2;
+		mean = _version_set->version_num / 2;
 	}
 	else if (_version_pop_type == LVP) {
 		mean = 1;
 	}
 	else if (_version_pop_type == RVP) {
-		mean = (rand() % __version_set->version_num) + 1;
+		mean = (rand() % _version_set->version_num) + 1;
 	}
 
-	double SD = SIGMA;
-	// ëª¨ë“  ê´€ë ¨ ë…¼ë¬¸ë“¤ì´ SD ê°’ì€ ê³ ì • fixê°’ìœ¼ë¡œ í•˜ê³ , ê°’ì— ë”°ë¼ ë‹¬ë¼ì§€ë„ë¡ ì‹œë®¬ë ˆì´ì…˜ì„ ë”°ë¡œ í•˜ê³  ìˆë‹¤.
-	// ë‚˜ë„ ì´ê±° ê·¸ëƒ¥ ì‹¤í—˜ì— ì¶”ê°€ í•˜ëŠ”ê²Œ ì¢‹ê² ë‹¤.
-	SD += ((SD * ((double)(rand() % 1001) / 10000)) - (SD * 0.05)); // += 5% ì •ë„ë¡œ í•´ì„œ SDë§Œë“¦.
+	double SD = 1;
+	// ¸ğµç °ü·Ã ³í¹®µéÀÌ SD °ªÀº °íÁ¤ fix°ªÀ¸·Î ÇÏ°í, °ª¿¡ µû¶ó ´Ş¶óÁöµµ·Ï ½Ã¹Ä·¹ÀÌ¼ÇÀ» µû·Î ÇÏ°í ÀÖ´Ù.
+	// ³ªµµ ÀÌ°Å ±×³É ½ÇÇè¿¡ Ãß°¡ ÇÏ´Â°Ô ÁÁ°Ú´Ù.
+	SD += ((SD * ((double)(rand() % 21) / 100)) - (SD * 0.1)); // += 10% Á¤µµ·Î ÇØ¼­ SD¸¸µê.
 
-	//í‘œì¤€í¸ì°¨ì˜ ì¸¡ì • ë‹¨ìœ„ëŠ” ì› ìë£Œì™€ ê°™ìŠµë‹ˆë‹¤. ì˜ˆë¥¼ ë“¤ë©´ ì› ìë£Œì˜ ì¸¡ì • ë‹¨ìœ„ê°€ ì„¼í‹°ë¯¸í„°ì´ë©´ í‘œì¤€í¸ì°¨ì˜ ì¸¡ì • ë‹¨ìœ„ë„ ì„¼í‹°ë¯¸í„°ì…ë‹ˆë‹¤.
+	//Ç¥ÁØÆíÂ÷ÀÇ ÃøÁ¤ ´ÜÀ§´Â ¿ø ÀÚ·á¿Í °°½À´Ï´Ù. ¿¹¸¦ µé¸é ¿ø ÀÚ·áÀÇ ÃøÁ¤ ´ÜÀ§°¡ ¼¾Æ¼¹ÌÅÍÀÌ¸é Ç¥ÁØÆíÂ÷ÀÇ ÃøÁ¤ ´ÜÀ§µµ ¼¾Æ¼¹ÌÅÍÀÔ´Ï´Ù.
 
-	//ì´ í¸ì°¨ê°€ ì‘ì„ ìˆ˜ë¡ ìš°ë¦¬ ê²ƒì— ë¶ˆë¦¬. ì™œëƒí•˜ë©´ ì‘ì„ ìˆ˜ë¡ mean ë²„ì „ì— ì¸ê¸°ë„ê°€ ëª°ë¹µë˜ê¸° ë•Œë¬¸.
-	//A small Ïƒ indicates that most of the accesses are to one version(m) and a large Ïƒ indicates that the accesses to different version are evenly distributed.
-	//ì‘ì€ SDëŠ” ëŒ€ë¶€ë¶„ì˜ ì•¡ì„¸ìŠ¤ê°€ í•œ ë²„ì „(m)ì— ëŒ€í•œ ê²ƒì´ê³  í° SDëŠ” ë‹¤ë¥¸ ë²„ì „ì— ëŒ€í•œ ì•¡ì„¸ìŠ¤ê°€ ê· ë“±í•˜ê²Œ ë¶„ì‚°ë˜ì–´ ìˆìŒì„ ë‚˜íƒ€ëƒ…ë‹ˆë‹¤.
+	//ÀÌ ÆíÂ÷°¡ ÀÛÀ» ¼ö·Ï ¿ì¸® °Í¿¡ ºÒ¸®. ¿Ö³ÄÇÏ¸é ÀÛÀ» ¼ö·Ï mean ¹öÀü¿¡ ÀÎ±âµµ°¡ ¸ô»§µÇ±â ¶§¹®.
+	//A small ¥ò indicates that most of the accesses are to one version(m) and a large ¥ò indicates that the accesses to different version are evenly distributed.
+	//ÀÛÀº SD´Â ´ëºÎºĞÀÇ ¾×¼¼½º°¡ ÇÑ ¹öÀü(m)¿¡ ´ëÇÑ °ÍÀÌ°í Å« SD´Â ´Ù¸¥ ¹öÀü¿¡ ´ëÇÑ ¾×¼¼½º°¡ ±ÕµîÇÏ°Ô ºĞ»êµÇ¾î ÀÖÀ½À» ³ªÅ¸³À´Ï´Ù.
 
 	double sum = 0;
-	for (int ver = 1; ver <= __version_set->version_num; ver++) {
+	for (int ver = 1; ver <= _version_set->version_num; ver++) {
 		double result = 0;
 		result = (1 / (sqrt(2 * PI) * SD)) * pow(M_E, -pow((ver - mean), 2) / (2 * pow(SD, 2)));
 
 		ver_pop[ver] = result;
 		sum += result;
 	}
-	for (int ver = 1; ver <= __version_set->version_num; ver++) {
+	for (int ver = 1; ver <= _version_set->version_num; ver++) {
 		ver_pop[ver] /= sum;
 	}
-	//ëª¨ë‘ í•©í•´ í•©ì´ 1ì´ì–´ì•¼í•¨
+	//¸ğµÎ ÇÕÇØ ÇÕÀÌ 1ÀÌ¾î¾ßÇÔ
 
 	return ver_pop;
 }

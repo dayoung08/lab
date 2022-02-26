@@ -314,7 +314,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES]/_server_list[ES].processing_capacity, ES));
+				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES], ES));
 		}
 
 		while (!lowest_used_GHz_of_ES.empty()) {
@@ -386,7 +386,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 		set<pair<double, int>> lowest_used_GHz_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES] / _server_list[ES].processing_capacity, ES));
+				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES], ES));
 		}
 
 		while (!lowest_used_GHz_of_ES.empty()) {
@@ -1239,8 +1239,10 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 						ESs_in_coverage.push_back(es);
 					}
 				}
-
+				int cnt = -1;
 				while (ESs_in_coverage.size()) {
+					if (++cnt == 3)
+						break;
 					int pos = rand() % ESs_in_coverage.size();
 					int ES = ESs_in_coverage[pos];
 					ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
@@ -1420,7 +1422,10 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 			}
 		}
 
+		int cnt = -1;
 		while (ESs_in_coverage.size()) {
+			if (++cnt == 3)
+				break;
 			int pos = rand() % ESs_in_coverage.size();
 			int ES = ESs_in_coverage[pos];
 			ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
@@ -1497,7 +1502,7 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 		set<pair<double, int>> lowest_used_Mbps_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
+				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES], ES));
 		}
 
 		while (!lowest_used_Mbps_of_ES.empty()) {
@@ -1566,7 +1571,7 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 				set<pair<double, int>> lowest_used_Mbps_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES])
-						lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
+						lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES], ES));
 				}
 
 				while (!lowest_used_Mbps_of_ES.empty()) {
@@ -1672,7 +1677,7 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		set<pair<double, int>> lowest_used_Mbps_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
+				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES], ES));
 		}
 
 		while (!lowest_used_Mbps_of_ES.empty()) {
@@ -1744,7 +1749,7 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		set<pair<double, int>> lowest_used_Mbps_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES] / _server_list[ES].maximum_bandwidth, ES));
+				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES], ES));
 		}
 
 		while (!lowest_used_Mbps_of_ES.empty()) {

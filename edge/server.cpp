@@ -5,11 +5,12 @@
 //Hewlett Packard Enterprise Synergy 660 Gen10 Compute Module http://www.spec.org/power_ssj2008/results/res2019q2/power_ssj2008-20190311-00885.html
 
 double ES_GHz[NUM_OF_MACHINE + 1] = { 0, 864, 1254.4, 256, 324.8, 313.6 };
-//1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html -> vcpu : 768개
-//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html -> vcpu: 1024개
-//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html -> vcpu: 256개
-//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html -> vcpu: 224개
-//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html -> vcpu: 256개
+double ES_one_core_GHz[NUM_OF_MACHINE + 1] = { 0, 2.25, 2.45, 2.00, 2.90, 2.45 };
+//1. ASUSTeK Computer Inc. RS620SA-E10-RS12 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20200918-01046.html
+//2. Hewlett Packard Enterprise Apollo XL225n Gen10 Plus https://www.spec.org/power_ssj2008/results/res2021q1/power_ssj2008-20210223-01073.html
+//3. Dell Inc. PowerEdge R7525 http://www.spec.org/power_ssj2008/results/res2020q2/power_ssj2008-20200324-01021.html
+//4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html
+//5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html
 
 void server_initalization(server* _server_list, int _model, bool _bandwidth_model_flag) {
 	_server_list[0].index = 0;
@@ -17,42 +18,45 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 	_server_list[0].cost_model_type = 0;
 
 	_server_list[0].processing_capacity = 1814.4;
-	_server_list[0].maximum_bandwidth = INF;
+	_server_list[0].maximum_bandwidth = INFINITY;
 	_server_list[0].cpu_usage_cost_alpha = 0;
 	_server_list[0].bandwidth_cost_alpha = 0;
 
 
 	mt19937 random_generation(SEED);
-	normal_distribution<double> normal_distribution_for_cpu_usage_cost_alpha(0.791339, 0.11053275); 
-	normal_distribution<double> normal_distribution_for_bandwidth_cost_alpha(0.352295981, 0.308087043);
+	//normal_distribution<double> normal_distribution_for_cpu_usage_cost_alpha(5.209248167, 0.727618028);
+	//normal_distribution<double> normal_distribution_for_bandwidth_cost_alpha(0.352295981, 0.308087043);
 
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		_server_list[ES].index = ES;
 		//_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
-		_server_list[ES].processing_capacity = ES_GHz[rand() % NUM_OF_MACHINE + 1];
-		_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
-		
-		while (_server_list[ES].cpu_usage_cost_alpha < 0.63 && _server_list[ES].cpu_usage_cost_alpha > 1) {
+		int pos = rand() % NUM_OF_MACHINE + 1;
+		_server_list[ES].processing_capacity = ES_GHz[pos];
+		/*_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
+		while (_server_list[ES].cpu_usage_cost_alpha < 4.145 || _server_list[ES].cpu_usage_cost_alpha > 6.582827772) {
 			_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
-		}
-  		_server_list[ES].cpu_usage_cost_alpha *= _server_list[ES].processing_capacity; //1GHz당 비용이므로 곱해줌
+		}*/
+		_server_list[ES].cpu_usage_cost_alpha = ((double)(rand() % 2439 + 4145)) / 1000;
+  		_server_list[ES].cpu_usage_cost_alpha *= ES_one_core_GHz[pos]; //1GHz당 비용이므로 곱해줌
 	}	
 	//220225
-	normal_distribution<double> normal_distribution_for_maximum_bandwidth(22248.14815, 22614.44549);
+	//normal_distribution<double> normal_distribution_for_maximum_bandwidth(22248.14815, 22614.44549);
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		if (_bandwidth_model_flag) {
-			_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
-			while (_server_list[ES].maximum_bandwidth < 650 && _server_list[ES].maximum_bandwidth > 11105) {
+			/*_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
+			while (_server_list[ES].maximum_bandwidth < 650 || _server_list[ES].maximum_bandwidth > 11105) {
 				_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
 			}
 			_server_list[ES].bandwidth_cost_alpha = normal_distribution_for_bandwidth_cost_alpha(random_generation);
-			while (_server_list[ES].bandwidth_cost_alpha < 0.008 && _server_list[ES].bandwidth_cost_alpha > 1) {
+			while (_server_list[ES].bandwidth_cost_alpha < 0.008 ||_server_list[ES].bandwidth_cost_alpha > 1) {
 				_server_list[ES].bandwidth_cost_alpha = normal_distribution_for_bandwidth_cost_alpha(random_generation);
-			}
-			_server_list[ES].bandwidth_cost_alpha *= (_server_list[ES].maximum_bandwidth / 1000); //1Mbps당 비용이므로 곱해줌
+			}*/
+			_server_list[ES].maximum_bandwidth = rand() % 10456 + 650;
+			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 993 +8)) / 1000;
+			_server_list[ES].bandwidth_cost_alpha *= (_server_list[ES].maximum_bandwidth / 1000); //1Gbps당 비용이므로 곱해줌
 		}
 		else {
-			_server_list[ES].maximum_bandwidth = INF;
+			_server_list[ES].maximum_bandwidth = INFINITY;
 			_server_list[ES].bandwidth_cost_alpha = 0;
 		}
 
