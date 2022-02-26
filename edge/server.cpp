@@ -17,7 +17,7 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 	_server_list[0].cost_model_type = 0;
 
 	_server_list[0].processing_capacity = 1814.4;
-	_server_list[0].maximum_bandwidth = INF;
+	_server_list[0].maximum_bandwidth = INFINITY;
 	_server_list[0].cpu_usage_cost_alpha = 0;
 	_server_list[0].bandwidth_cost_alpha = 0;
 
@@ -35,7 +35,7 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 		while (_server_list[ES].cpu_usage_cost_alpha < 0.63 && _server_list[ES].cpu_usage_cost_alpha > 1) {
 			_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
 		}
-		_server_list[ES].cpu_usage_cost_alpha *= _server_list[ES].processing_capacity; //1GHz¥Á ∫ÒøÎ¿Ãπ«∑Œ ∞ˆ«ÿ¡‹
+  		_server_list[ES].cpu_usage_cost_alpha *= _server_list[ES].processing_capacity; //1GHz¥Á ∫ÒøÎ¿Ãπ«∑Œ ∞ˆ«ÿ¡‹
 	}	
 	//220225
 	normal_distribution<double> normal_distribution_for_maximum_bandwidth(22248.14815, 22614.44549);
@@ -52,7 +52,7 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 			_server_list[ES].bandwidth_cost_alpha *= (_server_list[ES].maximum_bandwidth / 1000); //1Mbps¥Á ∫ÒøÎ¿Ãπ«∑Œ ∞ˆ«ÿ¡‹
 		}
 		else {
-			_server_list[ES].maximum_bandwidth = INF;
+			_server_list[ES].maximum_bandwidth = INFINITY;
 			_server_list[ES].bandwidth_cost_alpha = 0;
 		}
 

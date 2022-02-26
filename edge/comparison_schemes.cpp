@@ -113,7 +113,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 		remained_Mbps[ES] = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
 	}
 	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $, total_Mbps : %lf Mbps \n", total_GHz, total_pwq, total_cost, total_Mbps);
-	is_not_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost >= _cost_limit));
+	is_not_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost > _cost_limit));
 }
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
