@@ -56,13 +56,20 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	for (int is_lowest_only_mode = 1; is_lowest_only_mode >= 0; is_lowest_only_mode--) { // mode = 1 : lowest version만, mode = 0; 2~N^ver 버전들 전부.
 		if (is_lowest_only_mode)
 			std::printf("[Lowest version만 우선 할당]\n");
-		else
+		else {
 			std::printf("\n[2~N^ver 버전들 전부 할당]\n");
+			total_ES_required_GHz = 0;
+			total_ES_required_Mbps = 0;
+			for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+				total_ES_required_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
+				total_ES_required_Mbps += _channel_list[ch].sum_of_version_set_Mbps[_version_set->version_set_num];
+			}
+		}
 
 		//TDA_phase 
-		double _GHz_rate = total_ES_required_GHz / total_ES_GHz_limit;
-		double _Mbps_rate = total_ES_required_Mbps / total_ES_Mbps_limit;
-		TDA_phase(_server_list, _channel_list, _version_set, _GHz_rate, _Mbps_rate, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
+		double GHz_rate = total_ES_required_GHz / total_ES_GHz_limit;
+		double Mbps_rate = total_ES_required_Mbps / total_ES_Mbps_limit;
+		TDA_phase(_server_list, _channel_list, _version_set, GHz_rate, Mbps_rate, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
 		total_cost = 0;
 		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 			double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), used_GHz[ES], _model);
@@ -121,7 +128,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 }
 
 void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _GHz_rate, double _Mbps_rate, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode) {
-	// 2. TA phase
+	// 2. TDA phase
 	set<pair<double, int>, greater<pair<double, int>>> ES_sort;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		double slope;
