@@ -105,7 +105,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 
 	//CR_phase
-	if (total_cost >= _cost_limit) {
+	if (total_cost > _cost_limit) {
 		//printf("CR phase ¡¯¿‘, current cost: %lf\n", total_cost);
 		CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_turned_on_at_lowest);
 
@@ -123,7 +123,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			total_GHz += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
 			total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
 		}
-		std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
+		//std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
+		std::printf("%lf\n", total_pwq);
 	}
 }
 
@@ -203,6 +204,23 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 				(_used_GHz[ES] + _channel_list[ch].video_GHz[ver] <= _server_list[ES].processing_capacity) &&
 				(_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver] <= _server_list[ES].maximum_bandwidth)) {
 
+				/*double total_cost = 0;
+				for (int es = 1; es <= NUM_OF_ES; es++) {
+					if (es == ES) {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+					else {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+				}
+				if (_is_lowest_only_mode && total_cost > _cost_limit) {
+					pos++;
+					continue;
+				}*/
 				is_allocated_ES = true;
 				break;
 			}

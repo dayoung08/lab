@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define SEED 123
+#define SEED 12
 #define INF 987654321
 
 //#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
@@ -27,7 +27,7 @@ using namespace std;
 #define NUM_OF_MACHINE 5
 
 //#define CHANNEL_NUM 8160  // 교수님 주신 파일의 NUM_OF_CLIENT * NUM_OF_USER
-#define NUM_OF_CHANNEL 6000 //4000~12000 사이이고, ((6000이 기준))
+#define NUM_OF_CHANNEL 6000 //2000~10000 사이이고, ((6000이 기준))
 
 //#define VERSION_NUM 7
 //#define VERSION_SET_NUM 32 // 오리지널 버전 제외하고, 마지막 버전은 반드시 저장. 2^(7-2) set 1이 오리지널과 마지막 버전만 들어있는 것.
@@ -103,6 +103,7 @@ public:
 	double* video_GHz;//[VERSION_NUM + 1];
 	double* video_Mbps;//[VERSION_NUM + 1];
 	double* pwq;//[VERSION_NUM + 1]; // weighted video quality라고 쓰여있음. 하도 평소에 video pwq이라 불러서 코딩때도 이렇게 함.
+	//double* popularity_priority;//[VERSION_NUM + 1];
 	
 	double* sum_of_video_quality;//[VERSION_SET_NUM + 1];
 	double* sum_of_pwq;//[VERSION_SET_NUM + 1];
@@ -148,6 +149,7 @@ double* set_version_pop(bitrate_version_set* _bitrate_version_set, int _version_
 
 /* server.cpp */
 void server_initalization(server* _server_list, int _model, bool _bandwidth_model_flag);
+void server_initalization_for_bandwidth(server* _server_list, int _model, bool _bandwidth_model_flag);
 double calculate_ES_cpu_usage_cost(server* _server, double _used_GHz, int _model);
 double calculate_ES_bandwidth_cost(server* _server, double _used_Mbps, int _model);
 double get_total_charge(server* _server_list, int _cost_model);

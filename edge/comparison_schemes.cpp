@@ -60,7 +60,7 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 }
 
 void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
-	if (method_index == GHz_WF_AP) {
+	/*if (method_index == GHz_WF_AP) {
 		printf("\n<<GHz_worst_fit_AP>>\n");
 	}
 	if (method_index == GHz_WF_HPF) {
@@ -90,7 +90,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	if (method_index == Mbps_WF_HPF) {
 		printf("\n<<Mbps_worst_fit_HPF>>\n");
 	}
-	
+	*/
 	double total_GHz = 0;
 	double total_pwq = 0;
 	double total_Mbps = 0;
@@ -112,8 +112,9 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 		remained_Mbps[ES] = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
 	}
-	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $, total_Mbps : %lf Mbps \n", total_GHz, total_pwq, total_cost, total_Mbps);
-	is_not_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost > _cost_limit));
+	std::printf("%lf\n", total_pwq);
+	//std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $, total_Mbps : %lf Mbps \n", total_GHz, total_pwq, total_cost, total_Mbps);
+	//is_not_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost > _cost_limit));
 }
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
@@ -296,7 +297,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
-	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
@@ -638,7 +639,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
-	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
@@ -985,7 +986,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 가장 낮은 leasing 금액을 가진 ES에 우선적으로 할당한다. 같은 금액이면 사용한 GHz의 합이 제일 큰 ES에 할당한다.
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
-	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
@@ -1241,7 +1242,7 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 				}
 				int cnt = -1;
 				while (ESs_in_coverage.size()) {
-					if (++cnt == 3)
+					if (cnt++ == 1)
 						break;
 					int pos = rand() % ESs_in_coverage.size();
 					int ES = ESs_in_coverage[pos];
@@ -1327,7 +1328,7 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - coverage가 맞는 ES server를 랜덤으로 선정한다.//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
-	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
@@ -1424,7 +1425,7 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 
 		int cnt = -1;
 		while (ESs_in_coverage.size()) {
-			if (++cnt == 3)
+			if (cnt++ == 1)
 				break;
 			int pos = rand() % ESs_in_coverage.size();
 			int ES = ESs_in_coverage[pos];
@@ -1659,7 +1660,7 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 Mbps가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
 
-	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > version_popularities_set;
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {

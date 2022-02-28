@@ -11,7 +11,7 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 		_channel_list[ch].video_GHz = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 		_channel_list[ch].pwq = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 		_channel_list[ch].video_Mbps = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
-
+		//_channel_list[ch].popularity_priority = (double*)malloc(sizeof(double) * (_version_set->version_num + 1));
 		_channel_list[ch].sum_of_video_quality = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_pwq = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
 		_channel_list[ch].sum_of_version_set_GHz = (double*)malloc(sizeof(double) * (_version_set->version_set_num + 1));
@@ -19,7 +19,6 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 
 		_channel_list[ch].version_pop_type = _version_pop_type;
 		double* ver_pop = set_version_pop(_version_set, _channel_list[ch].version_pop_type);
-
 		_channel_list[ch].popularity[0] = channel_pop[ch];
 		for (int ver = 1; ver <= _version_set->version_num; ver++) {
 			_channel_list[ch].video_quality[ver] = 0;
@@ -27,6 +26,26 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].video_GHz[ver] = 0;
 			_channel_list[ch].pwq[ver] = 0;
 			_channel_list[ch].video_Mbps[ver] = 0;
+			/*if (_version_pop_type == HVP) {
+				_channel_list[ch].popularity_priority[ver] = (_version_set->version_num + 1) - ver;
+			}
+			else if (_version_pop_type == MVP) {
+				int base = _version_set->version_num / 2 + 1;
+				if (base > ver) {
+					_channel_list[ch].popularity_priority[ver] = base + 1 - ver;
+				}
+				else if (base < ver) {
+					_channel_list[ch].popularity_priority[ver] = base + ver) % _version_set->version_num);
+				}
+				else
+					_channel_list[ch].popularity_priority[ver] = ver;
+			}
+			else if (_version_pop_type == LVP) {
+				_channel_list[ch].popularity_priority[ver] = ver;
+			}
+			else if (_version_pop_type == RVP) {
+				_channel_list[ch].popularity_priority[ver] = (double)_version_set->version_num / 2;
+			}*/
 		}
 		for (int set = 1; set <= _version_set->version_set_num; set++) {
 			_channel_list[ch].sum_of_video_quality[set] = 0;
@@ -312,7 +331,7 @@ double* set_version_pop(bitrate_version_set* _version_set, int _version_pop_type
 	double SD = 1;
 	// 모든 관련 논문들이 SD 값은 고정 fix값으로 하고, 값에 따라 달라지도록 시뮬레이션을 따로 하고 있다.
 	// 나도 이거 그냥 실험에 추가 하는게 좋겠다.
-	SD += ((SD * ((double)(rand() % 21) / 100)) - (SD * 0.1)); // += 10% 정도로 해서 SD만듦.
+	SD += ((SD * ((double)(rand() % 1001) / 10000)) - (SD * 0.05)); // += 5% 정도로 해서 SD만듦.
 
 	//표준편차의 측정 단위는 원 자료와 같습니다. 예를 들면 원 자료의 측정 단위가 센티미터이면 표준편차의 측정 단위도 센티미터입니다.
 

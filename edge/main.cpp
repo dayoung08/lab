@@ -18,6 +18,7 @@ int main() {
 	channel_initialization(channel_list, &version_set, pop_type, metric_type);
 	server_initalization(server_list, model, bandwidth_apply_flag);
 	set_coverage_infomation(channel_list, server_list);
+	server_initalization_for_bandwidth(server_list, model, bandwidth_apply_flag);
 
 	double cost_limit = get_total_charge(server_list, model) * ratio;
 	printf("===== START =====\n");
@@ -30,11 +31,11 @@ int main() {
 	algorithm_run(server_list, channel_list, &version_set, cost_limit, model);
 	end = clock();
 	spent_time = end - start;
-	printf("%lf second\n\n", (double)spent_time / CLOCKS_PER_SEC);
+	//printf("%lf second\n\n", (double)spent_time / CLOCKS_PER_SEC);
 
 	//ºñ±³½ºÅ´ ¾ÆÁ÷ ÄÚµù ´ú ÇÔ
 
-	printf("===== ºñ±³ ½ºÅ´ =====\n\n");
+	//printf("===== ºñ±³ ½ºÅ´ =====\n\n");
 
 	comparison_schemes(RD_AP, server_list, channel_list, &version_set, cost_limit, model);
 	comparison_schemes(RD_HPF, server_list, channel_list, &version_set, cost_limit, model);

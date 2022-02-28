@@ -32,37 +32,25 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 		//_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
 		int pos = rand() % NUM_OF_MACHINE + 1;
 		_server_list[ES].processing_capacity = ES_GHz[pos];
-		/*_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
-		while (_server_list[ES].cpu_usage_cost_alpha < 4.145 || _server_list[ES].cpu_usage_cost_alpha > 6.582827772) {
-			_server_list[ES].cpu_usage_cost_alpha = normal_distribution_for_cpu_usage_cost_alpha(random_generation);
-		}*/
-		_server_list[ES].cpu_usage_cost_alpha = ((double)(rand() % 2439 + 4145)) / 1000;
-  		_server_list[ES].cpu_usage_cost_alpha *= ES_one_core_GHz[pos]; //1GHz당 비용이므로 곱해줌
+		_server_list[ES].cpu_usage_cost_alpha = ((double)(rand() % 38 + 63)) / 100;
 	}	
+}
+
+void server_initalization_for_bandwidth(server* _server_list, int _model, bool _bandwidth_model_flag) {
 	//220225
-	//normal_distribution<double> normal_distribution_for_maximum_bandwidth(22248.14815, 22614.44549);
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		if (_bandwidth_model_flag) {
-			/*_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
-			while (_server_list[ES].maximum_bandwidth < 650 || _server_list[ES].maximum_bandwidth > 11105) {
-				_server_list[ES].maximum_bandwidth = normal_distribution_for_maximum_bandwidth(random_generation);
-			}
-			_server_list[ES].bandwidth_cost_alpha = normal_distribution_for_bandwidth_cost_alpha(random_generation);
-			while (_server_list[ES].bandwidth_cost_alpha < 0.008 ||_server_list[ES].bandwidth_cost_alpha > 1) {
-				_server_list[ES].bandwidth_cost_alpha = normal_distribution_for_bandwidth_cost_alpha(random_generation);
-			}*/
-			_server_list[ES].maximum_bandwidth = rand() % 10456 + 650;
-			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 993 +8)) / 1000;
-			_server_list[ES].bandwidth_cost_alpha *= (_server_list[ES].maximum_bandwidth / 1000); //1Gbps당 비용이므로 곱해줌
+			// _server_list[ES].maximum_bandwidth = rand() % 451 + 50; // 가정용 인터넷 기준인데. 이걸로도 아마존이랑 차이없다.
+			_server_list[ES].maximum_bandwidth = rand() % 999001 + 1000; // 아마존 기준 
+			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 993 + 8)) / 1000;
+			_server_list[ES].cpu_usage_cost_alpha = _server_list[ES].bandwidth_cost_alpha = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 		}
 		else {
 			_server_list[ES].maximum_bandwidth = INFINITY;
 			_server_list[ES].bandwidth_cost_alpha = 0;
 		}
-
 	}
 }
-
 //비용 관련
 double calculate_ES_cpu_usage_cost(server* _server, double _used_GHz, int _model) { //초당 cost
 	double cost = 0;
@@ -70,7 +58,7 @@ double calculate_ES_cpu_usage_cost(server* _server, double _used_GHz, int _model
 		cost = _server->cpu_usage_cost_alpha * (_used_GHz / _server->processing_capacity);
 	}
 	else if (_model == ONOFF_MODEL) {
-		if (_used_GHz)
+		if (_used_GHz > 0)
 			cost = _server->cpu_usage_cost_alpha;
 		else
 			cost = 0;
@@ -96,7 +84,7 @@ double calculate_ES_bandwidth_cost(server* _server, double _used_Mbps, int _mode
 		cost = _server->bandwidth_cost_alpha * (_used_Mbps / _server->maximum_bandwidth);
 	}
 	else if (_model == ONOFF_MODEL) {
-		if (_used_Mbps)
+		if (_used_Mbps > 0)
 			cost = _server->bandwidth_cost_alpha;
 		else
 			cost = 0;
