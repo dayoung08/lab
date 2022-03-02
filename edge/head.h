@@ -160,7 +160,7 @@ double rad2deg(double _rad);
 
 /* bitrate_version_set.cpp */
 void set_version_set(bitrate_version_set* _version_set, short* _selected_set, short** _selected_ES);
-void is_not_success_for_lowest_allocation(short** _selected_ES, int* _ES_count, bool is_not_satisfied_cost_constraints);
+bool is_success_for_lowest_allocation(short** _selected_ES, int* _ES_count);
 
 /* algorithm.cpp */
 void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model);

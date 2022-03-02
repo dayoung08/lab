@@ -126,8 +126,8 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			total_GHz += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
 			total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
 		}
-		std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
-		//std::printf("%lf\n", total_pwq);
+		//std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
+		std::printf("%lf\n", total_pwq);
 	}
 }
 
