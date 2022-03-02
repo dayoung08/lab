@@ -1,9 +1,9 @@
 #include "head.h"
 int main() {
-	bool bandwidth_apply_flag = false;
+	bool bandwidth_apply_flag = true;
 	srand(SEED);
 
-	double ratio = 0.7; // 3, 4, 5, 6, 7
+	double ratio = 0.5;// 2 3, 4, 5, 6, 7
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;

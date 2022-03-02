@@ -223,7 +223,7 @@ bool is_success_for_lowest_allocation(short** _selected_ES, int* _ES_count) {
 	}
 
 	if (alloc_cnt < NUM_OF_CHANNEL) {
-		std::printf("alloc_cnt < NUM_OF_CHANNEL.\n");
+		//std::printf("alloc_cnt < NUM_OF_CHANNEL.\n");
 		return false;
 	}
 
