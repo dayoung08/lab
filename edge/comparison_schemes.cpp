@@ -191,6 +191,10 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 		}
 	}
 
+	channel_popularities_set.clear();
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
+	}
 	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
@@ -435,7 +439,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 }
 
 void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
-	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 cost가 가장 적은 ES에 할당한다. 
+	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 비용이 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널을 우선적으로 선택하여 모든 version을 트랜스코딩하고, 각 version에 대해 ES를 (위에서 선택한 것) 할당한다.
 
 	bool** is_allocated_for_versions = (bool**)malloc(sizeof(bool*) * (NUM_OF_CHANNEL + 1));
@@ -451,8 +455,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 
 	while (!channel_popularities_set.empty()) {
 		int ch = (*channel_popularities_set.begin()).second;
-		channel_popularities_set.erase(channel_popularities_set.begin());
-		//가장 인기많은 ch를 고름.
+		channel_popularities_set.erase(channel_popularities_set.begin()); //가장 인기많은 ch를 고름.
 
 		//이제 이 채널의 커버리지 내의 ES를 찾고, 사용한 비용에 따라 오름차순 정렬. 
 		set<pair<double, int>> lowest_cost_of_ES;
@@ -498,7 +501,6 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 				is_allocated_for_versions[ch][1] = true;
 				break;
 			} //조건이 잘 맞을 경우 할당.
-			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 		}
 
 		if (!is_allocated_for_versions[ch][1]) { //모든 엣지에 할당이 불가능한 상태임
@@ -516,14 +518,11 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 		}
 	}
 
-	int alloc_cnt = 0;
+	channel_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
-		if (is_allocated_for_versions[ch][1]) {
-			alloc_cnt++;
-		}
 	}
-	if (alloc_cnt == NUM_OF_CHANNEL) {
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
@@ -541,6 +540,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 						lowest_cost_of_ES.insert(make_pair(cost, ES));
 					}
 				}
+
 
 				while (!lowest_cost_of_ES.empty()) {
 					int ES = (*lowest_cost_of_ES.begin()).second;
@@ -621,12 +621,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			}
 		}
 	}
-	else {
-		cout << "error\n";
-	}
 }
-
-
 
 void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
@@ -864,14 +859,11 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 		}
 	}
 
-	int alloc_cnt = 0;
+	channel_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
-		if (is_allocated_for_versions[ch][1]) {
-			alloc_cnt++;
-		}
 	}
-	if (alloc_cnt == NUM_OF_CHANNEL) {
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
 		while (!channel_popularities_set.empty()) {
 			bool is_feasible = true;
 			int ch = (*channel_popularities_set.begin()).second;
@@ -1047,7 +1039,6 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 	}
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
-	int alloc_cnt = 0;
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
@@ -1206,14 +1197,11 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 		}
 	}
 
-	int alloc_cnt = 0;
+	channel_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
-		if (is_allocated_for_versions[ch][1]) {
-			alloc_cnt++;
-		}
 	}
-	if (alloc_cnt == NUM_OF_CHANNEL) {
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());//가장 인기많은 ch를 고름.
@@ -1542,14 +1530,12 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			}
 		}
 	}
-	int alloc_cnt = 0;
+
+	channel_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
-		if (is_allocated_for_versions[ch][1]) {
-			alloc_cnt++;
-		}
 	}
-	if (alloc_cnt == NUM_OF_CHANNEL) {
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
