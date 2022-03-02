@@ -304,6 +304,7 @@ double* set_gamma_pop(int length, double k, double theta) {
 		//cout << gamma_pdf[value] << " ";
 	}
 	//채널 갯수 줄이기가 힘드니까 노드 갯수로 로드 결정하자
+	//random_shuffle(gamma_pdf.begin(), gamma_pdf.end());
 	double* arr = (double*)malloc(sizeof(double) * (length + 1));
 	copy(gamma_pdf.begin(), gamma_pdf.end(), arr);
 	return arr;

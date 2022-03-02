@@ -90,10 +90,9 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		std::printf("=TDA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
 		if (is_lowest_only_mode) {
-			is_not_success_for_lowest_allocation(selected_ES, ES_count, (total_cost >= _cost_limit));
-			if (total_cost >= _cost_limit)
+			if (!is_success_for_lowest_allocation(selected_ES, ES_count)) {
 				exit(0);
-
+			}
 			// TA 페이즈의 lowest version 할당 결과, 태스크 1개 이상 할당 된 것이 있으면 on
 			if (_model == ONOFF_MODEL) {
 				for (int ES = 0; ES <= NUM_OF_ES; ES++) {
@@ -102,12 +101,16 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 				}
 			}
 		}
+		else {
+			set_version_set(_version_set, selected_set, selected_ES);
+		}
 	}
 
 	//CR_phase
 	if (total_cost > _cost_limit) {
 		//printf("CR phase 진입, current cost: %lf\n", total_cost);
 		CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_turned_on_at_lowest);
+		set_version_set(_version_set, selected_set, selected_ES);
 
 		total_cost = 0;
 		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
@@ -123,38 +126,13 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			total_GHz += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
 			total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
 		}
-		//std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
-		std::printf("%lf\n", total_pwq);
+		std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
+		//std::printf("%lf\n", total_pwq);
 	}
 }
 
 void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, double _GHz_rate, double _Mbps_rate, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode) {
 	// 2. TDA phase
-	set<pair<double, int>, greater<pair<double, int>>> ES_sort;
-	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-		double slope;
-		if (_GHz_rate > _Mbps_rate) {
-			if (_model == LINEAR_MODEL) {
-				slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-			}
-			if (_model == ONOFF_MODEL) {
-				slope = _used_GHz[ES] / _server_list[ES].cpu_usage_cost_alpha;
-			}
-		}
-		else {
-			if (_model == LINEAR_MODEL) {
-				slope = (_server_list[ES].maximum_bandwidth - _used_Mbps[ES]) / calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-			}
-			if (_model == ONOFF_MODEL) {
-				slope = _used_Mbps[ES] / _server_list[ES].bandwidth_cost_alpha;
-			}
-		}
-
-		ES_sort.insert(make_pair(slope, ES)); //set
-	}
-	//리니어는 엣지를 골고루 선택해서 할당하는 것이 권장 되지만,
-	//on-off는 엣지를 골고루 할당하면 안되고, 할당 하던거 계속 할당하게 해야함.
-
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TA;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		if (_is_lowest_only_mode) {
@@ -188,6 +166,32 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 		int ver = (*list_TA.begin()).second.second; // slope가 가장 큰 것은 어떤 버전인가?
 		list_TA.erase(list_TA.begin());//맨 앞 삭제함
 
+
+		set<pair<double, int>, greater<pair<double, int>>> ES_sort;
+		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+			double slope;
+			if (_GHz_rate > _Mbps_rate) {
+				if (_model == LINEAR_MODEL) {
+					slope = (_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]) / calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model);
+				}
+				if (_model == ONOFF_MODEL) {
+					slope = (_used_GHz[ES] + _channel_list[ch].video_GHz[ver]) / _server_list[ES].cpu_usage_cost_alpha;
+				}
+			}
+			else {
+				if (_model == LINEAR_MODEL) {
+					slope = (_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver]) / calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_Mbps[ver], _model);
+				}
+				if (_model == ONOFF_MODEL) {
+					slope = (_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver]) / _server_list[ES].bandwidth_cost_alpha;
+				}
+			}
+
+			ES_sort.insert(make_pair(slope, ES)); //set
+		}
+		//리니어는 엣지를 골고루 선택해서 할당하는 것이 권장 되지만,
+		//on-off는 엣지를 골고루 할당하면 안되고, 할당 하던거 계속 할당하게 해야함.
+
 		set<pair<double, int>>::iterator pos = ES_sort.begin();
 		int ES = -1;
 		double GHz = 0;
@@ -204,7 +208,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 				(_used_GHz[ES] + _channel_list[ch].video_GHz[ver] <= _server_list[ES].processing_capacity) &&
 				(_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver] <= _server_list[ES].maximum_bandwidth)) {
 
-				/*double total_cost = 0;
+				double total_cost = 0;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES) {
 						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
@@ -220,12 +224,14 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 				if (_is_lowest_only_mode && total_cost > _cost_limit) {
 					pos++;
 					continue;
-				}*/
-				is_allocated_ES = true;
-				break;
+				}
+				else {
+					is_allocated_ES = true;
+					break;
+				}
 			}
-
-			pos++;
+			else
+				pos++;
 		}
 
 		if (is_allocated_ES) {
@@ -234,26 +240,6 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			_ES_count[ES]++;
 			_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
 			_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
-
-			ES_sort.erase(pos);
-			double slope;
-			if (_GHz_rate > _Mbps_rate) {
-				if (_model == LINEAR_MODEL) {
-					slope = (_server_list[ES].processing_capacity - _used_GHz[ES]) / calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-				}
-				if (_model == ONOFF_MODEL) {
-					slope = _used_GHz[ES] / _server_list[ES].cpu_usage_cost_alpha;
-				}
-			}
-			else {
-				if (_model == LINEAR_MODEL) {
-					slope = (_server_list[ES].maximum_bandwidth - _used_Mbps[ES]) / calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-				}
-				if (_model == ONOFF_MODEL) {
-					slope = _used_Mbps[ES] / _server_list[ES].bandwidth_cost_alpha;
-				}
-			}
-			ES_sort.insert(make_pair(slope, ES)); //set
 		}
 		else if (_used_GHz[0] + _channel_list[ch].video_GHz[ver] <= _server_list[0].processing_capacity) {
 			_selected_ES[ch][ver] = 0;
@@ -440,5 +426,4 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 
 	//set 계산하기
 	//if (!is_lowest_version)
-	set_version_set(_version_set, _selected_set, _selected_ES);
 }

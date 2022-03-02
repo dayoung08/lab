@@ -60,7 +60,7 @@ void comparison_schemes(int method_index, server* _server_list, channel* _channe
 }
 
 void print_method(int method_index, server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
-	/*if (method_index == GHz_WF_AP) {
+	if (method_index == GHz_WF_AP) {
 		printf("\n<<GHz_worst_fit_AP>>\n");
 	}
 	if (method_index == GHz_WF_HPF) {
@@ -90,7 +90,7 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	if (method_index == Mbps_WF_HPF) {
 		printf("\n<<Mbps_worst_fit_HPF>>\n");
 	}
-	*/
+	
 	double total_GHz = 0;
 	double total_pwq = 0;
 	double total_Mbps = 0;
@@ -112,9 +112,8 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 		remained_Mbps[ES] = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
 	}
-	std::printf("%lf\n", total_pwq);
-	//std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $, total_Mbps : %lf Mbps \n", total_GHz, total_pwq, total_cost, total_Mbps);
-	//is_not_success_for_lowest_allocation(_selected_ES, _ES_count, (total_cost > _cost_limit));
+	//std::printf("%lf\n", total_pwq);
+	std::printf(" total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $, total_Mbps : %lf Mbps \n", total_GHz, total_pwq, total_cost, total_Mbps);
 }
 
 void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
@@ -191,14 +190,8 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 			}
 		}
 	}
-	int alloc_cnt = 0;
-	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-		channel_popularities_set.insert(make_pair(_channel_list[ch].get_channel_popularity(), ch));
-		if (is_allocated_for_versions[ch][1]) {
-			alloc_cnt++;
-		}
-	}
-	if (alloc_cnt == NUM_OF_CHANNEL) {
+
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
 		while (!channel_popularities_set.empty()) {
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
@@ -296,7 +289,6 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
-
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
@@ -347,7 +339,7 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
 				//ES_version_count_in_comparison_schemes[ES][1]++;
-
+				
 				is_allocated = true;
 				break;
 			} //조건이 잘 맞을 경우 할당.
@@ -362,11 +354,10 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
-				//ES_version_count_in_comparison_schemes[0][1]++;
 			}
 		}
 	}
-
+	
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
@@ -374,69 +365,70 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
 	}
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
+		while (!version_popularities_set.empty()) {
+			bool is_allocated = false;
+			int ch = (*version_popularities_set.begin()).second.first;
+			int ver = (*version_popularities_set.begin()).second.second;
 
-	while (!version_popularities_set.empty()) {
-		bool is_allocated = false;
-		int ch = (*version_popularities_set.begin()).second.first;
-		int ver = (*version_popularities_set.begin()).second.second;
+			version_popularities_set.erase(version_popularities_set.begin());
+			//가장 인기많은 ch를 고름.
 
-		version_popularities_set.erase(version_popularities_set.begin());
-		//가장 인기많은 ch를 고름.
-
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 GHz에 따라 오름차순 정렬. 
-		set<pair<double, int>> lowest_used_GHz_of_ES;
-		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES], ES));
-		}
-
-		while (!lowest_used_GHz_of_ES.empty()) {
-			int ES = (*lowest_used_GHz_of_ES.begin()).second;
-			lowest_used_GHz_of_ES.erase(lowest_used_GHz_of_ES.begin());
-
-			double total_cost = 0;
-			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
-				}
-				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
-				}
+			//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 GHz에 따라 오름차순 정렬. 
+			set<pair<double, int>> lowest_used_GHz_of_ES;
+			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+				if (_channel_list[ch].available_server_list[ES])
+					lowest_used_GHz_of_ES.insert(make_pair(_used_GHz[ES], ES));
 			}
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
-				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
-				(total_cost <= _cost_limit)) {
-				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+			while (!lowest_used_GHz_of_ES.empty()) {
+				int ES = (*lowest_used_GHz_of_ES.begin()).second;
+				lowest_used_GHz_of_ES.erase(lowest_used_GHz_of_ES.begin());
 
-				_selected_ES[ch][ver] = ES;
-				_ES_count[ES]++;
-				//ES_version_count_in_comparison_schemes[ES][ver]++;
+				double total_cost = 0;
+				for (int es = 1; es <= NUM_OF_ES; es++) {
+					if (es == ES) {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+					else {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+				}
 
-				is_allocated = true;
-				break;
+				double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+				double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+				if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+					(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+					(total_cost <= _cost_limit)) {
+					_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+
+					_selected_ES[ch][ver] = ES;
+					_ES_count[ES]++;
+					//ES_version_count_in_comparison_schemes[ES][ver]++;
+
+					is_allocated = true;
+					break;
+				}
+				//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 			}
-			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
-		}
 
-		if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
-			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
-			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
-				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
+			if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
+				double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+				if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
+					_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
-				_selected_ES[ch][ver] = 0;
-				_ES_count[0]++;
-				//ES_version_count_in_comparison_schemes[0][ver]++;
+					_selected_ES[ch][ver] = 0;
+					_ES_count[0]++;
+					//ES_version_count_in_comparison_schemes[0][ver]++;
 
-				break;
+					break;
+				}
 			}
 		}
 	}
@@ -610,7 +602,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			if (cnt < _version_set->version_num - 2) // 1이랑 원본 빼서 -2
 				is_feasible = false;
 
-			if (!is_feasible) { //여기부터 수정할 것. 이전에 할당한 거 전부 풀기.
+			if (!is_feasible && cnt) {  //여기부터 수정할 것. 이전에 할당한 거 전부 풀기.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
@@ -638,7 +630,6 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 GHz가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
-
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
@@ -694,7 +685,6 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
 				//ES_version_count_in_comparison_schemes[ES][1]++;
-
 				is_allocated = true;
 				break;
 			} //조건이 잘 맞을 경우 할당.
@@ -714,86 +704,95 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		}
 	}
 
-	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
 	}
-
-	while (!version_popularities_set.empty()) {
-		bool is_allocated = false;
-		int ch = (*version_popularities_set.begin()).second.first;
-		int ver = (*version_popularities_set.begin()).second.second;
-
-		version_popularities_set.erase(version_popularities_set.begin());
-		//가장 인기많은 ch를 고름.
-
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES의 cost에 따라 오름차순 정렬. 
-		set<pair<double, int>> lowest_cost_of_ES;
-		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-			if (_channel_list[ch].available_server_list[ES]) {
-				double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-				double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-
-				double cost = max(cpu_usage_cost, bandwidth_cost);
-				lowest_cost_of_ES.insert(make_pair(cost, ES));
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
+		//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
+		int alloc_cnt = 0;
+		version_popularities_set.clear();
+		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
+				version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 			}
 		}
+		if (alloc_cnt == NUM_OF_CHANNEL) {
+			while (!version_popularities_set.empty()) {
+				bool is_allocated = false;
+				int ch = (*version_popularities_set.begin()).second.first;
+				int ver = (*version_popularities_set.begin()).second.second;
 
-		while (!lowest_cost_of_ES.empty()) {
-			int ES = (*lowest_cost_of_ES.begin()).second;
-			lowest_cost_of_ES.erase(lowest_cost_of_ES.begin());
+				version_popularities_set.erase(version_popularities_set.begin());
+				//가장 인기많은 ch를 고름.
 
-			double total_cost = 0;
-			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES의 cost에 따라 오름차순 정렬. 
+				set<pair<double, int>> lowest_cost_of_ES;
+				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+					if (_channel_list[ch].available_server_list[ES]) {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
+
+						double cost = max(cpu_usage_cost, bandwidth_cost);
+						lowest_cost_of_ES.insert(make_pair(cost, ES));
+					}
 				}
-				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+
+				while (!lowest_cost_of_ES.empty()) {
+					int ES = (*lowest_cost_of_ES.begin()).second;
+					lowest_cost_of_ES.erase(lowest_cost_of_ES.begin());
+
+					double total_cost = 0;
+					for (int es = 1; es <= NUM_OF_ES; es++) {
+						if (es == ES) {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
+						else {
+							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+							total_cost += max(cpu_usage_cost, bandwidth_cost);
+						}
+					}
+
+					double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+					if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+						(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+						(total_cost <= _cost_limit)) {
+						_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+
+						_selected_ES[ch][ver] = ES;
+						_ES_count[ES]++;
+						//ES_version_count_in_comparison_schemes[ES][ver]++;
+
+						is_allocated = true;
+						break;
+					}
+					//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 				}
-			}
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
-				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
-				(total_cost <= _cost_limit)) {
-				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+				if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
+					double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+					if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
+						_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+						_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
-				_selected_ES[ch][ver] = ES;
-				_ES_count[ES]++;
-				//ES_version_count_in_comparison_schemes[ES][ver]++;
+						_selected_ES[ch][ver] = 0;
+						_ES_count[0]++;
+						//ES_version_count_in_comparison_schemes[0][ver]++;
 
-				is_allocated = true;
-				break;
-			}
-			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
-		}
-
-		if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
-			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
-			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
-				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
-
-				_selected_ES[ch][ver] = 0;
-				_ES_count[0]++;
-				//ES_version_count_in_comparison_schemes[0][ver]++;
-
-				break;
+						break;
+					}
+				}
 			}
 		}
 	}
 }
-
 
 void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 가장 낮은 leasing 금액을 가진 ES에 우선적으로 할당한다.
@@ -832,14 +831,12 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					if (_ES_count[es]) {
+						total_cost += max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
+					}
 				}
 			}
 
@@ -853,7 +850,6 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
-				//ES_version_count_in_comparison_schemes[ES][ver]++;
 
 				is_allocated_for_versions[ch][1] = true;
 				break;
@@ -885,13 +881,12 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 	}
 	if (alloc_cnt == NUM_OF_CHANNEL) {
 		while (!channel_popularities_set.empty()) {
+			bool is_feasible = true;
 			int ch = (*channel_popularities_set.begin()).second;
 			channel_popularities_set.erase(channel_popularities_set.begin());
 			//2~version_num-1까지
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				is_allocated_for_versions[ch][ver] = false;
-
-				//이제 이 채널의 커버리지 내의 ES를 찾고, 가장 낮은 임대 금액에 따라 정렬.
 				set<pair<double, int>> lowest_price_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
@@ -949,19 +944,13 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 
 						is_allocated_for_versions[ch][ver] = true;
 					}
+					else {
+						is_feasible = false;
+					}
 				}
 			}
 
-			bool is_feasible = true;
-			int cnt = 0;
-			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
-				if (is_allocated_for_versions[ch][ver])
-					cnt++;
-			}
-			if (cnt < _version_set->version_num - 2) // 1이랑 원본 빼서 -2
-				is_feasible = false;
-
-			if (!is_feasible) { //여기부터 수정할 것. 이전에 할당한 거 전부 풀기.
+			if (!is_feasible) {  //여기부터 수정할 것. 이전에 할당한 거 전부 풀기.
 				for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 					if (is_allocated_for_versions[ch][ver]) {
 						int ES = _selected_ES[ch][ver];
@@ -980,12 +969,15 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 			}
 		}
 	}
+	else {
+		cout << "error\n";
+	}
 }
+
 
 void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 가장 낮은 leasing 금액을 가진 ES에 우선적으로 할당한다. 같은 금액이면 사용한 GHz의 합이 제일 큰 ES에 할당한다.
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
-
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
@@ -1039,6 +1031,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 				_selected_ES[ch][1] = ES;
 				_ES_count[ES]++;
+
 				//ES_version_count_in_comparison_schemes[ES][1]++;
 
 				is_allocated = true;
@@ -1055,84 +1048,87 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 
 				_selected_ES[ch][1] = 0;
 				_ES_count[0]++;
+
 				//ES_version_count_in_comparison_schemes[0][1]++;
 			}
 		}
 	}
 
 	//모든 채널의 2~N^ver-1 버전들에 대해 할당을 시작한다.
+	int alloc_cnt = 0;
 	version_popularities_set.clear();
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
 	}
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
+		while (!version_popularities_set.empty()) {
+			bool is_allocated = false;
+			int ch = (*version_popularities_set.begin()).second.first;
+			int ver = (*version_popularities_set.begin()).second.second;
 
-	while (!version_popularities_set.empty()) {
-		bool is_allocated = false;
-		int ch = (*version_popularities_set.begin()).second.first;
-		int ver = (*version_popularities_set.begin()).second.second;
+			version_popularities_set.erase(version_popularities_set.begin());
+			//가장 인기많은 ch를 고름.
 
-		version_popularities_set.erase(version_popularities_set.begin());
-		//가장 인기많은 ch를 고름.
-
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES의 cost에 따라 오름차순 정렬. 
-		set<pair<double, int>> lowest_price_of_ES;
-		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
-				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-				lowest_price_of_ES.insert(make_pair(cost, ES));
-			}
-		}
-
-		while (!lowest_price_of_ES.empty()) {
-			int ES = (*lowest_price_of_ES.begin()).second;
-			lowest_price_of_ES.erase(lowest_price_of_ES.begin());
-
-			double total_cost = 0;
-			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
-				}
-				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+			//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES의 cost에 따라 오름차순 정렬. 
+			set<pair<double, int>> lowest_price_of_ES;
+			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+				if (_channel_list[ch].available_server_list[ES]) {
+					double cost = _server_list[ES].cpu_usage_cost_alpha;
+					//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					lowest_price_of_ES.insert(make_pair(cost, ES));
 				}
 			}
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
-				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
-				(total_cost <= _cost_limit)) {
-				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+			while (!lowest_price_of_ES.empty()) {
+				int ES = (*lowest_price_of_ES.begin()).second;
+				lowest_price_of_ES.erase(lowest_price_of_ES.begin());
 
-				_selected_ES[ch][ver] = ES;
-				_ES_count[ES]++;
-				//ES_version_count_in_comparison_schemes[ES][ver]++;
+				double total_cost = 0;
+				for (int es = 1; es <= NUM_OF_ES; es++) {
+					if (es == ES) {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+					else {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+				}
 
-				is_allocated = true;
-				break;
+				double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+				double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+				if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+					(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+					(total_cost <= _cost_limit)) {
+					_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+
+					_selected_ES[ch][ver] = ES;
+					_ES_count[ES]++;
+					//ES_version_count_in_comparison_schemes[ES][ver]++;
+
+					is_allocated = true;
+					break;
+				}
+				//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 			}
-			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
-		}
 
-		if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
-			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
-			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
-				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
+			if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
+				double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+				if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
+					_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
-				_selected_ES[ch][ver] = 0;
-				_ES_count[0]++;
-				//ES_version_count_in_comparison_schemes[0][ver]++;
+					_selected_ES[ch][ver] = 0;
+					_ES_count[0]++;
+					//ES_version_count_in_comparison_schemes[0][ver]++;
 
-				break;
+					break;
+				}
 			}
 		}
 	}
@@ -1327,7 +1323,6 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 
 void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - coverage가 맞는 ES server를 랜덤으로 선정한다.//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
-
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
@@ -1407,73 +1402,74 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
 	}
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
+		while (!version_popularities_set.empty()) {
+			bool is_allocated = false;
+			int ch = (*version_popularities_set.begin()).second.first;
+			int ver = (*version_popularities_set.begin()).second.second;
 
-	while (!version_popularities_set.empty()) {
-		bool is_allocated = false;
-		int ch = (*version_popularities_set.begin()).second.first;
-		int ver = (*version_popularities_set.begin()).second.second;
+			version_popularities_set.erase(version_popularities_set.begin());//가장 인기많은 ch를 고름.
 
-		version_popularities_set.erase(version_popularities_set.begin());//가장 인기많은 ch를 고름.
-
-		//랜덤 ES를 고르고, 이 채널의 커버리지 내의 ES가 맞는지 확인한다.
-		vector<int> ESs_in_coverage;
-		for (int es = 1; es <= NUM_OF_ES; es++) {
-			if (_channel_list[ch].available_server_list[es]) {
-				ESs_in_coverage.push_back(es);
-			}
-		}
-
-		int cnt = -1;
-		while (ESs_in_coverage.size()) {
-			if (cnt++ == 1)
-				break;
-			int pos = rand() % ESs_in_coverage.size();
-			int ES = ESs_in_coverage[pos];
-			ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
-
-			double total_cost = 0;
+			//랜덤 ES를 고르고, 이 채널의 커버리지 내의 ES가 맞는지 확인한다.
+			vector<int> ESs_in_coverage;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
-				}
-				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+				if (_channel_list[ch].available_server_list[es]) {
+					ESs_in_coverage.push_back(es);
 				}
 			}
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
-				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
-				(total_cost <= _cost_limit)) {
-				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+			int cnt = -1;
+			while (ESs_in_coverage.size()) {
+				if (cnt++ == 1)
+					break;
+				int pos = rand() % ESs_in_coverage.size();
+				int ES = ESs_in_coverage[pos];
+				ESs_in_coverage.erase(ESs_in_coverage.begin() + pos);
 
-				_selected_ES[ch][ver] = ES;
-				_ES_count[ES]++;
-				//ES_version_count_in_comparison_schemes[ES][ver]++;
+				double total_cost = 0;
+				for (int es = 1; es <= NUM_OF_ES; es++) {
+					if (es == ES) {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+					else {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+				}
 
-				is_allocated = true;
-				break;
+				double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+				double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+				if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+					(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+					(total_cost <= _cost_limit)) {
+					_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+
+					_selected_ES[ch][ver] = ES;
+					_ES_count[ES]++;
+					//ES_version_count_in_comparison_schemes[ES][ver]++;
+
+					is_allocated = true;
+					break;
+				}
+				//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 			}
-			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
-		}
 
-		if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
-			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
-			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
-				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
+			if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
+				double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+				if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
+					_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
-				_selected_ES[ch][ver] = 0;
-				_ES_count[0]++;
-				//ES_version_count_in_comparison_schemes[0][ver]++;
+					_selected_ES[ch][ver] = 0;
+					_ES_count[0]++;
+					//ES_version_count_in_comparison_schemes[0][ver]++;
 
-				break;
+					break;
+				}
 			}
 		}
 	}
@@ -1659,7 +1655,6 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model) {
 	//엣지 선택 - 각 ES server의 coverage를 확인하고, 사용한 Mbps가 가장 적은 ES에 할당한다. 
 	//버전 선택 - 가장 인기도가 높은 채널-버전을 우선적으로 선택하여 ES를 (위에서 선택한 것) 할당한다.
-
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> version_popularities_set;
 
 	//처음엔 1번 버전에 대해서만 set에 삽입한다.
@@ -1737,69 +1732,70 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 			version_popularities_set.insert(make_pair(_channel_list[ch].popularity[ver], make_pair(ch, ver)));
 		}
 	}
+	if (is_success_for_lowest_allocation(_selected_ES, _ES_count)) {
+		while (!version_popularities_set.empty()) {
+			bool is_allocated = false;
+			int ch = (*version_popularities_set.begin()).second.first;
+			int ver = (*version_popularities_set.begin()).second.second;
 
-	while (!version_popularities_set.empty()) {
-		bool is_allocated = false;
-		int ch = (*version_popularities_set.begin()).second.first;
-		int ver = (*version_popularities_set.begin()).second.second;
+			version_popularities_set.erase(version_popularities_set.begin());
+			//가장 인기많은 ch를 고름.
 
-		version_popularities_set.erase(version_popularities_set.begin());
-		//가장 인기많은 ch를 고름.
-
-		//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 Mbps에 따라 오름차순 정렬. 
-		set<pair<double, int>> lowest_used_Mbps_of_ES;
-		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-			if (_channel_list[ch].available_server_list[ES])
-				lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES], ES));
-		}
-
-		while (!lowest_used_Mbps_of_ES.empty()) {
-			int ES = (*lowest_used_Mbps_of_ES.begin()).second;
-			lowest_used_Mbps_of_ES.erase(lowest_used_Mbps_of_ES.begin());
-
-			double total_cost = 0;
-			for (int es = 1; es <= NUM_OF_ES; es++) {
-				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
-				}
-				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
-				}
+			//이제 이 채널의 커버리지 내의 ES를 찾고, 그 ES에 할당된 Mbps에 따라 오름차순 정렬. 
+			set<pair<double, int>> lowest_used_Mbps_of_ES;
+			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
+				if (_channel_list[ch].available_server_list[ES])
+					lowest_used_Mbps_of_ES.insert(make_pair(_used_Mbps[ES], ES));
 			}
 
-			double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
-			double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
-			if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
-				(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
-				(total_cost <= _cost_limit)) {
-				_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+			while (!lowest_used_Mbps_of_ES.empty()) {
+				int ES = (*lowest_used_Mbps_of_ES.begin()).second;
+				lowest_used_Mbps_of_ES.erase(lowest_used_Mbps_of_ES.begin());
 
-				_selected_ES[ch][ver] = ES;
-				_ES_count[ES]++;
-				//ES_version_count_in_comparison_schemes[ES][ver]++;
+				double total_cost = 0;
+				for (int es = 1; es <= NUM_OF_ES; es++) {
+					if (es == ES) {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+					else {
+						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
+						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
+						total_cost += max(cpu_usage_cost, bandwidth_cost);
+					}
+				}
 
-				is_allocated = true;
-				break;
+				double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+				double Mbps = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
+				if ((GHz - _channel_list[ch].video_GHz[ver] >= 0) &&
+					(Mbps - _channel_list[ch].video_Mbps[ver] >= 0) &&
+					(total_cost <= _cost_limit)) {
+					_used_GHz[ES] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[ES] += _channel_list[ch].video_Mbps[ver];
+
+					_selected_ES[ch][ver] = ES;
+					_ES_count[ES]++;
+					//ES_version_count_in_comparison_schemes[ES][ver]++;
+
+					is_allocated = true;
+					break;
+				}
+				//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
 			}
-			//number_of_allocated_versions_of_ES.insert(make_pair(ES_version_count_in_comparison_schemes[ch][ver], ES));
-		}
 
-		if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
-			double GHz = _server_list[0].processing_capacity - _used_GHz[0];
-			if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
-				_used_GHz[0] += _channel_list[ch].video_GHz[ver];
-				_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
+			if (!is_allocated) { //모든 엣지에 할당이 불가능한 상태임
+				double GHz = _server_list[0].processing_capacity - _used_GHz[0];
+				if (GHz - _channel_list[ch].video_GHz[ver] >= 0) {
+					_used_GHz[0] += _channel_list[ch].video_GHz[ver];
+					_used_Mbps[0] += _channel_list[ch].video_Mbps[ver];
 
-				_selected_ES[ch][ver] = 0;
-				_ES_count[0]++;
-				//ES_version_count_in_comparison_schemes[0][ver]++;
+					_selected_ES[ch][ver] = 0;
+					_ES_count[0]++;
+					//ES_version_count_in_comparison_schemes[0][ver]++;
 
-				break;
+					break;
+				}
 			}
 		}
 	}

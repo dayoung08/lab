@@ -216,7 +216,7 @@ void set_version_set(bitrate_version_set* _version_set, short* _selected_set, sh
 	}
 }
 
-void is_not_success_for_lowest_allocation(short** _selected_ES, int* _ES_count, bool is_not_satisfied_cost_constraints) {
+bool is_success_for_lowest_allocation(short** _selected_ES, int* _ES_count) {
 	int alloc_cnt = 0;
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 		alloc_cnt += _ES_count[ES];
@@ -224,9 +224,8 @@ void is_not_success_for_lowest_allocation(short** _selected_ES, int* _ES_count, 
 
 	if (alloc_cnt < NUM_OF_CHANNEL) {
 		std::printf("alloc_cnt < NUM_OF_CHANNEL.\n");
+		return false;
 	}
 
-	if (is_not_satisfied_cost_constraints) {
-		std::printf("모든 채널의 lowest version이 cost budget 내에 할당되지 않는 문제 발생.\n");
-	}
+	return true;
 }
