@@ -82,9 +82,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		std::printf("=TDA= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n", total_GHz, total_pwq, total_cost);
 
 		if (is_lowest_only_mode) {
-			if (!is_success_for_lowest_allocation(selected_ES, ES_count)) {
-				exit(0);
-			}
+			is_success_for_lowest_allocation(selected_ES, ES_count);
+			//if (!is_success_for_lowest_allocation(selected_ES, ES_count)) {
+				//exit(0);
+			//}
 			// TA 페이즈의 lowest version 할당 결과, 태스크 1개 이상 할당 된 것이 있으면 on
 			if (_model == ONOFF_MODEL) {
 				for (int ES = 0; ES <= NUM_OF_ES; ES++) {
@@ -145,8 +146,8 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 					if (!_bandwidth_apply_flag)
 						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
 					else {
-						double base = sqrt(pow(_nomalized_base_value.first.first, 2) + pow(_nomalized_base_value.first.second, 2));
-						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver]/base, 2) + pow(_channel_list[ch].video_Mbps[ver]/base, 2));
+						//double base = sqrt(pow(_nomalized_base_value.first.first, 2) + pow(_nomalized_base_value.first.second, 2));
+						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver]/_nomalized_base_value.first.first, 2) + pow(_channel_list[ch].video_Mbps[ver]/_nomalized_base_value.first.second, 2));
 					}
 					list_TA.insert(make_pair(slope, make_pair(ch, ver)));
 				}
@@ -173,12 +174,12 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			}
 			else {
 				//double base = sqrt(pow(_server_list[ES].processing_capacity, 2) + pow(_server_list[ES].maximum_bandwidth, 2));
-				double base = sqrt(pow(_nomalized_base_value.second.first, 2) + pow(_nomalized_base_value.second.second, 2));
+				//double base = sqrt(pow(_nomalized_base_value.second.first, 2) + pow(_nomalized_base_value.second.second, 2));
 				if (_model == LINEAR_MODEL) {
-					slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]), 2)/base + pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver])/ base, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
+					slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver])/_nomalized_base_value.second.first, 2)/ + pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver])/_nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
 				if (_model == ONOFF_MODEL) {
-					slope = sqrt(pow((_used_GHz[ES] + _channel_list[ch].video_GHz[ver])/base, 2) + pow((_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver])/ base, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
+					slope = sqrt(pow((_used_GHz[ES] + _channel_list[ch].video_GHz[ver])/_nomalized_base_value.second.first, 2) + pow((_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver])/_nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
 			}
 
