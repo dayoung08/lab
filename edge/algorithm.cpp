@@ -1,11 +1,7 @@
 #include "head.h"
 
-double total_ES_GHz_limit = 0;
-double total_ES_Mbps_limit = 0;
-double total_ES_required_GHz = 0;
-double total_ES_required_Mbps = 0;
 //알고리즘 여기서부터 이제 짜야함
-void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model, bool _bandwidth_apply_flag) {
+void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model, bool _bandwidth_apply_flag, pair<pair<double, double>, pair<double, double>> _nomalized_base_value) {
 	short selected_set[NUM_OF_CHANNEL + 1]; // 각 채널에서 사용하는 비트레이트 set
 	short** selected_ES;
 
@@ -25,6 +21,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	memset(used_Mbps, 0, (sizeof(double) * (NUM_OF_ES + 1)));
 	memset(ES_count, 0, (sizeof(int) * (NUM_OF_ES + 1)));
 
+	double total_ES_GHz_limit = 0;
+	double total_ES_Mbps_limit = 0;
+	double total_ES_required_GHz = 0;
+	double total_ES_required_Mbps = 0;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		total_ES_GHz_limit += _server_list[ES].processing_capacity;
 		total_ES_Mbps_limit += _server_list[ES].maximum_bandwidth;
@@ -61,15 +61,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 
 		//TDA_phase 
-		total_ES_required_GHz = 0;
-		total_ES_required_Mbps = 0;
-		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-			total_ES_required_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
-			total_ES_required_Mbps += _channel_list[ch].sum_of_version_set_Mbps[_version_set->version_set_num];
-		}
-		double GHz_rate = total_ES_required_GHz / total_ES_GHz_limit;
-		double Mbps_rate = total_ES_required_Mbps / total_ES_Mbps_limit;
-		TDA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode, _bandwidth_apply_flag);
+		TDA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode, _bandwidth_apply_flag, _nomalized_base_value);
 		total_cost = 0;
 		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 			double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), used_GHz[ES], _model);
@@ -131,7 +123,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 }
 
-void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode, bool _bandwidth_apply_flag) {
+void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode, bool _bandwidth_apply_flag, pair<pair<double, double>, pair<double, double>> _nomalized_base_value) {
 	// 2. TDA phase
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TA;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
@@ -139,9 +131,10 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			double slope;
 			if (!_bandwidth_apply_flag)
 				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_GHz[1];
-			else
+			else {
+				double base = sqrt(pow(_nomalized_base_value.first.first, 2) + pow(_nomalized_base_value.first.second, 2));
 				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / sqrt(pow(_channel_list[ch].video_GHz[1], 2) + pow(_channel_list[ch].video_Mbps[1], 2));
-
+			}
 			list_TA.insert(make_pair(slope, make_pair(ch, 1)));
 		}
 		else {
@@ -152,8 +145,8 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 					if (!_bandwidth_apply_flag)
 						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
 					else {
-						double base = sqrt(pow(total_ES_required_GHz, 2) + pow(total_ES_required_Mbps, 2));
-						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver], 2) + pow(_channel_list[ch].video_Mbps[ver], 2));
+						double base = sqrt(pow(_nomalized_base_value.first.first, 2) + pow(_nomalized_base_value.first.second, 2));
+						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver]/base, 2) + pow(_channel_list[ch].video_Mbps[ver]/base, 2));
 					}
 					list_TA.insert(make_pair(slope, make_pair(ch, ver)));
 				}
@@ -180,7 +173,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			}
 			else {
 				//double base = sqrt(pow(_server_list[ES].processing_capacity, 2) + pow(_server_list[ES].maximum_bandwidth, 2));
-				double base = sqrt(pow(total_ES_GHz_limit, 2) + pow(total_ES_Mbps_limit, 2));
+				double base = sqrt(pow(_nomalized_base_value.second.first, 2) + pow(_nomalized_base_value.second.second, 2));
 				if (_model == LINEAR_MODEL) {
 					slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]), 2)/base + pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver])/ base, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
