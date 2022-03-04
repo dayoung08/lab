@@ -58,8 +58,6 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			std::printf("[Lowest version만 우선 할당]\n");
 		else {
 			std::printf("\n[2~N^ver 버전들 전부 할당]\n");
-			total_ES_required_GHz = 0;
-			total_ES_required_Mbps = 0;
 			for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 				total_ES_required_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
 				total_ES_required_Mbps += _channel_list[ch].sum_of_version_set_Mbps[_version_set->version_set_num];
