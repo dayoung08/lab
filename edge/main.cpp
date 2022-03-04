@@ -3,12 +3,12 @@ int main() {
 	bool bandwidth_apply_flag = true;
 	srand(SEED);
 
-	double ratio = 0.5;// 2 3, 4, 5, 6, 7
+	double ratio = 0.2;// 2 3, 4, 5, 6, 7
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;
-	int model = LINEAR_MODEL;
-	//int model = ONOFF_MODEL;
+	//int model = LINEAR_MODEL;
+	int model = ONOFF_MODEL;
 	int bitrate_set = 0; // 0~4 (디폴트 0)
 	//이 위의 인자들을 실험 환경에 따라 변경
 
@@ -28,12 +28,9 @@ int main() {
 
 	clock_t start, end, spent_time;
 	start = clock();
-	algorithm_run(server_list, channel_list, &version_set, cost_limit, model);
+	algorithm_run(server_list, channel_list, &version_set, cost_limit, model, bandwidth_apply_flag);
 	end = clock();
 	spent_time = end - start;
-	//printf("%lf second\n\n", (double)spent_time / CLOCKS_PER_SEC);
-
-	//비교스킴 아직 코딩 덜 함
 
 	//printf("===== 비교 스킴 =====\n\n");
 
@@ -57,5 +54,6 @@ int main() {
 		comparison_schemes(Mbps_WF_HPF, server_list, channel_list, &version_set, cost_limit, model);
 	}
 
+	printf("\n%lf second\n\n", (double)spent_time / CLOCKS_PER_SEC);
 	printf("===== FINISH =====\n");
 }

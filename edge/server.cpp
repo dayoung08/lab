@@ -40,8 +40,8 @@ void server_initalization_for_bandwidth(server* _server_list, int _model, bool _
 	//220225
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		if (_bandwidth_model_flag) {
-			// _server_list[ES].maximum_bandwidth = rand() % 451 + 50; // 가정용 인터넷 기준인데. 이걸로도 아마존이랑 차이없다.
-			_server_list[ES].maximum_bandwidth = rand() % 999001 + 1000; // 아마존 기준 
+			_server_list[ES].maximum_bandwidth = rand() % 31 + 70; //
+			//_server_list[ES].maximum_bandwidth = rand() % 999001 + 1000; // 아마존 기준 
 			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 993 + 8)) / 1000;
 			_server_list[ES].cpu_usage_cost_alpha = _server_list[ES].bandwidth_cost_alpha = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 		}

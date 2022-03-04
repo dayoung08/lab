@@ -1,14 +1,18 @@
 #include "head.h"
 
-//ì•Œê³ ë¦¬ì¦˜ ì—¬ê¸°ì„œë¶€í„° ì´ì œ ì§œì•¼í•¨
-void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model) {
-	short selected_set[NUM_OF_CHANNEL + 1]; // ê° ì±„ë„ì—ì„œ ì‚¬ìš©í•˜ëŠ” ë¹„íŠ¸ë ˆì´íŠ¸ set
+double total_ES_GHz_limit = 0;
+double total_ES_Mbps_limit = 0;
+double total_ES_required_GHz = 0;
+double total_ES_required_Mbps = 0;
+//¾Ë°í¸®Áò ¿©±â¼­ºÎÅÍ ÀÌÁ¦ Â¥¾ßÇÔ
+void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, int _model, bool _bandwidth_apply_flag) {
+	short selected_set[NUM_OF_CHANNEL + 1]; // °¢ Ã¤³Î¿¡¼­ »ç¿ëÇÏ´Â ºñÆ®·¹ÀÌÆ® set
 	short** selected_ES;
 
 	selected_ES = (short**)malloc(sizeof(short*) * (NUM_OF_CHANNEL + 1));
 	for (int row = 1; row <= NUM_OF_CHANNEL; row++) {
-		selected_ES[row] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•˜ë‹ˆê¹Œ
-		for (int col = 1; col <= _version_set->version_num - 1; col++) {  // ì˜¤ë¦¬ì§€ë„ ë²„ì „ì€ íŠ¸ëœìŠ¤ì½”ë”© ì•ˆí•˜ë‹ˆê¹Œ
+		selected_ES[row] = (short*)malloc(sizeof(short) * (_version_set->version_num));  // ¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇÏ´Ï±î
+		for (int col = 1; col <= _version_set->version_num - 1; col++) {  // ¿À¸®Áö³Î ¹öÀüÀº Æ®·£½ºÄÚµù ¾ÈÇÏ´Ï±î
 			selected_ES[row][col] = -1;
 		}
 		selected_set[row] = _version_set->version_set_num;
@@ -21,14 +25,10 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	memset(used_Mbps, 0, (sizeof(double) * (NUM_OF_ES + 1)));
 	memset(ES_count, 0, (sizeof(int) * (NUM_OF_ES + 1)));
 
-	double total_ES_GHz_limit = 0;
-	double total_ES_Mbps_limit = 0;
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		total_ES_GHz_limit += _server_list[ES].processing_capacity;
 		total_ES_Mbps_limit += _server_list[ES].maximum_bandwidth;
 	}
-	double total_ES_required_GHz = 0;
-	double total_ES_required_Mbps = 0;
 	double total_first_pwq = 0;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		total_first_pwq += _channel_list[ch].sum_of_pwq[1];
@@ -36,15 +36,15 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		total_ES_required_Mbps += _channel_list[ch].sum_of_version_set_Mbps[1];
 	}
 
-	printf("lowest versionë§Œ íŠ¸ëœìŠ¤ì½”ë”© í–ˆì„ ë•Œ pwq ì´ í•© %lf\n", total_first_pwq);
-	printf("lowest versionë§Œ íŠ¸ëœìŠ¤ì½”ë”© í–ˆì„ ë•Œ %lf GHz / GHz ì´ í•© %lf GHz\n", total_ES_required_GHz, (_server_list[0].processing_capacity + total_ES_GHz_limit));
+	printf("lowest version¸¸ Æ®·£½ºÄÚµù ÇßÀ» ¶§ pwq ÃÑ ÇÕ %lf\n", total_first_pwq);
+	printf("lowest version¸¸ Æ®·£½ºÄÚµù ÇßÀ» ¶§ %lf GHz / GHz ÃÑ ÇÕ %lf GHz\n", total_ES_required_GHz, (_server_list[0].processing_capacity + total_ES_GHz_limit));
 	if ((_server_list[0].processing_capacity + total_ES_GHz_limit) < total_ES_required_GHz) {
-		printf("GHzê°€ ëª¨ìë€ ìƒí™©/Channel ìˆ˜ë¥¼ ì¤„ì´ê±°ë‚˜, ì—£ì§€ ìˆ˜ë¥¼ ëŠ˜ë¦´ ê²ƒ\n");
+		printf("GHz°¡ ¸ğÀÚ¶õ »óÈ²/Channel ¼ö¸¦ ÁÙÀÌ°Å³ª, ¿§Áö ¼ö¸¦ ´Ã¸± °Í\n");
 		exit(0);
 	}
-	printf("lowest versionë§Œ íŠ¸ëœìŠ¤ì½”ë”© í–ˆì„ ë•Œ %lf Mbps / Mbps ì´ í•© %lf Mbps\n", total_ES_required_Mbps, (_server_list[0].maximum_bandwidth + total_ES_Mbps_limit));
+	printf("lowest version¸¸ Æ®·£½ºÄÚµù ÇßÀ» ¶§ %lf Mbps / Mbps ÃÑ ÇÕ %lf Mbps\n", total_ES_required_Mbps, (_server_list[0].maximum_bandwidth + total_ES_Mbps_limit));
 	if ((_server_list[0].maximum_bandwidth + total_ES_Mbps_limit) < total_ES_required_Mbps) {
-		printf("Mbpsê°€ ëª¨ìë€ ìƒí™©/Channel ìˆ˜ë¥¼ ì¤„ì´ê±°ë‚˜, ì—£ì§€ ìˆ˜ë¥¼ ëŠ˜ë¦´ ê²ƒ\n");
+		printf("Mbps°¡ ¸ğÀÚ¶õ »óÈ²/Channel ¼ö¸¦ ÁÙÀÌ°Å³ª, ¿§Áö ¼ö¸¦ ´Ã¸± °Í\n");
 		exit(0);
 	}
 
@@ -53,23 +53,23 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	double total_cost = 0;
 	bool is_turned_on_at_lowest[NUM_OF_ES + 1];
 	memset(is_turned_on_at_lowest, 0, (sizeof(bool) * (NUM_OF_ES + 1)));
-	for (int is_lowest_only_mode = 1; is_lowest_only_mode >= 0; is_lowest_only_mode--) { // mode = 1 : lowest versionë§Œ, mode = 0; 2~N^ver ë²„ì „ë“¤ ì „ë¶€.
+	for (int is_lowest_only_mode = 1; is_lowest_only_mode >= 0; is_lowest_only_mode--) { // mode = 1 : lowest version¸¸, mode = 0; 2~N^ver ¹öÀüµé ÀüºÎ.
 		if (is_lowest_only_mode)
-			std::printf("[Lowest versionë§Œ ìš°ì„  í• ë‹¹]\n");
+			std::printf("[Lowest version¸¸ ¿ì¼± ÇÒ´ç]\n");
 		else {
-			std::printf("\n[2~N^ver ë²„ì „ë“¤ ì „ë¶€ í• ë‹¹]\n");
-			total_ES_required_GHz = 0;
-			total_ES_required_Mbps = 0;
-			for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-				total_ES_required_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
-				total_ES_required_Mbps += _channel_list[ch].sum_of_version_set_Mbps[_version_set->version_set_num];
-			}
+			std::printf("\n[2~N^ver ¹öÀüµé ÀüºÎ ÇÒ´ç]\n");
 		}
 
 		//TDA_phase 
+		total_ES_required_GHz = 0;
+		total_ES_required_Mbps = 0;
+		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+			total_ES_required_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
+			total_ES_required_Mbps += _channel_list[ch].sum_of_version_set_Mbps[_version_set->version_set_num];
+		}
 		double GHz_rate = total_ES_required_GHz / total_ES_GHz_limit;
 		double Mbps_rate = total_ES_required_Mbps / total_ES_Mbps_limit;
-		TDA_phase(_server_list, _channel_list, _version_set, _cost_limit, GHz_rate, Mbps_rate, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
+		TDA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode, _bandwidth_apply_flag);
 		total_cost = 0;
 		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 			double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), used_GHz[ES], _model);
@@ -93,7 +93,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 			if (!is_success_for_lowest_allocation(selected_ES, ES_count)) {
 				exit(0);
 			}
-			// TA í˜ì´ì¦ˆì˜ lowest version í• ë‹¹ ê²°ê³¼, íƒœìŠ¤í¬ 1ê°œ ì´ìƒ í• ë‹¹ ëœ ê²ƒì´ ìˆìœ¼ë©´ on
+			// TA ÆäÀÌÁîÀÇ lowest version ÇÒ´ç °á°ú, ÅÂ½ºÅ© 1°³ ÀÌ»ó ÇÒ´ç µÈ °ÍÀÌ ÀÖÀ¸¸é on
 			if (_model == ONOFF_MODEL) {
 				for (int ES = 0; ES <= NUM_OF_ES; ES++) {
 					if (!is_turned_on_at_lowest[ES] && used_GHz[ES])
@@ -108,7 +108,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 	//CR_phase
 	if (total_cost > _cost_limit) {
-		//printf("CR phase ì§„ì…, current cost: %lf\n", total_cost);
+		//printf("CR phase ÁøÀÔ, current cost: %lf\n", total_cost);
 		CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_turned_on_at_lowest);
 		set_version_set(_version_set, selected_set, selected_ES);
 
@@ -131,29 +131,30 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	}
 }
 
-void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, double _GHz_rate, double _Mbps_rate, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode) {
+void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode, bool _bandwidth_apply_flag) {
 	// 2. TDA phase
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TA;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		if (_is_lowest_only_mode) {
 			double slope;
-			if (_GHz_rate > _Mbps_rate) 
+			if (!_bandwidth_apply_flag)
 				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_GHz[1];
 			else
-				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_Mbps[1];
+				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / sqrt(pow(_channel_list[ch].video_GHz[1], 2) + pow(_channel_list[ch].video_Mbps[1], 2));
 
 			list_TA.insert(make_pair(slope, make_pair(ch, 1)));
 		}
 		else {
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
-				if ((_selected_set[ch] - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // ì´ì „ì— ì„ íƒí•œ setì—ì„œ í• ë‹¹í–ˆë˜ GHzëŠ” ì „ë¶€ ì‚­ì œí•´ ì¤€ë‹¤. 
+				if ((_selected_set[ch] - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // ÀÌÀü¿¡ ¼±ÅÃÇÑ set¿¡¼­ ÇÒ´çÇß´ø GHz´Â ÀüºÎ »èÁ¦ÇØ ÁØ´Ù. 
 					int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
 					double slope;
-					if (_GHz_rate > _Mbps_rate)
+					if (!_bandwidth_apply_flag)
 						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
-					else
-						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_Mbps[ver];
-
+					else {
+						double base = sqrt(pow(total_ES_required_GHz, 2) + pow(total_ES_required_Mbps, 2));
+						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver], 2) + pow(_channel_list[ch].video_Mbps[ver], 2));
+					}
 					list_TA.insert(make_pair(slope, make_pair(ch, ver)));
 				}
 			}
@@ -162,35 +163,36 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 
 	int cnt = 0;
 	while (list_TA.size()) {
-		int ch = (*list_TA.begin()).second.first; // slopeê°€ ê°€ì¥ í° ê²ƒì€ ì–´ë–¤ ì±„ë„ì¸ê°€?
-		int ver = (*list_TA.begin()).second.second; // slopeê°€ ê°€ì¥ í° ê²ƒì€ ì–´ë–¤ ë²„ì „ì¸ê°€?
-		list_TA.erase(list_TA.begin());//ë§¨ ì• ì‚­ì œí•¨
-
+		int ch = (*list_TA.begin()).second.first; // slope°¡ °¡Àå Å« °ÍÀº ¾î¶² Ã¤³ÎÀÎ°¡?
+		int ver = (*list_TA.begin()).second.second; // slope°¡ °¡Àå Å« °ÍÀº ¾î¶² ¹öÀüÀÎ°¡?
+		list_TA.erase(list_TA.begin());//¸Ç ¾Õ »èÁ¦ÇÔ
 
 		set<pair<double, int>, greater<pair<double, int>>> ES_sort;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			double slope;
-			if (_GHz_rate > _Mbps_rate) {
+			if (!_bandwidth_apply_flag){
 				if (_model == LINEAR_MODEL) {
 					slope = (_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]) / calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model);
 				}
 				if (_model == ONOFF_MODEL) {
-					slope = (_used_GHz[ES] + _channel_list[ch].video_GHz[ver]) / _server_list[ES].cpu_usage_cost_alpha;
+					slope = (_used_GHz[ES] + _channel_list[ch].video_GHz[ver]) / calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model);
 				}
 			}
 			else {
+				//double base = sqrt(pow(_server_list[ES].processing_capacity, 2) + pow(_server_list[ES].maximum_bandwidth, 2));
+				double base = sqrt(pow(total_ES_GHz_limit, 2) + pow(total_ES_Mbps_limit, 2));
 				if (_model == LINEAR_MODEL) {
-					slope = (_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver]) / calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_Mbps[ver], _model);
+					slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]), 2)/base + pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver])/ base, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
 				if (_model == ONOFF_MODEL) {
-					slope = (_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver]) / _server_list[ES].bandwidth_cost_alpha;
+					slope = sqrt(pow((_used_GHz[ES] + _channel_list[ch].video_GHz[ver])/base, 2) + pow((_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver])/ base, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
 			}
 
 			ES_sort.insert(make_pair(slope, ES)); //set
 		}
-		//ë¦¬ë‹ˆì–´ëŠ” ì—£ì§€ë¥¼ ê³¨ê³ ë£¨ ì„ íƒí•´ì„œ í• ë‹¹í•˜ëŠ” ê²ƒì´ ê¶Œì¥ ë˜ì§€ë§Œ,
-		//on-offëŠ” ì—£ì§€ë¥¼ ê³¨ê³ ë£¨ í• ë‹¹í•˜ë©´ ì•ˆë˜ê³ , í• ë‹¹ í•˜ë˜ê±° ê³„ì† í• ë‹¹í•˜ê²Œ í•´ì•¼í•¨.
+		//¸®´Ï¾î´Â ¿§Áö¸¦ °ñ°í·ç ¼±ÅÃÇØ¼­ ÇÒ´çÇÏ´Â °ÍÀÌ ±ÇÀå µÇÁö¸¸,
+		//on-off´Â ¿§Áö¸¦ °ñ°í·ç ÇÒ´çÇÏ¸é ¾ÈµÇ°í, ÇÒ´ç ÇÏ´ø°Å °è¼Ó ÇÒ´çÇÏ°Ô ÇØ¾ßÇÔ.
 
 		set<pair<double, int>>::iterator pos = ES_sort.begin();
 		int ES = -1;
@@ -201,8 +203,8 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 				break;
 			}
 
-			ES = (*pos).second; // ê°€ì¥ ë‚¨ì€ GHzê°€ ë§ì€ ì—£ì§€ëŠ” ë¬´ì—‡ì¸ê°€?
-			GHz = (*pos).first; // ê·¸ ì—£ì§€ì˜ GHzëŠ” ì–¼ë§ˆì¸ê°€?
+			ES = (*pos).second; // °¡Àå ³²Àº GHz°¡ ¸¹Àº ¿§Áö´Â ¹«¾ùÀÎ°¡?
+			GHz = (*pos).first; // ±× ¿§ÁöÀÇ GHz´Â ¾ó¸¶ÀÎ°¡?
 
 			if ((_channel_list[ch].available_server_list[ES]) && 
 				(_used_GHz[ES] + _channel_list[ch].video_GHz[ver] <= _server_list[ES].processing_capacity) &&
@@ -249,7 +251,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 		}
 	}
 
-	//set ê³„ì‚°í•˜ê¸°
+	//set °è»êÇÏ±â
 	//if (!_is_lowest_only_mode)
 	//	set_version_set(_version_set, _selected_set, _selected_ES);
 }
@@ -257,18 +259,18 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _total_cost, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool* _is_turned_on_at_lowest) {
 	set<pair<double, pair<int, int>>> versions_in_CTS;
 
-	//cost limitë¥¼ ë§Œì¡±í•  ë•Œ ê¹Œì§€ ES ì—ì„œ ê° ë²„ì „ë“¤ì„ ì œê±°í•˜ê³ ,
-	//ì œê±°ëœ ë²„ì „ë“¤ì„ CTSë¡œ ì˜®ê¸´ë‹¤ìŒ, CTS capacity ë„˜ëŠ” ê²ƒì„ ì œê±°í•œë‹¤. // 20210713 ì¶”ê°€í•¨.
+	//cost limit¸¦ ¸¸Á·ÇÒ ¶§ ±îÁö ES ¿¡¼­ °¢ ¹öÀüµéÀ» Á¦°ÅÇÏ°í,
+	//Á¦°ÅµÈ ¹öÀüµéÀ» CTS·Î ¿Å±ä´ÙÀ½, CTS capacity ³Ñ´Â °ÍÀ» Á¦°ÅÇÑ´Ù. // 20210713 Ãß°¡ÇÔ.
 	if (_model == LINEAR_MODEL) {
 		set<pair<double, pair<int, int>>> list_CR;
-		// slope (pwq/cost) ê°’ / channel-version
-		// pwq ê°’ / channel-version
+		// slope (pwq/cost) °ª / channel-version
+		// pwq °ª / channel-version
 		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
 				if (_selected_ES[ch][ver] == 0) {
 					double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
-					//CTSì˜ ë°´ë“œìœ— ì œí•œì€ ì—†ìœ¼ë¯€ë¡œ
+					//CTSÀÇ ¹êµåÀ­ Á¦ÇÑÀº ¾øÀ¸¹Ç·Î
 					versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver)));
 				}
 				if (_selected_ES[ch][ver] >= 1) {
@@ -282,14 +284,14 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		}
 
 		while (list_CR.size()) {
-			int ch_in_ES = (*list_CR.begin()).second.first; // slopeê°€ ê°€ì¥ í° ê²ƒì€ ì–´ë–¤ ì±„ë„ì¸ê°€?
-			int ver_in_ES = (*list_CR.begin()).second.second; // slopeê°€ ê°€ì¥ í° ê²ƒì€ ì–´ë–¤ ë²„ì „ì¸ê°€?
-			list_CR.erase(list_CR.begin());// list_CRì˜ ë§¨ ì• ì‚­ì œí•¨
+			int ch_in_ES = (*list_CR.begin()).second.first; // slope°¡ °¡Àå Å« °ÍÀº ¾î¶² Ã¤³ÎÀÎ°¡?
+			int ver_in_ES = (*list_CR.begin()).second.second; // slope°¡ °¡Àå Å« °ÍÀº ¾î¶² ¹öÀüÀÎ°¡?
+			list_CR.erase(list_CR.begin());// list_CRÀÇ ¸Ç ¾Õ »èÁ¦ÇÔ
 
 			int set_temp = _selected_set[ch_in_ES] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver_in_ES - 1)));
 			double slope = (_channel_list[ch_in_ES].sum_of_pwq[_selected_set[ch_in_ES]] - _channel_list[ch_in_ES].sum_of_pwq[set_temp]) / _channel_list[ch_in_ES].video_GHz[ver_in_ES];
-			//CTSì˜ ë°´ë“œìœ— ì œí•œì€ ì—†ìœ¼ë¯€ë¡œ. slopeëŠ” CTSì— ë“¤ì–´ê°„ í›„ë³´êµ° ì„ íƒì„ ìœ„í•´ ê³„ì‚°ëœ ê²ƒ.
-			versions_in_CTS.insert(make_pair(slope, make_pair(ch_in_ES, ver_in_ES))); //CTSì— ì„ì‹œ í• ë‹¹
+			//CTSÀÇ ¹êµåÀ­ Á¦ÇÑÀº ¾øÀ¸¹Ç·Î. slope´Â CTS¿¡ µé¾î°£ ÈÄº¸±º ¼±ÅÃÀ» À§ÇØ °è»êµÈ °Í.
+			versions_in_CTS.insert(make_pair(slope, make_pair(ch_in_ES, ver_in_ES))); //CTS¿¡ ÀÓ½Ã ÇÒ´ç
 
 			double prev_GHz_cost = calculate_ES_cpu_usage_cost(&(_server_list[_selected_ES[ch_in_ES][ver_in_ES]]), _used_GHz[_selected_ES[ch_in_ES][ver_in_ES]], _model);
 			double prev_Mbps_cost = calculate_ES_bandwidth_cost(&(_server_list[_selected_ES[ch_in_ES][ver_in_ES]]), _used_Mbps[_selected_ES[ch_in_ES][ver_in_ES]], _model);
@@ -311,9 +313,9 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			double curr_GHz_cost = calculate_ES_cpu_usage_cost(&(_server_list[_selected_ES[ch_in_ES][ver_in_ES]]), _used_GHz[_selected_ES[ch_in_ES][ver_in_ES]], _model);
 			double curr_Mbps_cost = calculate_ES_bandwidth_cost(&(_server_list[_selected_ES[ch_in_ES][ver_in_ES]]), _used_Mbps[_selected_ES[ch_in_ES][ver_in_ES]], _model);
 			double curr_cost = max(curr_GHz_cost, curr_Mbps_cost);
-			_total_cost -= (prev_cost - curr_cost); // cost ê³„ì‚°
+			_total_cost -= (prev_cost - curr_cost); // cost °è»ê
 
-			_selected_ES[ch_in_ES][ver_in_ES] = 0; //CTSì— ì„ì‹œ í• ë‹¹
+			_selected_ES[ch_in_ES][ver_in_ES] = 0; //CTS¿¡ ÀÓ½Ã ÇÒ´ç
 
 			if (_total_cost <= _cost_limit) {
 				break;
@@ -321,32 +323,32 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		}
 	}
 
-	// ì´ ë•Œ ESì—ì„œ ëº„ ë•Œ, ingesion serverì— ìˆëŠ” ë²„ì „ë³´ë‹¤ pwqê°€ ë†’ì„ ê²½ìš°,
-	// (ì¦‰ CTSì— í• ë‹¹ëœ ë²„ì „ ì¤‘, pwqê°€ ì œì¼ ë‚®ì€ ë²„ì „ê³¼ ë¹„êµí•œë‹¤.)
-	// (CTSì— í• ë‹¹ëœ ë²„ì „ì´ ë¹¼ë ¤ëŠ” ë²„ì „ë³´ë‹¤ ë” pwqê°€ ë‚®ì„ ê²½ìš°, í•´ë‹¹ ë²„ì „ì€ CTSì— ë“¤ì–´ê°€ê³  ì›ë˜ ê±°ê¸° ìˆë˜ ë²„ì „ì€ ë¹ ì§.)
-	// ESì—ì„œ ëº€ ê²ƒì€ ë‹¤ì‹œ CTSì— ë³´ë‚´ê³ , ingesion serverì—ì„œ ë¹„êµ ë²„ì „ì„ ì™„ì „íˆ ëº€ë‹¤.
+	// ÀÌ ¶§ ES¿¡¼­ »¬ ¶§, ingesion server¿¡ ÀÖ´Â ¹öÀüº¸´Ù pwq°¡ ³ôÀ» °æ¿ì,
+	// (Áï CTS¿¡ ÇÒ´çµÈ ¹öÀü Áß, pwq°¡ Á¦ÀÏ ³·Àº ¹öÀü°ú ºñ±³ÇÑ´Ù.)
+	// (CTS¿¡ ÇÒ´çµÈ ¹öÀüÀÌ »©·Á´Â ¹öÀüº¸´Ù ´õ pwq°¡ ³·À» °æ¿ì, ÇØ´ç ¹öÀüÀº CTS¿¡ µé¾î°¡°í ¿ø·¡ °Å±â ÀÖ´ø ¹öÀüÀº ºüÁü.)
+	// ES¿¡¼­ »« °ÍÀº ´Ù½Ã CTS¿¡ º¸³»°í, ingesion server¿¡¼­ ºñ±³ ¹öÀüÀ» ¿ÏÀüÈ÷ »«´Ù.
 
 	if (_model == ONOFF_MODEL) {
 		double pwq[NUM_OF_ES + 1];
 		memset(pwq, 0, (sizeof(double) * (NUM_OF_ES + 1)));
-		// pwq ê°’ / channel-version
+		// pwq °ª / channel-version
 		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
 
 				if (_selected_ES[ch][ver] == 0) {
 					double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
-					//CTSì˜ ë°´ë“œìœ— ì œí•œì€ ì—†ìœ¼ë¯€ë¡œ
+					//CTSÀÇ ¹êµåÀ­ Á¦ÇÑÀº ¾øÀ¸¹Ç·Î
 					versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver)));
 				}
-				else if (_selected_ES[ch][ver] >= 1 && !_is_turned_on_at_lowest[_selected_ES[ch][ver]]) { // ESì— í• ë‹¹ëœ ë²„ì „ë“¤ì€ pwqì˜ í•©ì„ êµ¬í•´ì¤Œ
+				else if (_selected_ES[ch][ver] >= 1 && !_is_turned_on_at_lowest[_selected_ES[ch][ver]]) { // ES¿¡ ÇÒ´çµÈ ¹öÀüµéÀº pwqÀÇ ÇÕÀ» ±¸ÇØÁÜ
 					pwq[_selected_ES[ch][ver]] += (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]);
 				}
 			}
 		}
 
 		set<pair<double, int>> list_CR;
-		// slope (pwq/cost) ê°’ / ES
+		// slope (pwq/cost) °ª / ES
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (!_is_turned_on_at_lowest[ES]) {
 				double GHz_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
@@ -360,8 +362,8 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		int cnt = 0;
 		while (list_CR.size()) {
 			cnt++;
-			int ES = (*list_CR.begin()).second; // slopeê°€ ê°€ì¥ í° ê²ƒì€ ì–´ë–¤ ì—£ì§€ì¸ê°€?
-			list_CR.erase(list_CR.begin());//ë§¨ ì• ì‚­ì œí•¨
+			int ES = (*list_CR.begin()).second; // slope°¡ °¡Àå Å« °ÍÀº ¾î¶² ¿§ÁöÀÎ°¡?
+			list_CR.erase(list_CR.begin());//¸Ç ¾Õ »èÁ¦ÇÔ
 
 			double GHz_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
 			double Mbps_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
@@ -374,19 +376,19 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 			_used_Mbps[ES] = 0;
 
 			_total_cost -= cost;
-			//ì—¬ê¸°ê¹Œì§€ëŠ” cost ë•Œë¬¸ì— ESì— í• ë‹¹ëœ versionë“¤ì„ ë¹¼ëŠ” ê²ƒ.
+			//¿©±â±îÁö´Â cost ¶§¹®¿¡ ES¿¡ ÇÒ´çµÈ versionµéÀ» »©´Â °Í.
 
-			//ëºë˜ ì—£ì§€ ì•ˆì— ìˆëŠ” ë²„ì „ë“¤ CTSì— í• ë‹¹í•˜ê¸°
+			//»°´ø ¿§Áö ¾È¿¡ ÀÖ´Â ¹öÀüµé CTS¿¡ ÇÒ´çÇÏ±â
 			for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 				for (int ver = 1; ver <= _version_set->version_num - 1; ver++) {
 					if (_selected_ES[ch][ver] == ES) {
 						if (ver > 1) {
 							int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
 							double slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
-							//CTSì˜ ë°´ë“œìœ— ì œí•œì€ ì—†ìœ¼ë¯€ë¡œ
-							versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver))); //CTSì— ì„ì‹œ í• ë‹¹
+							//CTSÀÇ ¹êµåÀ­ Á¦ÇÑÀº ¾øÀ¸¹Ç·Î
+							versions_in_CTS.insert(make_pair(slope, make_pair(ch, ver))); //CTS¿¡ ÀÓ½Ã ÇÒ´ç
 						}
-						_selected_ES[ch][ver] = 0; //CTSì— ì„ì‹œ í• ë‹¹
+						_selected_ES[ch][ver] = 0; //CTS¿¡ ÀÓ½Ã ÇÒ´ç
 					}
 				}
 			}
@@ -398,13 +400,13 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	}
 
 
-	//versions_in_CTSì˜ processing capacityì— ë§ê²Œ ì‚­ì œ.
-	//ì´ ì•„ë˜ ë¶€ë¶„ onoff modelì´ë‘ ë˜‘ê°™ìŒ
+	//versions_in_CTSÀÇ processing capacity¿¡ ¸Â°Ô »èÁ¦.
+	//ÀÌ ¾Æ·¡ ºÎºĞ onoff modelÀÌ¶û ¶È°°À½
 	while (versions_in_CTS.size()) {
-		int ch_in_CTS = (*versions_in_CTS.begin()).second.first; // slopeê°€ ê°€ì¥ í° ê²ƒì€ ì–´ë–¤ ì±„ë„ì¸ê°€?
-		int ver_in_CTS = (*versions_in_CTS.begin()).second.second; // slopeê°€ ê°€ì¥ í° ê²ƒì€ ì–´ë–¤ ë²„ì „ì¸ê°€?
+		int ch_in_CTS = (*versions_in_CTS.begin()).second.first; // slope°¡ °¡Àå Å« °ÍÀº ¾î¶² Ã¤³ÎÀÎ°¡?
+		int ver_in_CTS = (*versions_in_CTS.begin()).second.second; // slope°¡ °¡Àå Å« °ÍÀº ¾î¶² ¹öÀüÀÎ°¡?
 
-		versions_in_CTS.erase(versions_in_CTS.begin());// list_CRì˜ ë§¨ ì• ì‚­ì œí•¨
+		versions_in_CTS.erase(versions_in_CTS.begin());// list_CRÀÇ ¸Ç ¾Õ »èÁ¦ÇÔ
 
 		if (ver_in_CTS == 1)
 			printf("error\n");
@@ -417,13 +419,13 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		if (_used_GHz[0] <= _server_list[0].processing_capacity) {
 			break;
 		}
-		//CTSì˜ ë°´ë“œìœ—ì€ ë¬´ì œí•œì´ë¼ ìœ„ì˜ GHz ê´€ë ¨ if ê°™ì€ ê²ƒ ì—†ì–´ë„ ë¨
+		//CTSÀÇ ¹êµåÀ­Àº ¹«Á¦ÇÑÀÌ¶ó À§ÀÇ GHz °ü·Ã if °°Àº °Í ¾ø¾îµµ µÊ
 	}
 
 	if (_used_GHz[0] > _server_list[0].processing_capacity) {
-		printf("[[Error!]] CTS ì„œë²„ì˜ processing capacity ì´ˆê³¼\n");
+		printf("[[Error!]] CTS ¼­¹öÀÇ processing capacity ÃÊ°ú\n");
 	}
 
-	//set ê³„ì‚°í•˜ê¸°
+	//set °è»êÇÏ±â
 	//if (!is_lowest_version)
 }
