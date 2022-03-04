@@ -27,10 +27,10 @@ int main() {
 	printf("감마 분포 - k 값 : %lf, 세타 값 : %lf\n\n", K_gamma, THETA_gamma);
 	printf("엣지 수 : %d, 채널 수 : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
 
-	set<double, greater<double>> ver_GHz;
-	set<double, greater<double>> ver_Mbps;
-	set<double, greater<double>> ES_processing_capacity;
-	set<double, greater<double>> ES_maximum_bandwidth;
+	set<double, less<double>> ver_GHz;
+	set<double, less<double>> ver_Mbps;
+	set<double, less<double>> ES_processing_capacity;
+	set<double, less<double>> ES_maximum_bandwidth;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 1; ver <= version_set.version_num - 1; ver++) {
 			ver_GHz.insert(channel_list[ch].video_GHz[ver]);
