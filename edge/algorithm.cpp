@@ -69,6 +69,9 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 
 			total_cost += max(cpu_usage_cost, bandwidth_cost);
 		}
+		if (!is_lowest_only_mode) {
+			set_version_set(_version_set, selected_set, selected_ES);
+		}
 
 		total_GHz = 0;
 		total_pwq = 0;
@@ -94,9 +97,6 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 				}
 			}
 		}
-		else {
-			set_version_set(_version_set, selected_set, selected_ES);
-		}
 	}
 
 	//CR_phase
@@ -104,24 +104,23 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		//printf("CR phase ¡¯¿‘, current cost: %lf\n", total_cost);
 		CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_turned_on_at_lowest);
 		set_version_set(_version_set, selected_set, selected_ES);
-
-		total_cost = 0;
-		for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-			double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), used_GHz[ES], _model);
-			double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), used_Mbps[ES], _model);
-
-			total_cost += max(cpu_usage_cost, bandwidth_cost);
-		}
-
-		total_GHz = 0;
-		total_pwq = 0;
-		for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-			total_GHz += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
-			total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
-		}
-		//std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
-		std::printf("%lf\n", total_pwq);
 	}
+	total_cost = 0;
+	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
+		double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), used_GHz[ES], _model);
+		double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), used_Mbps[ES], _model);
+
+		total_cost += max(cpu_usage_cost, bandwidth_cost);
+	}
+
+	total_GHz = 0;
+	total_pwq = 0;
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		total_GHz += _channel_list[ch].sum_of_version_set_GHz[selected_set[ch]];
+		total_pwq += _channel_list[ch].sum_of_pwq[selected_set[ch]];
+	}
+	//std::printf("=CR= total_GHz : %lf GHz, total_pwq : %lf, total_cost : %lf $\n\n", total_GHz, total_pwq, total_cost);
+	std::printf("%lf\n", total_pwq);
 }
 
 void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode, bool _bandwidth_apply_flag, pair<pair<double, double>, pair<double, double>> _nomalized_base_value) {
