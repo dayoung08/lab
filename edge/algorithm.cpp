@@ -138,8 +138,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			}
 			list_TDA.insert(make_pair(slope, make_pair(ch, 1)));
 		}
-		else {
-			//bandwidth 제약 적용
+		else { //bandwidth 제약 적용
 			for (int ver = 2; ver <= _version_set->version_num - 1; ver++) {
 				if ((_selected_set[ch] - 1) & (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)))) { // 이전에 선택한 set에서 할당했던 GHz는 전부 삭제해 준다. 
 					int set_temp = _selected_set[ch] - (_version_set->number_for_bit_opration >> (_version_set->set_versions_number_for_bit_opration - (ver - 1)));
@@ -173,7 +172,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 					slope = (_used_GHz[ES] + _channel_list[ch].video_GHz[ver]) / calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model);
 				}
 			}
-			else {
+			else { //bandwidth 제약 적용
 				if (_model == LINEAR_MODEL) {
 					slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first, 2) / +pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
