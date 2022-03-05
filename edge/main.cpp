@@ -3,12 +3,12 @@ int main() {
 	bool bandwidth_apply_flag = true;
 	srand(SEED);
 
-	double ratio = 0.2;// 2 3, 4, 5, 6, 7
+	double ratio = 0.6;// 2 3, 4, 5, 6, 7
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;
-	//int model = LINEAR_MODEL;
-	int model = ONOFF_MODEL;
+	int model = LINEAR_MODEL;
+	//int model = ONOFF_MODEL;
 	int bitrate_set = 0; // 0~4 (디폴트 0)
 	//이 위의 인자들을 실험 환경에 따라 변경
 
@@ -27,10 +27,10 @@ int main() {
 	printf("감마 분포 - k 값 : %lf, 세타 값 : %lf\n\n", K_gamma, THETA_gamma);
 	printf("엣지 수 : %d, 채널 수 : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
 
-	set<double, less<double>> ver_GHz;
-	set<double, less<double>> ver_Mbps;
-	set<double, less<double>> ES_processing_capacity;
-	set<double, less<double>> ES_maximum_bandwidth;
+	set<double, greater<double>> ver_GHz;
+	set<double, greater<double>> ver_Mbps;
+	set<double, greater<double>> ES_processing_capacity;
+	set<double, greater<double>> ES_maximum_bandwidth;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		for (int ver = 1; ver <= version_set.version_num - 1; ver++) {
 			ver_GHz.insert(channel_list[ch].video_GHz[ver]);

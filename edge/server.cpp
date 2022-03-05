@@ -40,8 +40,8 @@ void server_initalization_for_bandwidth(server* _server_list, int _model, bool _
 	//220225
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		if (_bandwidth_model_flag) {
-			_server_list[ES].maximum_bandwidth = rand() % 21 + 80; //
-			//_server_list[ES].maximum_bandwidth = rand() % 999001 + 1000; // 아마존 기준 
+			//_server_list[ES].maximum_bandwidth = rand() % 171 + 30; //https://docs.vmware.com/en/VMware-SD-WAN/services/sd-wan-aws-virtual-edge-deployment-guide/GUID-6D5BAC8C-5CFA-4564-A9A8-A92267779A96.html
+			_server_list[ES].maximum_bandwidth = rand() % 999001 + 1000; // 아마존 기준 
 			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 993 + 8)) / 1000;
 			_server_list[ES].cpu_usage_cost_alpha = _server_list[ES].bandwidth_cost_alpha = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 		}
