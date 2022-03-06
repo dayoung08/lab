@@ -52,6 +52,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	double total_pwq = 0;
 	double total_cost = 0;
 	bool is_turned_on_at_lowest[NUM_OF_ES + 1];
+	//TD_phase(_server_list, _channel_list, _version_set, selected_set, _bandwidth_apply_flag, _nomalized_base_value);
 	memset(is_turned_on_at_lowest, 0, (sizeof(bool) * (NUM_OF_ES + 1)));
 	for (int is_lowest_only_mode = 1; is_lowest_only_mode >= 0; is_lowest_only_mode--) { // mode = 1 : lowest version만, mode = 0; 2~N^ver 버전들 전부.
 		if (is_lowest_only_mode)
@@ -124,7 +125,6 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 }
 
 void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, double _cost_limit, short* _selected_set, short** _selected_ES, double* _used_GHz, double* _used_Mbps, int* _ES_count, int _model, bool _is_lowest_only_mode, bool _bandwidth_apply_flag, pair<pair<double, double>, pair<double, double>> _nomalized_base_value) {
-	// 2. TDA phase
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>> > list_TDA;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
 		if (_is_lowest_only_mode) {
@@ -132,8 +132,8 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			if (!_bandwidth_apply_flag)
 				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / _channel_list[ch].video_GHz[1];
 			else {
-				double base = sqrt(pow(_nomalized_base_value.first.first, 2) + pow(_nomalized_base_value.first.second, 2));
-				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / sqrt(pow(_channel_list[ch].video_GHz[1], 2) + pow(_channel_list[ch].video_Mbps[1], 2));
+				//slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / sqrt(pow(_channel_list[ch].video_GHz[1], 2) + pow(_channel_list[ch].video_Mbps[1], 2));
+				slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[1]) / ((_channel_list[ch].video_GHz[1] / _nomalized_base_value.first.first) * (_channel_list[ch].video_Mbps[1] / _nomalized_base_value.first.second));
 			}
 			list_TDA.insert(make_pair(slope, make_pair(ch, 1)));
 		}
@@ -145,7 +145,8 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 					if (!_bandwidth_apply_flag)
 						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
 					else {
-						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver] / _nomalized_base_value.first.first, 2) + pow(_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.first.second, 2));
+						//slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver] / _nomalized_base_value.first.first, 2) + pow(_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.first.second, 2));
+						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / ((_channel_list[ch].video_GHz[ver] / _nomalized_base_value.first.first) * (_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.first.second));
 					}
 					list_TDA.insert(make_pair(slope, make_pair(ch, ver)));
 
@@ -173,10 +174,14 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			}
 			else { //bandwidth 제약 적용
 				if (_model == LINEAR_MODEL) {
-					slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first, 2) / +pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
+					//slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first, 2) + pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
+					slope = (((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first) * ((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second)) /
+						max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
 				if (_model == ONOFF_MODEL) {
-					slope = sqrt(pow((_used_GHz[ES] + _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first, 2) + pow((_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
+					//slope = sqrt(pow((_used_GHz[ES] + _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first, 2) + pow((_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
+					slope = (((_used_GHz[ES] + _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first) * ((_used_Mbps[ES] + _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second)) /
+						max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
 			}
 			// _nomalized_base_value.second.first는 모든 엣지의 processing capacity 중 제일 높은 값, _nomalized_base_value.second.second는 모든 엣지의 maximum bandwidth 중 제일 높은 값. 이것들로 나누어서 0~1로 노멀라이즈
@@ -420,3 +425,38 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 	//set 계산하기
 	//if (!is_lowest_version)
 }
+
+
+/*void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _bandwidth_apply_flag, pair<pair<double, double>, pair<double, double>> _nomalized_base_value) {
+	//1. TD phase
+	double total_GHz = 0;
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		_selected_set[ch] = _version_set->version_set_num;
+		total_GHz += _channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num];
+	}
+	set<pair<double, pair<int, int>>> list_TD;
+	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
+		for (int set = 1; set <= _version_set->version_set_num - 1; set++) { //소스는 전부 1080p
+			double slope = (_channel_list[ch].sum_of_pwq[_version_set->version_set_num] - _channel_list[ch].sum_of_pwq[set]) / (_channel_list[ch].sum_of_version_set_GHz[_version_set->version_set_num] - _channel_list[ch].sum_of_version_set_GHz[set]);
+			list_TD.insert(make_pair(slope, make_pair(ch, set)));
+		}
+	}
+
+	while (list_TD.size()) {
+		int ch = (*list_TD.begin()).second.first; // slope가 가장 큰 것은 어떤 채널인가?
+		int set = (*list_TD.begin()).second.second; //slope가 가장 큰 것은 어떤 세트인가?
+
+		list_TD.erase(list_TD.begin());//맨 앞 삭제함
+		int prev_set = _selected_set[ch];
+		if (_channel_list[ch].sum_of_version_set_GHz[set] < _channel_list[ch].sum_of_version_set_GHz[prev_set]) {
+			double expected_total_GHz = total_GHz - _channel_list[ch].sum_of_version_set_GHz[prev_set] + _channel_list[ch].sum_of_version_set_GHz[set];
+			total_GHz = expected_total_GHz;
+			if (expected_total_GHz < _nomalized_base_value.second.first) {
+				break;
+			}
+			_selected_set[ch] = set;
+		}
+	}
+}
+*/
+
