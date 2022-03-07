@@ -3,13 +3,13 @@ int main() {
 	bool bandwidth_apply_flag = false;
 	srand(SEED);
 
-	double ratio = 0.3;// 2 3, 4, 5, 6
+	double ratio = 0.5;// 0.2 0.3, 0.4, 0.5, 0.6
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;
-	int model = LINEAR_MODEL;
-	//int model = ONOFF_MODEL;
-	int bitrate_set = 0; // 0~4 (디폴트 0)
+	//int model = LINEAR_MODEL;
+	int model = ONOFF_MODEL;
+	int bitrate_set = 2; // 0~4 (디폴트 0)
 	//이 위의 인자들을 실험 환경에 따라 변경
 
 	server server_list[NUM_OF_ES + 1];

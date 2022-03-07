@@ -771,12 +771,10 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					total_cost += max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					if (_ES_count[es]) {
-						total_cost += max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
-					}
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -827,7 +825,7 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 				set<pair<double, int>> lowest_price_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
-						double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
+						double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 						lowest_price_of_ES.insert(make_pair(cost, ES));
 					}
 				}
@@ -928,7 +926,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
+				double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -1001,7 +999,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 			set<pair<double, int>> lowest_price_of_ES;
 			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 				if (_channel_list[ch].available_server_list[ES]) {
-					double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
+					double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 					lowest_price_of_ES.insert(make_pair(cost, ES));
 				}
 			}
