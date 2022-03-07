@@ -175,7 +175,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 			else { //bandwidth 제약 적용
 				if (_model == LINEAR_MODEL) {
 					//slope = sqrt(pow((_server_list[ES].processing_capacity - _used_GHz[ES] - _channel_list[ch].video_GHz[ver]) / _nomalized_base_value.second.first, 2) + pow((_server_list[ES].maximum_bandwidth - _used_Mbps[ES] - _channel_list[ch].video_Mbps[ver]) / _nomalized_base_value.second.second, 2)) / max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
-					slope = ( (((_server_list[ES].processing_capacity - _used_GHz[ES]) / _nomalized_base_value.second.first) * ((_server_list[ES].maximum_bandwidth - _used_Mbps[ES]) / _nomalized_base_value.second.second)) - ((_channel_list[ch].video_GHz[ver] / _nomalized_base_value.second.first) * (_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.second.second)) ) /
+					slope = ( ((_server_list[ES].processing_capacity / _nomalized_base_value.second.first) * (_server_list[ES].maximum_bandwidth / _nomalized_base_value.second.second)) - ((_used_GHz[ES] / _nomalized_base_value.second.first) * (_used_Mbps[ES] / _nomalized_base_value.second.second)) - ((_channel_list[ch].video_GHz[ver] / _nomalized_base_value.second.first) * (_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.second.second)) ) /
 						max(calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES] + _channel_list[ch].video_GHz[ver], _model), calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES] + _channel_list[ch].video_Mbps[ver], _model));
 				}
 				if (_model == ONOFF_MODEL) {
