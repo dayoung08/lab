@@ -146,7 +146,7 @@ void TDA_phase(server* _server_list, channel* _channel_list, bitrate_version_set
 						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / _channel_list[ch].video_GHz[ver];
 					else {
 						//slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / sqrt(pow(_channel_list[ch].video_GHz[ver] / _nomalized_base_value.first.first, 2) + pow(_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.first.second, 2));
-						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / ((_channel_list[ch].video_GHz[ver] / _nomalized_base_value.second.first) * (_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.second.second));
+						slope = (_channel_list[ch].sum_of_pwq[_selected_set[ch]] - _channel_list[ch].sum_of_pwq[set_temp]) / ((_channel_list[ch].video_GHz[ver] / _nomalized_base_value.first.first) * (_channel_list[ch].video_Mbps[ver] / _nomalized_base_value.first.second));
 					}
 					list_TDA.insert(make_pair(slope, make_pair(ch, ver)));
 
