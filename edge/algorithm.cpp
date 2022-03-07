@@ -47,12 +47,12 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		printf("Mbps가 모자란 상황/Channel 수를 줄이거나, 엣지 수를 늘릴 것\n");
 		exit(0);
 	}
+	//TD_phase(_server_list, _channel_list, _version_set, selected_set);
 
 	double total_GHz = 0;
 	double total_pwq = 0;
 	double total_cost = 0;
 	bool is_turned_on_at_lowest[NUM_OF_ES + 1];
-	//TD_phase(_server_list, _channel_list, _version_set, selected_set, _bandwidth_apply_flag, _nomalized_base_value);
 	memset(is_turned_on_at_lowest, 0, (sizeof(bool) * (NUM_OF_ES + 1)));
 	for (int is_lowest_only_mode = 1; is_lowest_only_mode >= 0; is_lowest_only_mode--) { // mode = 1 : lowest version만, mode = 0; 2~N^ver 버전들 전부.
 		if (is_lowest_only_mode)
@@ -390,7 +390,7 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 }
 
 
-/*void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set, bool _bandwidth_apply_flag,  pair<double, double> _nomalized_base_value) {
+/*void TD_phase(server* _server_list, channel* _channel_list, bitrate_version_set* _version_set, short* _selected_set) {
 	//1. TD phase
 	double total_GHz = 0;
 	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
@@ -557,10 +557,6 @@ void TDA_phase_for_bandwidth(server* _server_list, channel* _channel_list, bitra
 		}
 		is_processed[ch][ver] = true;
 	}
-
-	//set 계산하기
-	//if (!_is_lowest_only_mode)
-	//	set_version_set(_version_set, _selected_set, _selected_ES);
 }
 
 
@@ -740,7 +736,4 @@ void CR_phase_for_bandwidth(server* _server_list, channel* _channel_list, bitrat
 	if (_used_GHz[0] > _server_list[0].processing_capacity) {
 		printf("[[Error!]] CTS 서버의 processing capacity 초과\n");
 	}
-
-	//set 계산하기
-	//if (!is_lowest_version)
 }
