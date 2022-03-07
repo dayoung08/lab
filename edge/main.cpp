@@ -1,9 +1,9 @@
 #include "head.h"
 int main() {
-	bool bandwidth_apply_flag = true;
+	bool bandwidth_apply_flag = false;
 	srand(SEED);
 
-	double ratio = 0.2;// 2 3, 4, 5, 6
+	double ratio = 0.5;// 2 3, 4, 5, 6
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;
@@ -26,31 +26,10 @@ int main() {
 	printf("비용 한도 : %lf\n", cost_limit);
 	printf("감마 분포 - k 값 : %lf, 세타 값 : %lf\n\n", K_gamma, THETA_gamma);
 	printf("엣지 수 : %d, 채널 수 : %d\n\n", NUM_OF_ES, NUM_OF_CHANNEL);
-
-	set<double, greater<double>> ver_GHz;
-	set<double, greater<double>> ver_Mbps;
-	set<double, greater<double>> ES_processing_capacity;
-	set<double, greater<double>> ES_maximum_bandwidth;
-	for (int ch = 1; ch <= NUM_OF_CHANNEL; ch++) {
-		for (int ver = 1; ver <= version_set.version_num - 1; ver++) {
-			ver_GHz.insert(channel_list[ch].video_GHz[ver]);
-			ver_Mbps.insert(channel_list[ch].video_Mbps[ver]);
-		}
-	}
-	for (int es = 1; es <= NUM_OF_ES; es++) {
-		ES_processing_capacity.insert(server_list[es].processing_capacity);
-		ES_maximum_bandwidth.insert(server_list[es].maximum_bandwidth);
-	}
-
-	double ver_max_GHz = (*ver_GHz.begin());
-	double ver_max_Mbps = (*ver_Mbps.begin());
-	double ver_max_processing_capacity = (*ES_processing_capacity.begin());
-	double ver_max_bandwidth = (*ES_maximum_bandwidth.begin());
-
-	pair<pair<double, double>, pair<double, double>> nomalized_base_value = make_pair(make_pair(ver_max_GHz, ver_max_Mbps), make_pair(ver_max_processing_capacity, ver_max_bandwidth));
+	
 	clock_t start, end, spent_time;
 	start = clock();
-	algorithm_run(server_list, channel_list, &version_set, cost_limit, model, bandwidth_apply_flag, nomalized_base_value);
+	algorithm_run(server_list, channel_list, &version_set, cost_limit, model, bandwidth_apply_flag);
 	end = clock();
 	spent_time = end - start;
 

@@ -20,7 +20,7 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 
 	version_set_num = pow(2, (version_num - 2));
 	resolution = (int*)malloc(sizeof(int) * (version_num + 1));
-	bitrate = (int*)malloc(sizeof(int) * (version_num + 1));
+	bitrate_kbps = (int*)malloc(sizeof(int) * (version_num + 1));
 	//data_size = (double*)malloc(sizeof(double) * (version_num + 1));
 	mean = (double*)malloc(sizeof(double) * (version_num));
 
@@ -33,13 +33,13 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		resolution[2] = 400224; // 400x224
 		resolution[1] = 400224; // 400x224
 
-		bitrate[7] = 2500; //kbps
-		bitrate[6] = 2000;
-		bitrate[5] = 1500;
-		bitrate[4] = 1000;
-		bitrate[3] = 600;
-		bitrate[2] = 400;
-		bitrate[1] = 200;
+		bitrate_kbps[7] = 2500; //kbps
+		bitrate_kbps[6] = 2000;
+		bitrate_kbps[5] = 1500;
+		bitrate_kbps[4] = 1000;
+		bitrate_kbps[3] = 600;
+		bitrate_kbps[2] = 400;
+		bitrate_kbps[1] = 200;
 
 		if (_metric_type == VMAF) {
 			mean[6] = 95; //2000 
@@ -80,17 +80,17 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		resolution[2] = 640360; //  640x360
 		resolution[1] = 426240; //  426x240
 
-		bitrate[11] = 35500;
-		bitrate[10] = 23500;
-		bitrate[9] = 13500;
-		bitrate[8] = 9500;
-		bitrate[7] = 6750;
-		bitrate[6] = 4500;
-		bitrate[5] = 4125;
-		bitrate[4] = 2750;
-		bitrate[3] = 1250;
-		bitrate[2] = 700;
-		bitrate[1] = 500;
+		bitrate_kbps[11] = 35500;
+		bitrate_kbps[10] = 23500;
+		bitrate_kbps[9] = 13500;
+		bitrate_kbps[8] = 9500;
+		bitrate_kbps[7] = 6750;
+		bitrate_kbps[6] = 4500;
+		bitrate_kbps[5] = 4125;
+		bitrate_kbps[4] = 2750;
+		bitrate_kbps[3] = 1250;
+		bitrate_kbps[2] = 700;
+		bitrate_kbps[1] = 500;
 
 		mean[10] = 99.9; //23500
 		mean[9] = 99.5; //13500
@@ -115,16 +115,16 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		resolution[2] = 384288; // 384x288
 		resolution[1] = 320240; // 320x240
 
-		bitrate[10] = 5800;
-		bitrate[9] = 4300;
-		bitrate[8] = 3000;
-		bitrate[7] = 2350;
-		bitrate[6] = 1750;
-		bitrate[5] = 1050;
-		bitrate[4] = 750;
-		bitrate[3] = 560;
-		bitrate[2] = 375;
-		bitrate[1] = 235;
+		bitrate_kbps[10] = 5800;
+		bitrate_kbps[9] = 4300;
+		bitrate_kbps[8] = 3000;
+		bitrate_kbps[7] = 2350;
+		bitrate_kbps[6] = 1750;
+		bitrate_kbps[5] = 1050;
+		bitrate_kbps[4] = 750;
+		bitrate_kbps[3] = 560;
+		bitrate_kbps[2] = 375;
+		bitrate_kbps[1] = 235;
 
 		mean[9] = 98.1; //4300
 		mean[8] = 97; //3000
@@ -145,13 +145,13 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		resolution[2] = 640360; //  640x360
 		resolution[1] = 480270; // 480x270
 
-		bitrate[7] = 11000;
-		bitrate[6] = 6000;
-		bitrate[5] = 2750;
-		bitrate[4] = 1350;
-		bitrate[3] = 1350;
-		bitrate[2] = 1000;
-		bitrate[1] = 400;
+		bitrate_kbps[7] = 11000;
+		bitrate_kbps[6] = 6000;
+		bitrate_kbps[5] = 2750;
+		bitrate_kbps[4] = 1350;
+		bitrate_kbps[3] = 1350;
+		bitrate_kbps[2] = 1000;
+		bitrate_kbps[1] = 400;
 
 		mean[6] = 98.3; //6000
 		mean[5] = 96; // 2750
@@ -171,15 +171,15 @@ bitrate_version_set::bitrate_version_set(int _index, int _metric_type) {
 		resolution[2] = 640360; //  640x360
 		resolution[1] = 480270; // 480x270
 
-		bitrate[9] = 10000;
-		bitrate[8] = 6000;
-		bitrate[7] = 4000;
-		bitrate[6] = 3000;
-		bitrate[5] = 2400;
-		bitrate[4] = 1500;
-		bitrate[3] = 807;
-		bitrate[2] = 505;
-		bitrate[1] = 253;
+		bitrate_kbps[9] = 10000;
+		bitrate_kbps[8] = 6000;
+		bitrate_kbps[7] = 4000;
+		bitrate_kbps[6] = 3000;
+		bitrate_kbps[5] = 2400;
+		bitrate_kbps[4] = 1500;
+		bitrate_kbps[3] = 807;
+		bitrate_kbps[2] = 505;
+		bitrate_kbps[1] = 253;
 
 		mean[8] = 98.3; //6000
 		mean[7] = 97.8; //4000

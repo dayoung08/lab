@@ -17,8 +17,8 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 	//_server_list[0].machine_type = 0;
 	_server_list[0].cost_model_type = 0;
 
-	_server_list[0].processing_capacity = 1814.4;
-	_server_list[0].maximum_bandwidth = INFINITY;
+	_server_list[0].processing_capacity = 1;
+	_server_list[0].maximum_bandwidth = 1;
 	_server_list[0].cpu_usage_cost_alpha = 0;
 	_server_list[0].bandwidth_cost_alpha = 0;
 
@@ -32,6 +32,7 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 		//_server_list[ES].machine_type = rand() % NUM_OF_MACHINE + 1;
 		int pos = rand() % NUM_OF_MACHINE + 1;
 		_server_list[ES].processing_capacity = ES_GHz[pos];
+		_server_list[ES].processing_capacity /= CTS_GHz;
 		_server_list[ES].cpu_usage_cost_alpha = ((double)(rand() % 38 + 63)) / 100;
 	}	
 }
@@ -40,8 +41,9 @@ void server_initalization_for_bandwidth(server* _server_list, int _model, bool _
 	//220225
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 		if (_bandwidth_model_flag) {
-			_server_list[ES].maximum_bandwidth = rand() % 171 + 30; //https://docs.vmware.com/en/VMware-SD-WAN/services/sd-wan-aws-virtual-edge-deployment-guide/GUID-6D5BAC8C-5CFA-4564-A9A8-A92267779A96.html
+			_server_list[ES].maximum_bandwidth = rand() % 71 + 30; //https://docs.vmware.com/en/VMware-SD-WAN/services/sd-wan-aws-virtual-edge-deployment-guide/GUID-6D5BAC8C-5CFA-4564-A9A8-A92267779A96.html
 			//_server_list[ES].maximum_bandwidth = rand() % 999001 + 1000; // 아마존 기준 
+			_server_list[ES].maximum_bandwidth /= CTS_Mbps;
 			_server_list[ES].bandwidth_cost_alpha = ((double)(rand() % 993 + 8)) / 1000;
 			//_server_list[ES].cpu_usage_cost_alpha = _server_list[ES].bandwidth_cost_alpha = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
 		}
@@ -52,6 +54,12 @@ void server_initalization_for_bandwidth(server* _server_list, int _model, bool _
 	}
 }
 //비용 관련
+double calculate_ES_cost(server* _server, double _used_GHz, double _used_Mbps, int _model) {
+	double GHz_cost = calculate_ES_cpu_usage_cost(_server, _used_GHz, _model);
+	double Mbps_cost = calculate_ES_bandwidth_cost(_server, _used_Mbps, _model);
+	return max(GHz_cost, Mbps_cost);
+}
+
 double calculate_ES_cpu_usage_cost(server* _server, double _used_GHz, int _model) { //초당 cost
 	double cost = 0;
 	if (_model == LINEAR_MODEL) {
@@ -63,17 +71,6 @@ double calculate_ES_cpu_usage_cost(server* _server, double _used_GHz, int _model
 		else
 			cost = 0;
 	}
-	/*else if (_model == STEP_MODEL) {
-		double percent = _used_GHz / _server->processing_capacity;
-		double step = 0;
-		if (percent) {
-			step = ((double)((int)(percent * 10) + 1)) / 10;
-		}
-		else
-			step = 0;
-		cost = _server->cost_alpha * step;
-	}*/
-
 	return cost;
 }
 

@@ -105,9 +105,8 @@ void print_method(int method_index, server* _server_list, channel* _channel_list
 	double remained_Mbps[NUM_OF_ES + 1];
 
 	for (int ES = 0; ES <= NUM_OF_ES; ES++) {
-		double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-		double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-		total_cost += max(cpu_usage_cost, bandwidth_cost);
+		double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
+		total_cost += cost;
 
 		remained_GHz[ES] = _server_list[ES].processing_capacity - _used_GHz[ES];
 		remained_Mbps[ES] = _server_list[ES].maximum_bandwidth - _used_Mbps[ES];
@@ -149,14 +148,10 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -216,14 +211,10 @@ void GHz_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_vers
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
 						if (es == ES) {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 						}
 						else {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 						}
 					}
 
@@ -321,14 +312,10 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -392,14 +379,10 @@ void GHz_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ver
 				double total_cost = 0;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES) {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 					}
 					else {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 					}
 				}
 
@@ -461,10 +444,7 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-				double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-
-				double cost = max(cpu_usage_cost, bandwidth_cost);
+				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -476,14 +456,10 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -533,14 +509,10 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 				set<pair<double, int>> lowest_cost_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-
-						double cost = max(cpu_usage_cost, bandwidth_cost);
+						double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
 						lowest_cost_of_ES.insert(make_pair(cost, ES));
 					}
 				}
-
 
 				while (!lowest_cost_of_ES.empty()) {
 					int ES = (*lowest_cost_of_ES.begin()).second;
@@ -549,14 +521,10 @@ void cost_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
 						if (es == ES) {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 						}
 						else {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 						}
 					}
 
@@ -644,10 +612,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 		set<pair<double, int>> lowest_cost_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-				double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-
-				double cost = max(cpu_usage_cost, bandwidth_cost);
+				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
 				lowest_cost_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -659,14 +624,10 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -720,10 +681,7 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 			set<pair<double, int>> lowest_cost_of_ES;
 			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 				if (_channel_list[ch].available_server_list[ES]) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-
-					double cost = max(cpu_usage_cost, bandwidth_cost);
+					double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
 					lowest_cost_of_ES.insert(make_pair(cost, ES));
 				}
 			}
@@ -735,14 +693,10 @@ void cost_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 				double total_cost = 0;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES) {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 					}
 					else {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 					}
 				}
 
@@ -806,7 +760,6 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
 				double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
-				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -874,8 +827,7 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 				set<pair<double, int>> lowest_price_of_ES;
 				for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 					if (_channel_list[ch].available_server_list[ES]) {
-						double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
-						//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+						double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
 						lowest_price_of_ES.insert(make_pair(cost, ES));
 					}
 				}
@@ -887,14 +839,10 @@ void lowest_price_first_AP(server* _server_list, channel* _channel_list, bitrate
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
 						if (es == ES) {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 						}
 						else {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 						}
 					}
 
@@ -980,8 +928,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 		set<pair<double, int>> lowest_price_of_ES;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (_channel_list[ch].available_server_list[ES]) {
-				double cost = max(_server_list[ES].bandwidth_cost_alpha, _server_list[ES].cpu_usage_cost_alpha);
-				//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
 				lowest_price_of_ES.insert(make_pair(cost, ES));
 			}
 		}
@@ -994,14 +941,10 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -1058,8 +1001,7 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 			set<pair<double, int>> lowest_price_of_ES;
 			for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 				if (_channel_list[ch].available_server_list[ES]) {
-					double cost = _server_list[ES].cpu_usage_cost_alpha;
-					//double GHz = _server_list[ES].processing_capacity - _used_GHz[ES];
+					double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
 					lowest_price_of_ES.insert(make_pair(cost, ES));
 				}
 			}
@@ -1071,14 +1013,10 @@ void lowest_price_first_HPF(server* _server_list, channel* _channel_list, bitrat
 				double total_cost = 0;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES) {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 					}
 					else {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 					}
 				}
 
@@ -1153,14 +1091,10 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -1227,14 +1161,10 @@ void random_AP(server* _server_list, channel* _channel_list, bitrate_version_set
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
 						if (es == ES) {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 						}
 						else {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 						}
 					}
 
@@ -1333,14 +1263,10 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -1409,14 +1335,10 @@ void random_HPF(server* _server_list, channel* _channel_list, bitrate_version_se
 				double total_cost = 0;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES) {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 					}
 					else {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 					}
 				}
 
@@ -1489,14 +1411,10 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -1556,14 +1474,10 @@ void Mbps_worst_fit_AP(server* _server_list, channel* _channel_list, bitrate_ver
 					double total_cost = 0;
 					for (int es = 1; es <= NUM_OF_ES; es++) {
 						if (es == ES) {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 						}
 						else {
-							double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-							double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-							total_cost += max(cpu_usage_cost, bandwidth_cost);
+							total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 						}
 					}
 
@@ -1661,14 +1575,10 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 			double total_cost = 0;
 			for (int es = 1; es <= NUM_OF_ES; es++) {
 				if (es == ES) {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[1], _used_Mbps[es] + _channel_list[ch].video_Mbps[1], _model);
 				}
 				else {
-					double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-					double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-					total_cost += max(cpu_usage_cost, bandwidth_cost);
+					total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 				}
 			}
 
@@ -1733,14 +1643,10 @@ void Mbps_worst_fit_HPF(server* _server_list, channel* _channel_list, bitrate_ve
 				double total_cost = 0;
 				for (int es = 1; es <= NUM_OF_ES; es++) {
 					if (es == ES) {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es] + _channel_list[ch].video_GHz[ver], _used_Mbps[es] + _channel_list[ch].video_Mbps[ver], _model);
 					}
 					else {
-						double cpu_usage_cost = calculate_ES_cpu_usage_cost(&(_server_list[es]), _used_GHz[es], _model);
-						double bandwidth_cost = calculate_ES_bandwidth_cost(&(_server_list[es]), _used_Mbps[es], _model);
-						total_cost += max(cpu_usage_cost, bandwidth_cost);
+						total_cost += calculate_ES_cost(&(_server_list[es]), _used_GHz[es], _used_Mbps[es], _model);
 					}
 				}
 

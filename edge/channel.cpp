@@ -25,27 +25,7 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].popularity[ver] = channel_pop[ch] * ver_pop[ver];
 			_channel_list[ch].video_GHz[ver] = 0;
 			_channel_list[ch].pwq[ver] = 0;
-			_channel_list[ch].video_Mbps[ver] = 0;
-			/*if (_version_pop_type == HVP) {
-				_channel_list[ch].popularity_priority[ver] = (_version_set->version_num + 1) - ver;
-			}
-			else if (_version_pop_type == MVP) {
-				int base = _version_set->version_num / 2 + 1;
-				if (base > ver) {
-					_channel_list[ch].popularity_priority[ver] = base + 1 - ver;
-				}
-				else if (base < ver) {
-					_channel_list[ch].popularity_priority[ver] = base + ver) % _version_set->version_num);
-				}
-				else
-					_channel_list[ch].popularity_priority[ver] = ver;
-			}
-			else if (_version_pop_type == LVP) {
-				_channel_list[ch].popularity_priority[ver] = ver;
-			}
-			else if (_version_pop_type == RVP) {
-				_channel_list[ch].popularity_priority[ver] = (double)_version_set->version_num / 2;
-			}*/
+			_channel_list[ch].video_Mbps[ver] = ((double)_version_set->bitrate_kbps[ver] / 1000) / CTS_Mbps; //1000으로 나누는 이유는 kbps라서...
 		}
 		for (int set = 1; set <= _version_set->version_set_num; set++) {
 			_channel_list[ch].sum_of_video_quality[set] = 0;
@@ -54,9 +34,7 @@ void channel_initialization(channel* _channel_list, bitrate_version_set* _versio
 			_channel_list[ch].sum_of_version_set_Mbps[set] = 0;
 		}
 		//위 까지 인기도 계산
-		for (int ver = 1; ver <= _version_set->version_num; ver++) {
-			_channel_list[ch].video_Mbps[ver] = (double)_version_set->bitrate[ver] / 1000;
-		} // bandwidth_requirement;
+
 		set_video_metric(&(_channel_list[ch]), _version_set, _metric_type); // 비디오 퀄리티 값 계산
 		set_GHz(&(_channel_list[ch]), _version_set); // processing-rate 계산
 		set_PWQ(&(_channel_list[ch]), _version_set); // PWQ 계산
@@ -229,7 +207,7 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 			b[ver] = 0.023854364;
 		}
 
-		double GHz = a[ver] * pow((double)_version_set->bitrate[ver] / 1000, b[ver]);
+		double GHz = a[ver] * pow((double)_version_set->bitrate_kbps[ver] / 1000, b[ver]);
 		//double GHz = a[version] + pow(r[version], b[version]);
 		GHz += ((GHz * ((double)(rand() % 1001) / 10000)) - (GHz * 0.05)); // += 10% 정도로 해서 GHz만듦.
 		GHz *= 4; // 논문이 4 core 임. perf의 cycle 보니 저건 각 코어의 평균임. 
@@ -239,6 +217,7 @@ void set_GHz(channel* _channel, bitrate_version_set* _version_set) {
 		/*if (GHz <= 0) {
 			cout << "버그";
 		}*/
+		GHz /= CTS_GHz;
 		_channel->video_GHz[ver] = GHz;
 	}
 }
