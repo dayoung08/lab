@@ -12,7 +12,7 @@ double ES_one_core_GHz[NUM_OF_MACHINE + 1] = { 0, 2.25, 2.45, 2.00, 2.90, 2.45 }
 //4. Fujitsu PRIMERGY RX4770 M6 https://www.spec.org/power_ssj2008/results/res2020q4/power_ssj2008-20201006-01049.html
 //5. Lenovo Global Technology ThinkSystem SR665 https://www.spec.org/power_ssj2008/results/res2021q2/power_ssj2008-20210408-01094.html
 
-void server_initalization(server* _server_list, int _model, bool _bandwidth_model_flag) {
+void server_initalization(server* _server_list, int _model) {
 	_server_list[0].index = 0;
 	//_server_list[0].machine_type = 0;
 	_server_list[0].cost_model_type = 0;
@@ -37,10 +37,10 @@ void server_initalization(server* _server_list, int _model, bool _bandwidth_mode
 	}	
 }
 
-void server_initalization_for_bandwidth(server* _server_list, int _model, bool _bandwidth_model_flag) {
+void server_initalization_for_bandwidth(server* _server_list, int _model, bool _bandwidth_apply_flag) {
 	//220225
 	for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-		if (_bandwidth_model_flag) {
+		if (_bandwidth_apply_flag) {
 			_server_list[ES].maximum_bandwidth = rand() % 171 + 30; //https://docs.vmware.com/en/VMware-SD-WAN/services/sd-wan-aws-virtual-edge-deployment-guide/GUID-6D5BAC8C-5CFA-4564-A9A8-A92267779A96.html
 			//_server_list[ES].maximum_bandwidth = rand() % 999001 + 1000; // 아마존 기준 
 			_server_list[ES].maximum_bandwidth /= CTS_Mbps;

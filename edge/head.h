@@ -150,8 +150,8 @@ double* set_gamma_pop(int length, double k, double theta);
 double* set_version_pop(bitrate_version_set* _bitrate_version_set, int _version_pop_type);
 
 /* server.cpp */
-void server_initalization(server* _server_list, int _model, bool _bandwidth_model_flag);
-void server_initalization_for_bandwidth(server* _server_list, int _model, bool _bandwidth_model_flag);
+void server_initalization(server* _server_list, int _model);
+void server_initalization_for_bandwidth(server* _server_list, int _model, bool _bandwidth_apply_flag);
 double calculate_ES_cost(server* _server, double _used_GHz, double _used_Mbps, int _model);
 double calculate_ES_cpu_usage_cost(server* _server, double _used_GHz, int _model);
 double calculate_ES_bandwidth_cost(server* _server, double _used_Mbps, int _model);

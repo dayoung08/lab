@@ -3,7 +3,7 @@ int main() {
 	bool bandwidth_apply_flag = false;
 	srand(SEED);
 
-	double ratio = 0.2;// 2 3, 4, 5, 6
+	double ratio = 0.3;// 2 3, 4, 5, 6
 	int pop_type = MVP;
 	int metric_type = VMAF;
 	//int metric_type = PSNR;
@@ -16,7 +16,7 @@ int main() {
 	channel channel_list[NUM_OF_CHANNEL + 1];
 	bitrate_version_set version_set(bitrate_set, metric_type); // default 0, VMAF;
 	channel_initialization(channel_list, &version_set, pop_type, metric_type);
-	server_initalization(server_list, model, bandwidth_apply_flag);
+	server_initalization(server_list, model);
 	set_coverage_infomation(channel_list, server_list);
 	server_initalization_for_bandwidth(server_list, model, bandwidth_apply_flag);
 
