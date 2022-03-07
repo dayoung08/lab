@@ -475,16 +475,16 @@ void TDA_phase_for_bandwidth(server* _server_list, channel* _channel_list, bitra
 		//할당 완료 된 것이 선택된다면 거르는 용도
 
 		bool resource_flag;
-		double sum_of_used_GHz = 0;
-		double sum_of_used_Mbps= 0;
+		double sum_of_remained_GHz = 0;
+		double sum_of_remained_Mbps= 0;
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
-			sum_of_used_GHz += _used_GHz[ES];
-			sum_of_used_Mbps += _used_Mbps[ES];
+			sum_of_remained_GHz += (_server_list[ES].processing_capacity -_used_GHz[ES]);
+			sum_of_remained_Mbps += (_server_list[ES].maximum_bandwidth - _used_Mbps[ES]);
 		}
 
 		int ch = -1;
 		int ver = -1;
-		if (_channel_list[ch_GHz].video_GHz[ver_GHz] / (_channel_list[ch_GHz].video_GHz[ver_GHz] + sum_of_used_GHz) > _channel_list[ch_Mbps].video_Mbps[ver_Mbps] / (_channel_list[ch_Mbps].video_Mbps[ver_Mbps] + sum_of_used_Mbps)) {
+		if (_channel_list[ch_GHz].video_GHz[ver_GHz] / sum_of_remained_GHz > _channel_list[ch_Mbps].video_Mbps[ver_Mbps] / sum_of_remained_Mbps) {
 			resource_flag = true;
 		}
 		else {
@@ -758,9 +758,12 @@ void CR_phase_for_bandwidth(server* _server_list, channel* _channel_list, bitrat
 		//할당 완료 된 것이 선택된다면 거르는 용도
 
 		//bool resource_flag;
+		double remained_GHz = _server_list[0].processing_capacity - _used_GHz[0];
+		double remained_Mbps = _server_list[0].maximum_bandwidth - _used_Mbps[0];
+
 		int ch_in_CTS = -1;
 		int ver_in_CTS = -1;
-		if (_channel_list[ch_GHz].video_GHz[ver_GHz] / (_channel_list[ch_GHz].video_GHz[ver_GHz] + _used_GHz[0]) > _channel_list[ch_Mbps].video_Mbps[ver_Mbps] / (_channel_list[ch_Mbps].video_Mbps[ver_Mbps] + _used_Mbps[0])) {
+		if (_channel_list[ch_GHz].video_GHz[ver_GHz] / remained_GHz > _channel_list[ch_Mbps].video_Mbps[ver_Mbps] / remained_Mbps) {
 			//resource_flag = true;
 			ch_in_CTS = ch_GHz;
 			ver_in_CTS = ver_GHz;
