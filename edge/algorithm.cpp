@@ -62,7 +62,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 		}
 
 		//TDA_phase _bandwidth_apply_flag
-		if(_bandwidth_apply_flag)
+		if(!_bandwidth_apply_flag)
 			TDA_phase(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
 		else
 			TDA_phase_for_bandwidth(_server_list, _channel_list, _version_set, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_lowest_only_mode);
@@ -105,7 +105,7 @@ void algorithm_run(server* _server_list, channel* _channel_list, bitrate_version
 	//CR_phase
 	if (total_cost > _cost_limit) {
 		//printf("CR phase ÁøÀÔ, current cost: %lf\n", total_cost);
-		if (_bandwidth_apply_flag)
+		if (!_bandwidth_apply_flag)
 			CR_phase(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_turned_on_at_lowest);
 		else
 			CR_phase_for_bandwidth(_server_list, _channel_list, _version_set, total_cost, _cost_limit, selected_set, selected_ES, used_GHz, used_Mbps, ES_count, _model, is_turned_on_at_lowest);
@@ -312,9 +312,8 @@ void CR_phase(server* _server_list, channel* _channel_list, bitrate_version_set*
 		// slope (pwq/cost) °ª / ES
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (!_is_turned_on_at_lowest[ES]) {
-				double GHz_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-				double Mbps_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-				double slope = pwq[ES] / max(GHz_cost, Mbps_cost);
+				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
+				double slope = pwq[ES] / cost;
 				list_CR.insert(make_pair(slope, ES));
 			}
 		}
