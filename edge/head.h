@@ -10,10 +10,10 @@
 
 using namespace std;
 
+#define SEED 12
+
 #define CTS_GHz 1814.4
 #define CTS_Mbps 1000; // 1Gbps
-#define SEED 12
-#define INF 987654321
 
 //#define PERIOD 30 // 한 달에 한 번 돈 낸다고 가정하자
 #define LINEAR_MODEL 0
