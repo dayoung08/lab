@@ -688,9 +688,8 @@ void CR_phase_for_bandwidth(server* _server_list, channel* _channel_list, bitrat
 		// slope (pwq/cost) °ª / ES
 		for (int ES = 1; ES <= NUM_OF_ES; ES++) {
 			if (!_is_turned_on_at_lowest[ES]) {
-				double GHz_cost = calculate_ES_cpu_usage_cost(&(_server_list[ES]), _used_GHz[ES], _model);
-				double Mbps_cost = calculate_ES_bandwidth_cost(&(_server_list[ES]), _used_Mbps[ES], _model);
-				double slope = pwq[ES] / max(GHz_cost, Mbps_cost);
+				double cost = calculate_ES_cost(&(_server_list[ES]), _used_GHz[ES], _used_Mbps[ES], _model);
+				double slope = pwq[ES] / cost;
 				list_CR.insert(make_pair(slope, ES));
 			}
 		}
