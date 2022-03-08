@@ -28,12 +28,12 @@ using namespace std;
 #define MIGRATION_STORAGE_SPACE_AWARE 10
 #define MIGRATION_LIFETIME_AWARE 11
 
-#define ALPHA 0.729 //0.729 // º¸Åë ºñµð¿À´Â 0.729ÀÓ. 1-¼¼Å¸. ÀÎ±âµµ - ÁöÇÁ ºÐÆ÷¿¡ »ç¿ëÇÏ´Â ¾ËÆÄ º£Å¸ °ª
+#define ALPHA 0.729 //0.729 // ë³´í†µ ë¹„ë””ì˜¤ëŠ” 0.729ìž„. 1-ì„¸íƒ€. ì¸ê¸°ë„ - ì§€í”„ ë¶„í¬ì— ì‚¬ìš©í•˜ëŠ” ì•ŒíŒŒ ë² íƒ€ ê°’
 #define BETA  1
 
-//#define NUM_OF_REQUEST_PER_SEC 40000 // 1ÃÊ¿¡ 40000¹øÀÇ Á¦°ø ¿äÃ»ÀÌ Å¬¶óÀÌ¾ðÆ®µé¿¡°Ô¼­ ¿Â´Ù°í °¡Á¤.
-#define VIDEO_BANDWIDTH 1.25f //ºñµð¿À°¡ 10000kbps(Áï 10Mbps)¶ó°í °¡Á¤ÇØº¾½Ã´Ù.10*0.125=1.25,ÇÏ³ª¿¡ 1.25MB/s°¡ µì´Ï´Ù.
-#define VIDEO_SIZE 12.5f;
+//#define NUM_OF_REQUEST_PER_SEC 40000 // 1ì´ˆì— 40000ë²ˆì˜ ì œê³µ ìš”ì²­ì´ í´ë¼ì´ì–¸íŠ¸ë“¤ì—ê²Œì„œ ì˜¨ë‹¤ê³  ê°€ì •.
+#define VIDEO_BANDWIDTH 1.25f //ë¹„ë””ì˜¤ê°€ 10000kbps(ì¦‰ 10Mbps)ë¼ê³  ê°€ì •í•´ë´…ì‹œë‹¤.10*0.125=1.25,í•˜ë‚˜ì— 1.25MB/sê°€ ë“­ë‹ˆë‹¤.
+#define VIDEO_SIZE 12.5f; // 12.5MB íŒŒì¼ ì‚¬ì´ì¦ˆ
 
 struct SSD {
 	int index;
