@@ -16,6 +16,12 @@
 
 int rand_cnt = 0;
 void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int _num_of_request_per_sec) {
+	SSD_initalization_for_simulation(_SSD_list, _num_of_SSDs);
+	video_initalization_for_simulation(_VIDEO_SEGMENT_list, _num_of_videos, _num_of_request_per_sec);
+	printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
+}
+
+void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].index = ssd_index;
@@ -45,7 +51,9 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 
 		_SSD_list[ssd_index].node_hostname = "datanode" + to_string(ssd);
 	}
+}
 
+void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_videos, int _num_of_request_per_sec) {
 	double* vid_pop = set_zipf_pop(_num_of_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
 	std::mt19937 g(SEED + rand_cnt);
@@ -55,7 +63,7 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 		int video_index = vid;
 		_VIDEO_SEGMENT_list[video_index].index = video_index;
 		_VIDEO_SEGMENT_list[video_index].size = (double)VIDEO_SIZE;
-		_VIDEO_SEGMENT_list[video_index].once_bandwidth = (double) VIDEO_BANDWIDTH;
+		_VIDEO_SEGMENT_list[video_index].once_bandwidth = (double)VIDEO_BANDWIDTH;
 
 		double pop = vid_pop_shuffle.back();
 		vid_pop_shuffle.pop_back();
@@ -68,7 +76,6 @@ void initalization_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_
 	delete[] vid_pop;
 	vid_pop_shuffle.clear();
 	vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
-	printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
 }
 
 void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _day) {
@@ -77,10 +84,8 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 	mt19937 g(SEED + rand_cnt);
 	rand_cnt++;
 	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
-	//vector<double>::iterator it = vid_pop_shuffle.begin() + _num_of_existed_videos;
-	//std::shuffle(vid_pop_shuffle.begin(), it, g);
-	//std::shuffle(it, vid_pop_shuffle.end(), g);
 
+	//우선 전부 제거함. 재계산을 위함.
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].total_assigned_VIDEOs_low_bandwidth_first.clear();
@@ -146,8 +151,11 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 }
 
 void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_segments, int _num_of_request_per_sec) {
-	//파일 읽어오는 형태로 할 예정임.
-	//https://tang2.tistory.com/335
+	SSD_initalization_for_testbed(_SSD_list, num_of_SSDs);
+	video_initalization_for_testbed(_VIDEO_SEGMENT_list, num_of_segments, _num_of_request_per_sec);
+}
+
+void SSD_initalization_for_testbed(SSD* _SSD_list, int& num_of_SSDs) {
 	ifstream fin_ssd("SSD_list.in"); // fin 객체 생성(cin 처럼 이용!) -> 셸 프로그래밍 파일 실행시, 이 파일이 없으면 생성하고(가볍게 미리 만든 디폴트 파일 copy하자), storage_usage, bandwidth_usage, write_MB가 0이도록 함
 	if (fin_ssd.is_open())
 	{
@@ -191,7 +199,9 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 	_SSD_list[VIRTUAL_SSD].total_write_MB = 0;
 	_SSD_list[VIRTUAL_SSD].running_days = 1; // 첫 날 = 1이니까
 	_SSD_list[VIRTUAL_SSD].node_hostname = "virtual_node";
+}
 
+void video_initalization_for_testbed(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_segments, int _num_of_request_per_sec) {
 	ifstream fin_video("uploaded_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
 	if (fin_video.is_open())
 	{
@@ -202,7 +212,7 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 		{
 			if (cnt == -1) {
 				num_of_segments = stoi(str);
-				_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_segments]; 
+				_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_segments];
 				vid_pop = set_zipf_pop(num_of_segments, ALPHA, BETA);
 			}
 			else {
@@ -226,13 +236,13 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 }
 
 void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int& _num_of_new_videos, int _num_of_request_per_sec) {
-	double* vid_pop = NULL;
-	ifstream fin_video("new_video_list.in"); // fin 객체 생성(cin 처럼 이용)
-	if (fin_video.is_open()){
-		double* vid_pop = NULL;
+	SSD_initalization_for_testbed(_SSD_list, _num_of_SSDs);
+
+	ifstream fin_new_video("new_video_list.in"); // fin 객체 생성(cin 처럼 이용)
+	if (fin_new_video.is_open()) {
 		string str;
 		int cnt = -1;
-		while (getline(fin_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
+		while (getline(fin_new_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
 		{
 			if (cnt == -1) {
 				_num_of_new_videos = stoi(str);
@@ -250,14 +260,14 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 			cnt++;
 		}
 	}
-	fin_video.close(); // 파일 닫기
+	fin_new_video.close(); // 파일 닫기
 
-	ifstream fin_video("existed_video_list.in"); // fin 객체 생성(cin 처럼 이용)
-	if (fin_video.is_open()){
+	ifstream fin_existed_video("existed_video_list.in"); // fin 객체 생성(cin 처럼 이용)
+	if (fin_existed_video.is_open()) {
 		double* vid_pop = NULL;
 		string str;
 		int cnt = -1;
-		while (getline(fin_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
+		while (getline(fin_existed_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
 		{
 			if (cnt == -1) {
 				_num_of_existed_videos = stoi(str);
@@ -276,10 +286,10 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 			cnt++;
 		}
 	}
-	fin_video.close(); // 파일 닫기
+	fin_existed_video.close(); // 파일 닫기
 
 	//기존의 엉상, 추가 영상을 합해서 인기도, 밴드윗 업데이트
-	vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
+	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
 		int video_index = vid;
 		double pop = vid_pop[video_index];

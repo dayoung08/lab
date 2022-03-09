@@ -209,7 +209,7 @@ void simulation_migartion() {
 	delete[](VIDEO_SEGMENT_list);
 }
 
-void testbed_placement() {
+void testbed_placement() { // 이거 좀 많이 수정해야함
 	SSD* SSD_list = NULL;
 	VIDEO_SEGMENT* existed_VIDEO_SEGMENT_list = NULL;
 	int num_of_SSDs, num_of_existed_videos;
