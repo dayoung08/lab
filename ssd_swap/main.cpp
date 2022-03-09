@@ -31,8 +31,12 @@ int main(int argc, char* argv[]) {
 		if (!strcmp(argv[1], "placement")) {
 			testbed_placement();
 		}
-		else if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
-			testbed_migration();
+		else
+			printf("command가 올바르지 않습니다. 다시 실행해 주세요.\n");
+		break;
+	case 3:
+		if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
+			testbed_migration(stoi(argv[2]));
 		}
 		else
 			printf("command가 올바르지 않습니다. 다시 실행해 주세요.\n");
@@ -72,7 +76,7 @@ void simulation_placement() {
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
 
-	initalization_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
+	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		SSD_list[ssd].running_days = (rand() % (MAX_RUNNING_DAY - MIN_RUNNING_DAY + 1)) + MIN_RUNNING_DAY;
 		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD)) / 10;
@@ -110,7 +114,7 @@ void simulation_placement() {
 void simulation_migartion() {
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
-	initalization_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
+	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
 	placement(SSD_list, VIDEO_SEGMENT_list, PLACEMENT_RANDOM, num_of_SSDs, num_of_videos);
 
@@ -124,8 +128,6 @@ void simulation_migartion() {
 		//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
 		//printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 	}
-
-
 	/*for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		printf("[SSD %d] ADWD %.2f\n", ssd, (SSD_list[ssd].total_write_MB / (SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity)) / SSD_list[ssd].running_days);
 	}*/
@@ -139,7 +141,7 @@ void simulation_migartion() {
 			if (num_of_new_videos > 0) {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
-				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, day);
+				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, day);
 
 				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
 				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
@@ -151,9 +153,8 @@ void simulation_migartion() {
 			}
 			else {
 				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
-				update_new_video_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, day);
+				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, day);
 			}
-
 			//migration 수행
 			//printf("%d일-%d ", day, time);
 			int migration_num;
@@ -209,55 +210,47 @@ void simulation_migartion() {
 	delete[](VIDEO_SEGMENT_list);
 }
 
-void testbed_placement() { // 이거 좀 많이 수정해야함
+void testbed_placement() {
 	SSD* SSD_list = NULL;
-	VIDEO_SEGMENT* existed_VIDEO_SEGMENT_list = NULL;
-	int num_of_SSDs, num_of_existed_videos;
-	initalization_for_testbed(SSD_list, existed_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos, num_of_request_per_sec);
-	//SSD와, 기존에 이미 저장된 비디오 리스트들 다 가져옴
+	VIDEO_SEGMENT* VIDEO_SEGMENT_list = NULL;
+	placed_video_init_for_testbed(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 
-	VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = NULL;
-	int num_of_new_videos;
-	update_new_video_for_testbed(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_existed_videos, num_of_new_videos, num_of_request_per_sec);
+	int placement_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
 
-	if (new_VIDEO_SEGMENT_list != NULL) {
-		int* prev_assigned_SSD = new int[num_of_existed_videos];
-		for (int vid = 0; vid < num_of_existed_videos; vid++) {
-			prev_assigned_SSD[vid] = existed_VIDEO_SEGMENT_list[vid].assigned_SSD;
-		}
-		migration(SSD_list, existed_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_existed_videos);
-		create_migration_infomation(SSD_list, existed_VIDEO_SEGMENT_list, num_of_existed_videos, prev_assigned_SSD); // 이동 정보 파일 생성
-	}
-
-	//placement(SSD_list, existed_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_existed_videos, num_of_new_videos); // 새로 추가한 비디오를 할당함.
-	create_placement_infomation(SSD_list, new_VIDEO_SEGMENT_list, num_of_new_videos);
-	// 배치 정보 파일 생성
-
-	VIDEO_SEGMENT* _VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_existed_videos + num_of_new_videos];
-	copy(existed_VIDEO_SEGMENT_list, existed_VIDEO_SEGMENT_list + num_of_existed_videos, _VIDEO_SEGMENT_list);
-	delete[] existed_VIDEO_SEGMENT_list;
-	copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_list + num_of_existed_videos + 1);
-	delete[] new_VIDEO_SEGMENT_list;
-	int num_of_videos = num_of_existed_videos + num_of_new_videos;
-	// 기존의 비디오 + 새로운 비디오 리스트를 합침
-
-	create_SSD_and_video_list(SSD_list, existed_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos);
+	create_placement_infomation(SSD_list, VIDEO_SEGMENT_list, num_of_videos);
+	create_SSD_and_video_list(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos);
 }
 
-void testbed_migration() {
+void testbed_migration(bool _has_new_files) {
 	SSD* SSD_list = NULL;
-	VIDEO_SEGMENT* existed_VIDEO_SEGMENT_list = NULL;
-	int num_of_SSDs, num_of_existed_videos;
-	initalization_for_testbed(SSD_list, existed_VIDEO_SEGMENT_list, num_of_SSDs, num_of_existed_videos, num_of_request_per_sec);
-	//SSD와, 기존에 이미 저장된 비디오 리스트들 다 가져옴
-
-	int* prev_assigned_SSD = new int[num_of_existed_videos];
-	for (int vid = 0; vid < num_of_existed_videos; vid++) {
-		prev_assigned_SSD[vid] = existed_VIDEO_SEGMENT_list[vid].assigned_SSD;
+	VIDEO_SEGMENT* VIDEO_SEGMENT_list = NULL;
+	VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = NULL;
+	
+	// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
+	//새로운 비디오 업데이트 안하고, 인기도만 바꾸기 가능함
+	migrated_video_init_for_testbed(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, _has_new_files);
+	int* prev_assigned_SSD = new int[num_of_videos];
+	for (int vid = 0; vid < num_of_videos; vid++) {
+		prev_assigned_SSD[vid] = VIDEO_SEGMENT_list[vid].assigned_SSD;
 	}
-	//비디오 migration
-	migration(SSD_list, existed_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_existed_videos);
 
-	create_migration_infomation(SSD_list, existed_VIDEO_SEGMENT_list, num_of_existed_videos, prev_assigned_SSD); // 이동 정보 파일 생성
+	VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
+	copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
+	delete[] VIDEO_SEGMENT_list;
+	copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);
+	delete[] new_VIDEO_SEGMENT_list;
+	VIDEO_SEGMENT_list = _VIDEO_SEGMENT_conbined_list;
+	num_of_videos += num_of_new_videos;  //기존 비디오 리스트에 새로운 비디오 추가
+	
+	//비디오 migration
+	int migration_num;
+	if (migration_method >= MIGRATION_OURS)
+		migration_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos + num_of_new_videos);
+	else
+		migration_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos + num_of_new_videos);
+
+	create_migration_infomation(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // 이동 정보 파일 생성
+	create_SSD_and_video_list(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos + num_of_new_videos);
+	delete[] VIDEO_SEGMENT_list;
 }
 
