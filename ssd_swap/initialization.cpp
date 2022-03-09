@@ -103,7 +103,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
 			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double)_num_of_request_per_sec * _existed_VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
-			_existed_VIDEO_SEGMENT_list[video_index].is_serviced = false;
+			_existed_VIDEO_SEGMENT_list[video_index].is_serviced = false; // 기존에 있었어도 일단 초기화
 			
 			if (_migration_method >= MIGRATION_OURS) {
 				if (SSD_index != NONE_ALLOC) {
@@ -126,7 +126,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].popularity = pop;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * (double)_num_of_request_per_sec * _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth; //220124
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].path = "/segment_" + to_string(video_index) + ".mp4";
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_serviced = false;
+			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_serviced = false; 
 
 			//이 아래는 migration scheme 쓸 때 사용함. vitual ssd에 넣어놓음
 			if (_migration_method >= MIGRATION_OURS) {
@@ -145,7 +145,7 @@ void update_new_video_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 	vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 }
 
-void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_videos, int _num_of_request_per_sec) {
+void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int& num_of_SSDs, int& num_of_segments, int _num_of_request_per_sec) {
 	//파일 읽어오는 형태로 할 예정임.
 	//https://tang2.tistory.com/335
 	ifstream fin_ssd("SSD_list.in"); // fin 객체 생성(cin 처럼 이용!) -> 셸 프로그래밍 파일 실행시, 이 파일이 없으면 생성하고(가볍게 미리 만든 디폴트 파일 copy하자), storage_usage, bandwidth_usage, write_MB가 0이도록 함
@@ -162,85 +162,74 @@ void initalization_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_lis
 			else {
 				int ssd_index = cnt;
 				_SSD_list[ssd_index].index = ssd_index;
-
 				string* ssd_info = split(str, '\t');
-				_SSD_list[ssd_index].node_hostname = ssd_info[0];
-				_SSD_list[ssd_index].storage_capacity = stod(ssd_info[1]);
-				_SSD_list[ssd_index].maximum_bandwidth = stod(ssd_info[2]);
-				_SSD_list[ssd_index].DWPD = stod(ssd_info[3]);
+				_SSD_list[ssd_index].node_hostname = ssd_info[0]; // datanode 이름임. TLC 1개, QLC하나가 같은 datanode hostname을 가짐
+				_SSD_list[ssd_index].storage_capacity = stod(ssd_info[1]); //검색해서 미리 입력해놓기
+				_SSD_list[ssd_index].maximum_bandwidth = stod(ssd_info[2]); //검색해서 미리 입력해놓기
+				_SSD_list[ssd_index].DWPD = stod(ssd_info[3]); //검색해서 미리 입력해놓기
 				_SSD_list[ssd_index].WAF = stod(ssd_info[4]);
 				// WAF = (Attrib_247 + Attrib_248) / Attrib_247로 계산하고,
 				//위의 값들은 smartctl -a /dev/sda 으로 읽어오기 가능함. https://community.ui.com/questions/Using-an-SSD-for-CloudKey-Gen2-Protect/b91b418f-ab93-42ba-8d0d-31b568f50bd9
 				_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
-
-				_SSD_list[ssd_index].storage_usage = stod(ssd_info[5]);
-				_SSD_list[ssd_index].total_bandwidth_usage = stod(ssd_info[6]);
-				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[7]);
-				_SSD_list[ssd_index].running_days = stoi(ssd_info[8]);
+				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[7]); // smartctl -a /dev/sda로 읽어오기 가능함 Total_LBAs_Written
+				_SSD_list[ssd_index].running_days = stoi(ssd_info[8]); // smartctl -a /dev/sda로 읽어오기 가능함 Power_On_Hours
 				_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD)) / _SSD_list[ssd_index].running_days;
 			}
 			cnt++;
 		}
 	}
 	fin_ssd.close(); // 파일 닫기
+	//파일 추가에 사용될 virtual storage
+	_SSD_list[VIRTUAL_SSD].storage_capacity = INFINITY;
+	_SSD_list[VIRTUAL_SSD].DWPD = INFINITY;
+	_SSD_list[VIRTUAL_SSD].WAF = 1;
+	_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
+	_SSD_list[VIRTUAL_SSD].storage_usage = 0;
+	_SSD_list[VIRTUAL_SSD].total_bandwidth_usage = 0;
+	_SSD_list[VIRTUAL_SSD].serviced_bandwidth_usage = 0;
+	_SSD_list[VIRTUAL_SSD].ADWD = 0;
+	_SSD_list[VIRTUAL_SSD].total_write_MB = 0;
+	_SSD_list[VIRTUAL_SSD].running_days = 1; // 첫 날 = 1이니까
+	_SSD_list[VIRTUAL_SSD].node_hostname = "virtual_node";
 
-	ifstream fin_video("existed_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
+	ifstream fin_video("uploaded_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
 	if (fin_video.is_open())
 	{
 		double* vid_pop = NULL;
-		vector<double>vid_pop_shuffle;
 		string str;
 		int cnt = -1;
 		while (getline(fin_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
 		{
 			if (cnt == -1) {
-				num_of_videos = stoi(str);
-				_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
-				vid_pop = set_zipf_pop(num_of_videos, ALPHA, BETA);
-				vid_pop_shuffle = vector<double>(vid_pop, vid_pop + num_of_videos);
-				std::mt19937 g(SEED + rand_cnt);
-				rand_cnt++;
-				std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
+				num_of_segments = stoi(str);
+				_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_segments]; 
+				vid_pop = set_zipf_pop(num_of_segments, ALPHA, BETA);
 			}
 			else {
 				int video_index = cnt;
 				_VIDEO_SEGMENT_list[video_index].index = video_index;
-
 				string* video_info = split(str, '\t');
 				_VIDEO_SEGMENT_list[video_index].path = video_info[0];
 				_VIDEO_SEGMENT_list[video_index].size = stod(video_info[1]);
 				_VIDEO_SEGMENT_list[video_index].once_bandwidth = stod(video_info[2]);
-				double pop = vid_pop_shuffle.back();
-				vid_pop_shuffle.pop_back();
-				//double pop = vid_pop[video_index];
+				double pop = vid_pop[video_index];
 				_VIDEO_SEGMENT_list[video_index].popularity = pop;
 				_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * _num_of_request_per_sec * _VIDEO_SEGMENT_list[video_index].once_bandwidth;
-				if (!strcmp(video_info[3].c_str(), "NONE_ALLOC")) {
-					_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-					_VIDEO_SEGMENT_list[video_index].is_serviced = false;
-				}
-				else {
-					_VIDEO_SEGMENT_list[video_index].assigned_SSD = stoi(video_info[3]);
-					_VIDEO_SEGMENT_list[video_index].is_serviced = true;
-				}
-				//여기부터 할당
+				_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
+				_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 			}
 			cnt++;
 		}
 		delete[] vid_pop;
-		vid_pop_shuffle.clear();
-		vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 	}
 	fin_video.close(); // 파일 닫기
 }
 
 void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int& _num_of_new_videos, int _num_of_request_per_sec) {
 	double* vid_pop = NULL;
-	vector<double>vid_pop_shuffle;
-
 	ifstream fin_video("new_video_list.in"); // fin 객체 생성(cin 처럼 이용)
-	if (fin_video.is_open())
-	{
+	if (fin_video.is_open()){
+		double* vid_pop = NULL;
 		string str;
 		int cnt = -1;
 		while (getline(fin_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
@@ -248,63 +237,78 @@ void update_new_video_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_
 			if (cnt == -1) {
 				_num_of_new_videos = stoi(str);
 				_new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[_num_of_new_videos];
-				vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
-				vid_pop_shuffle = vector<double>(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
-				std::mt19937 g(SEED + rand_cnt);
-				rand_cnt++;
-				vector<double>::iterator it = vid_pop_shuffle.begin() + _num_of_existed_videos;
-				std::shuffle(vid_pop_shuffle.begin(), it, g);
-				std::shuffle(it, vid_pop_shuffle.end(), g);
 			}
 			else {
-				int video_index = _num_of_existed_videos + cnt;
+				int video_index = cnt;
 				_new_VIDEO_SEGMENT_list[video_index].index = video_index;
-
 				string* video_info = split(str, '\t');
 				_new_VIDEO_SEGMENT_list[video_index].path = video_info[0];
 				_new_VIDEO_SEGMENT_list[video_index].size = stod(video_info[1]);
 				_new_VIDEO_SEGMENT_list[video_index].once_bandwidth = stod(video_info[2]);
-				double pop = vid_pop_shuffle.back();
-				vid_pop_shuffle.pop_back();
-				//double pop = vid_pop[video_index];
-				_new_VIDEO_SEGMENT_list[video_index].popularity = pop;
-				_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * _num_of_request_per_sec * _new_VIDEO_SEGMENT_list[video_index].once_bandwidth;
-				_new_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
 				_new_VIDEO_SEGMENT_list[video_index].is_serviced = false;
-				//여기부터 할당
 			}
 			cnt++;
 		}
-		delete[] vid_pop;
-		vid_pop_shuffle.clear();
-		vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 	}
 	fin_video.close(); // 파일 닫기
 
-	//기존의 비디오 정보의 인기도, 밴드윗 갱신
-	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-		int ssd_index = ssd;
-		_SSD_list[ssd_index].total_bandwidth_usage = 0;
-		_SSD_list[ssd_index].total_assigned_VIDEOs_low_bandwidth_first.clear();
+	ifstream fin_video("existed_video_list.in"); // fin 객체 생성(cin 처럼 이용)
+	if (fin_video.is_open()){
+		double* vid_pop = NULL;
+		string str;
+		int cnt = -1;
+		while (getline(fin_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
+		{
+			if (cnt == -1) {
+				_num_of_existed_videos = stoi(str);
+				_existed_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[_num_of_existed_videos];
+			}
+			else {
+				int video_index = cnt;
+				_existed_VIDEO_SEGMENT_list[video_index].index = video_index;
+				string* video_info = split(str, '\t');
+				_existed_VIDEO_SEGMENT_list[video_index].path = video_info[0];
+				_existed_VIDEO_SEGMENT_list[video_index].size = stod(video_info[1]);
+				_existed_VIDEO_SEGMENT_list[video_index].once_bandwidth = stod(video_info[2]);
+				_existed_VIDEO_SEGMENT_list[video_index].assigned_SSD = stoi(video_info[3]);
+				_existed_VIDEO_SEGMENT_list[video_index].is_serviced = false;
+			}
+			cnt++;
+		}
 	}
+	fin_video.close(); // 파일 닫기
 
-	for (int vid = 0; vid < _num_of_existed_videos; vid++) {
+	//기존의 엉상, 추가 영상을 합해서 인기도, 밴드윗 업데이트
+	vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
+	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
 		int video_index = vid;
 		double pop = vid_pop[video_index];
-		/*double pop = vid_pop_shuffle.back();
-		vid_pop_shuffle.pop_back();*/
+		_new_VIDEO_SEGMENT_list[video_index].popularity = pop;
+		_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * _num_of_request_per_sec * _new_VIDEO_SEGMENT_list[video_index].once_bandwidth;
 
-		_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
-		_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * _num_of_request_per_sec * VIDEO_BANDWIDTH; //220124
-		int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
-		if (SSD_index != NONE_ALLOC) {
-			_SSD_list[SSD_index].total_bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
-			_SSD_list[SSD_index].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+		if (video_index < _num_of_existed_videos) { // 기존에 있던 영상의 밴드윗 갱신
+			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
+			if (SSD_index != NONE_ALLOC) {
+				_SSD_list[SSD_index].storage_usage += _existed_VIDEO_SEGMENT_list[video_index].size;
+				_SSD_list[SSD_index].total_bandwidth_usage += _existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+				_SSD_list[SSD_index].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+			}
+			else {
+				_existed_VIDEO_SEGMENT_list[video_index].assigned_SSD = VIRTUAL_SSD;
+				_SSD_list[VIRTUAL_SSD].storage_usage += _new_VIDEO_SEGMENT_list[video_index].size;
+				_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += _new_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+				_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
+
+			}
+		}
+		else {	//새로운 파일들은 가상 스토리지에 삽입함
+			_new_VIDEO_SEGMENT_list[video_index].assigned_SSD = VIRTUAL_SSD;
+			_SSD_list[VIRTUAL_SSD].storage_usage += _new_VIDEO_SEGMENT_list[video_index].size;
+			_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += _new_VIDEO_SEGMENT_list[video_index].requested_bandwidth;
+			_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
 		}
 	}
 	delete[] vid_pop;
-	//vid_pop_shuffle.clear();
-	//vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 }
 
 double* set_zipf_pop(int length, double alpha, double beta) {
