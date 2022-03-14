@@ -11,6 +11,8 @@ using namespace std;
 #define SEED 111
 //#define INFINITY 987654321
 
+#define SSD_TYPE 10
+
 #define NONE_ALLOC -1
 #define VIRTUAL_SSD 0
 
@@ -31,15 +33,13 @@ using namespace std;
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
-//#define NUM_OF_REQUEST_PER_SEC 40000 // 1초에 40000번의 제공 요청이 클라이언트들에게서 온다고 가정.
-#define VIDEO_BANDWIDTH 1.25f //비디오가 10000kbps(즉 10Mbps)라고 가정해봅시다.10*0.125=1.25,하나에 1.25MB/s가 듭니다.
-#define VIDEO_SIZE 12.5f; // 1.25MB/s x 10초 12.5MB
+#define VIDEO_BANDWIDTH 1.5f //비디오가 12000kbps(즉 12Mbps)라고 가정해봅시다.12*0.125=1.25,하나에 1.25MB/s가 듭니다.
+#define VIDEO_SIZE 15.0f; // 1.5MB/s x 10초 15MB
 
 struct SSD {
 	int index;
 
 	double DWPD;
-	double WAF;
 
 	double storage_capacity;
 	double maximum_bandwidth;

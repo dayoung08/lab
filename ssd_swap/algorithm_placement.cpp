@@ -1,6 +1,5 @@
 #include "header.h"
 
-int rand_cnt_for_placement = 0; //for generation seed in placement_random
 int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_videos) {
 	int placement_num = 0;
 	switch (_method) {
@@ -91,8 +90,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 
 
 int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _placement_method, int _num_of_SSDs, int _num_of_videos) {
-	std::mt19937 g(SEED + rand_cnt_for_placement);
-	rand_cnt_for_placement++;
+	std::mt19937 g(SEED);
 
 	int placement_num = 0;
  	vector<int> target_ssd_list;

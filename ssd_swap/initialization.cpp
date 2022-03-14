@@ -3,16 +3,8 @@
 //update_new_video: 새로운 비디오 정보 가져오면서, 기존에 있던 video의 인기도, 대역폭도 함께 갱신
 //testbed 쪽 함수 고쳐야함...
 
-#define MAX_DWPD 150 //1.50  // for simulation
-#define MIN_DWPD 4   //0.04  // for simulation
-
-#define MAX_WAF 50 // 5.0 // for simulation
-#define MIN_WAF 10 // 1.0   // for simulation //https://www.crucial.com/support/articles-faq-ssd/why-does-SSD-seem-to-be-wearing-prematurely
-//https://news.skhynix.co.kr/post/zns-ssd-existing-ssd-and
-//https://manualzz.com/doc/24659687/title-tahoma-36ft-bold--0-0-204- 이거 보니 5짜리 있긴 있는듯
-
-#define MAX_SSD_BANDWIDTH 5000 // for simulation
-#define MIN_SSD_BANDWIDTH 400 // for simulation
+int bandwidth[SSD_TYPE] = { 3500, 3100, 2400, 1800, 560, 560, 560, 560, 550, 550 };
+double DWPD[SSD_TYPE] = { 0.410958904, 0.328767123, 0.290958904, 0.109589041, 0.646575342, 0.328767123, 0.306849315, 0.197260274, 0.109589041, 0.153424658 };
 
 int rand_cnt = 0;
 void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int _num_of_request_per_sec) {
@@ -28,15 +20,14 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 		if (ssd == VIRTUAL_SSD) {
 			_SSD_list[VIRTUAL_SSD].storage_capacity = INFINITY;
 			_SSD_list[VIRTUAL_SSD].DWPD = INFINITY;
-			_SSD_list[VIRTUAL_SSD].WAF = 1;
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			_SSD_list[ssd_index].storage_capacity = ((double)500000 * pow(2, rand() % 3)) + 0.00001; // 0.5, 1, 2TB
-			_SSD_list[ssd_index].DWPD = ((double)(rand() % (MAX_DWPD - MIN_DWPD + 1) + MIN_DWPD)) / 100;
-			_SSD_list[ssd_index].WAF = ((double)(rand() % (MAX_WAF - MIN_WAF + 1) + MIN_WAF)) / 10;
-			_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
-			_SSD_list[ssd_index].maximum_bandwidth = ((double)(rand() % (MAX_SSD_BANDWIDTH - MIN_SSD_BANDWIDTH + 1)) + MIN_SSD_BANDWIDTH) + 0.00001;
+			int r = rand() % SSD_TYPE;
+			//int r = ssd % SSD_TYPE;
+			_SSD_list[ssd_index].storage_capacity = ((double)256000 * pow(2, rand() % 5)) + 0.00001; // 0.5, 1, 2TB
+			_SSD_list[ssd_index].DWPD = DWPD[r];
+			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
 		}
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
@@ -275,12 +266,10 @@ void SSD_initalization_for_testbed(SSD* _SSD_list, int& _num_of_SSDs) {
 				_SSD_list[ssd_index].storage_capacity = stod(ssd_info[1]); //검색해서 미리 입력해놓기
 				_SSD_list[ssd_index].maximum_bandwidth = stod(ssd_info[2]); //검색해서 미리 입력해놓기
 				_SSD_list[ssd_index].DWPD = stod(ssd_info[3]); //검색해서 미리 입력해놓기
-				_SSD_list[ssd_index].WAF = stod(ssd_info[4]);
 				// WAF = (Attrib_247 + Attrib_248) / Attrib_247로 계산하고,
 				//위의 값들은 smartctl -a /dev/sda 으로 읽어오기 가능함. https://community.ui.com/questions/Using-an-SSD-for-CloudKey-Gen2-Protect/b91b418f-ab93-42ba-8d0d-31b568f50bd9
-				_SSD_list[ssd_index].DWPD /= _SSD_list[ssd_index].WAF;
-				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[7]); // smartctl -a /dev/sda로 읽어오기 가능함 Total_LBAs_Written
-				_SSD_list[ssd_index].running_days = stoi(ssd_info[8]); // smartctl -a /dev/sda로 읽어오기 가능함 Power_On_Hours
+				_SSD_list[ssd_index].total_write_MB = stod(ssd_info[4]); // smartctl -a /dev/sda로 읽어오기 가능함 Total_LBAs_Written
+				_SSD_list[ssd_index].running_days = stoi(ssd_info[5]); // smartctl -a /dev/sda로 읽어오기 가능함 Power_On_Hours
 				_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD)) / _SSD_list[ssd_index].running_days;
 			}
 			cnt++;
@@ -290,7 +279,6 @@ void SSD_initalization_for_testbed(SSD* _SSD_list, int& _num_of_SSDs) {
 	//파일 추가에 사용될 virtual storage
 	_SSD_list[VIRTUAL_SSD].storage_capacity = INFINITY;
 	_SSD_list[VIRTUAL_SSD].DWPD = INFINITY;
-	_SSD_list[VIRTUAL_SSD].WAF = 1;
 	_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 	_SSD_list[VIRTUAL_SSD].storage_usage = 0;
 	_SSD_list[VIRTUAL_SSD].total_bandwidth_usage = 0;

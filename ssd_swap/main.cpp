@@ -1,21 +1,20 @@
 #include "header.h"
-#define NUM_OF_DATEs 5  // for simulation 1 3 7 15 30
+#define NUM_OF_DATEs 30  // for simulation 1 3 7 15 30
 #define NUM_OF_TIMEs 4
 
 #define MIN_ADWD 1 // 0.2
 #define MAX_ADWD 1 // 20
-#define MIN_RUNNING_DAY 30
+#define MIN_RUNNING_DAY 1
 #define MAX_RUNNING_DAY 30
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
-int placement_method = 6; //2~6으로 바꾸면 비교스킴
-int num_of_SSDs = 30; // 10, 20, (30), 40, 50
-int num_of_videos = 5000000;// 100만, 200만, (300만), 400만, 500만, 600만
+int placement_method = 1; // 2~6으로 바꾸면 비교스킴
+int migration_method = 8; // 8~11로 바꾸면 비교스킴
 
-int migration_method = 7; // 8~11로 바꾸면 비교스킴
-int num_of_new_videos = 30000; // 10000, 20000, (30000), 40000, 50000
-int num_of_request_per_sec = 40000; // 24000, 32000, (40000), 48000, 56000, 64000
-//이거 0인게 제일 잘 나온다 왜지
+int num_of_SSDs = 30; // 10, 20, (30), 40, 50
+int num_of_videos = 3000000;// 100만, 200만, (300만), 400만, 500만, 600만
+int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000
+int num_of_request_per_sec = 20000; // 12000, 16000, (20000), 24000, 28000
 
 int main(int argc, char* argv[]) {
 	srand(SEED);
@@ -24,8 +23,8 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		simulation_placement();
-		//simulation_migartion();
+		//simulation_placement();
+		simulation_migartion();
 		break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
@@ -36,6 +35,8 @@ int main(int argc, char* argv[]) {
 		break;
 	case 3:
 		if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
+			num_of_videos = 0;
+			num_of_new_videos = 0;
 			testbed_migration(stoi(argv[2]));
 		}
 		else
