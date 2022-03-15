@@ -42,23 +42,16 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		//simulation_placement();
-		/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 			if (i == 8)
 				continue;
 			migration_method = i;
 			simulation_migartion();
-		}*/
-		migration_method = 7;
-		simulation_migartion();
-		migration_method = 9;
-		simulation_migartion();
-		migration_method = 11;
-		simulation_migartion();
+		}
 		migration_method = 1;
 		simulation_migartion();
-		int cnt;
 
+		int cnt;
 		cnt = 0;
 		while (cnt < result2.size()) {
 			printf("%lf\n", result2[cnt++]);
@@ -157,6 +150,11 @@ int main(int argc, char* argv[]) {
 			result1_day30.clear();
 		}
 		break;
+	/*for (int i = 1; i < MIGRATION_OURS; i++) {
+		placement_method = i;
+		simulation_placement();
+	}*/
+	break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
 			testbed_placement();
@@ -319,7 +317,7 @@ void simulation_placement() {
 	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		SSD_list[ssd].running_days = (rand() % (MAX_RUNNING_DAY - MIN_RUNNING_DAY + 1)) + MIN_RUNNING_DAY;
-		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD)) / 10;
+		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD));
 		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
 	}
 
@@ -354,17 +352,18 @@ void simulation_placement() {
 
 void simulation_migartion() {
 	srand(SEED);
+	placement_method = PLACEMENT_RANDOM;
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
 	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
-	placement(SSD_list, VIDEO_SEGMENT_list, PLACEMENT_RANDOM, num_of_SSDs, num_of_videos);
+	placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
 
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
 	//int num_new_ssd = 0;
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		SSD_list[ssd].running_days = (rand() % (MAX_RUNNING_DAY - MIN_RUNNING_DAY + 1)) + MIN_RUNNING_DAY;
-		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD)) / 10;
+		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD));
 		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
 		//printf("[SSD %d] serviced bandwidth %.2f / %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].serviced_bandwidth_usage, SSD_list[ssd].total_bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].serviced_bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 		//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
@@ -384,6 +383,7 @@ void simulation_migartion() {
 			if (num_of_new_videos > 0) {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
+				growing_cnt();
 				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, day);
 
 				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
@@ -396,6 +396,7 @@ void simulation_migartion() {
 			}
 			else {
 				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
+				growing_cnt();
 				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, day);
 			}
 			//migration 수행
@@ -404,7 +405,7 @@ void simulation_migartion() {
 			if(migration_method >= MIGRATION_OURS)
 				migration_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
 			else
-				migration_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
+				migration_num = placement(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
 
 			//printf("migration_num %d\n", migration_num);
 		}

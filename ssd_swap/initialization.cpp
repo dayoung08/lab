@@ -8,7 +8,6 @@ double DWPD[SSD_TYPE] = { 0.410958904, 0.328767123, 0.290958904, 0.109589041, 0.
 
 int rand_cnt;
 void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int _num_of_request_per_sec) {
-	srand(SEED);
 	rand_cnt = 0;
 	SSD_initalization_for_simulation(_SSD_list, _num_of_SSDs);
 	video_initalization_for_simulation(_VIDEO_SEGMENT_list, _num_of_videos, _num_of_request_per_sec);
@@ -20,6 +19,7 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 }
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
+	srand(SEED);
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].index = ssd_index;
@@ -80,7 +80,7 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_
 	srand(SEED);
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
-	mt19937 g(SEED + ++rand_cnt);
+	mt19937 g(SEED + rand_cnt);
 	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 
 	//우선 전부 제거함. 재계산을 위함.
@@ -195,7 +195,10 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			type_range.push_back(make_pair(type_start, video_index - 1));
 		}
 	}
-	type_range.push_back(make_pair(type_start, _num_of_existed_videos + _num_of_new_videos - 1));
+	type_range.push_back(make_pair(type_start, _num_of_existed_videos + _num_of_new_videos - 1));	
+	srand(SEED);
+	mt19937 g(SEED + rand_cnt);
+	shuffle(type_range.begin(), type_range.end(), g);
 
 	//페어 맨 뒤에거 뺀 다음에 첫, 마지막 세그먼트 index에 대해 for문을 돌리면서,  맨 뒤에 있는 pop을 빼면서 할당해줌.
 	int video_pos = 0;
@@ -394,4 +397,8 @@ string* split(string str, char Delimiter) {
 	result.clear();
 	vector<string>().swap(result); //메모리 해제를 위해
 	return result_array;
+}
+
+void growing_cnt() {
+	rand_cnt++;
 }
