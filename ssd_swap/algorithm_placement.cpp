@@ -136,6 +136,8 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 			//_VIDEO_SEGMENT_list[video_index].is_alloc = false;
 		}*/
 	}
+	//cout << _VIDEO_SEGMENT_list[1].assigned_SSD << endl;
+	//cout << _VIDEO_SEGMENT_list[10].assigned_SSD << endl;
 	return placement_num;
 }
 

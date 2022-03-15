@@ -8,10 +8,15 @@ double DWPD[SSD_TYPE] = { 0.410958904, 0.328767123, 0.290958904, 0.109589041, 0.
 
 int rand_cnt;
 void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int _num_of_request_per_sec) {
+	srand(SEED);
 	rand_cnt = 0;
 	SSD_initalization_for_simulation(_SSD_list, _num_of_SSDs);
 	video_initalization_for_simulation(_VIDEO_SEGMENT_list, _num_of_videos, _num_of_request_per_sec);
 	//printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
+	//cout << _SSD_list[1].storage_capacity << endl;
+	//cout << _SSD_list[10].storage_capacity << endl;
+	//cout << _SSD_list[1].DWPD << endl;
+	//cout << _SSD_list[10].DWPD << endl;
 }
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
@@ -46,10 +51,10 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 }
 
 void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_videos, int _num_of_request_per_sec) {
+	srand(SEED);
 	double* vid_pop = set_zipf_pop(_num_of_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
-	std::mt19937 g(SEED + rand_cnt);
-	rand_cnt++;
+	std::mt19937 g(SEED);
 	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
@@ -72,10 +77,10 @@ void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 }
 
 void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _day) {
+	srand(SEED);
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
-	mt19937 g(SEED + rand_cnt);
-	rand_cnt++;
+	mt19937 g(SEED + ++rand_cnt);
 	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 
 	//우선 전부 제거함. 재계산을 위함.
@@ -138,6 +143,9 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_
 			}
 		}
 	}
+
+	//cout << _existed_VIDEO_SEGMENT_list[1].popularity << endl;
+	//cout << _existed_VIDEO_SEGMENT_list[10].popularity << endl;
 	delete[] vid_pop;
 	vid_pop_shuffle.clear();
 	vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
