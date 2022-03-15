@@ -6,11 +6,12 @@
 int bandwidth[SSD_TYPE] = { 3500, 3100, 2400, 1800, 560, 560, 560, 560, 550, 550 };
 double DWPD[SSD_TYPE] = { 0.410958904, 0.328767123, 0.290958904, 0.109589041, 0.646575342, 0.328767123, 0.306849315, 0.197260274, 0.109589041, 0.153424658 };
 
-int rand_cnt = 0;
+int rand_cnt;
 void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int _num_of_request_per_sec) {
+	rand_cnt = 0;
 	SSD_initalization_for_simulation(_SSD_list, _num_of_SSDs);
 	video_initalization_for_simulation(_VIDEO_SEGMENT_list, _num_of_videos, _num_of_request_per_sec);
-	printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
+	//printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
 }
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
@@ -25,7 +26,7 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 		else {
 			int r = rand() % SSD_TYPE;
 			//int r = ssd % SSD_TYPE;
-			_SSD_list[ssd_index].storage_capacity = ((double)256000 * pow(2, rand() % 5)) + 0.00001; // 0.5, 1, 2TB
+			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, rand() % 5)) + 0.00001; // 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
 			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
 		}
