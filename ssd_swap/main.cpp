@@ -1,6 +1,6 @@
 #include "header.h"
 #define NUM_OF_DATEs 3  // for simulation 1 3 7 15 30
-#define NUM_OF_TIMEs 1
+#define NUM_OF_TIMEs 4
 
 #define MIN_ADWD 1 // 0.2
 #define MAX_ADWD 1 // 20
