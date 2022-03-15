@@ -222,7 +222,12 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 				continue;
 			}
 			_is_over_load[ssd] = true;
-			(*_bandwidth_usage_of_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
+			if (_migration_method == MIGRATION_OURS) {
+				double throughput = (_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth) / (_SSD_list[ssd].storage_capacity - _SSD_list[ssd].storage_usage);
+				(*_bandwidth_usage_of_SSDs).insert(make_pair(throughput, ssd));
+			}
+			else
+				(*_bandwidth_usage_of_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
 			_num_of_over_load++;
 		}
 		else
@@ -239,7 +244,9 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 		}
 		*_is_inserted_eliminated_video_list = true;
 		_num_of_over_load = 1;
-		(*_bandwidth_usage_of_SSDs).insert(make_pair(_SSD_list[VIRTUAL_SSD].total_bandwidth_usage - _SSD_list[VIRTUAL_SSD].maximum_bandwidth, VIRTUAL_SSD));
+		double throughput = (_SSD_list[VIRTUAL_SSD].total_bandwidth_usage - _SSD_list[VIRTUAL_SSD].maximum_bandwidth) / (_SSD_list[VIRTUAL_SSD].storage_capacity - _SSD_list[VIRTUAL_SSD].storage_usage);
+		(*_bandwidth_usage_of_SSDs).insert(make_pair(throughput, VIRTUAL_SSD));
+		//(*_bandwidth_usage_of_SSDs).insert(make_pair(_SSD_list[VIRTUAL_SSD].total_bandwidth_usage - _SSD_list[VIRTUAL_SSD].maximum_bandwidth, VIRTUAL_SSD));
 	}
 	//printf("num_of_over_load : %d\n", _num_of_over_load);
 }
