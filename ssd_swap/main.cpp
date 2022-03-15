@@ -42,13 +42,15 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+		/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 			if (i == 8)
 				continue;
 			migration_method = i;
 			simulation_migartion();
-		}
+		}*/
 		migration_method = 7;
+		simulation_migartion();
+		migration_method = 1;
 		simulation_migartion();
 
 		int cnt;
