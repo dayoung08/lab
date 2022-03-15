@@ -11,7 +11,7 @@
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 30; // 10, 20, (30), 40, 50
+int num_of_SSDs = 20; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 100만, 200만, (300만), 400만, 500만, 600만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 int num_of_request_per_sec = 20000; // 6666.666667, 13333.333334, (20000), 26666.666667, 33333.333334
@@ -42,13 +42,13 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+		/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 			if (i == 8)
 				continue;
 			migration_method = i;
 			simulation_migartion();
-		}
-		migration_method = 1;
+		}*/
+		migration_method = 7;
 		simulation_migartion();
 
 		int cnt;
