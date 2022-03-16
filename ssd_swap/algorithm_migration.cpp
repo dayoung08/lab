@@ -24,16 +24,16 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	bool* is_imposible = new bool[_num_of_SSDs];
 	fill(is_imposible, is_imposible + _num_of_SSDs, false);
 
-	set<pair<double, int>, greater<pair<double, int>>> bandwidth_usage_of_SSDs; 
+	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
 	vector<pair<double, int>> eliminated_video_list;
 	bool is_inserted_eliminated_video_list = false;
-	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &bandwidth_usage_of_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list);
-	//printf("num_of_over_load : %d\n", bandwidth_usage_of_SSDs.size());
+	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list);
+	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
 	//여기까지 초기화
 
 	int migration_num = 0;
-	while (!bandwidth_usage_of_SSDs.empty()) {
-		int from_ssd = (*bandwidth_usage_of_SSDs.begin()).second;
+	while (!over_load_SSDs.empty()) {
+		int from_ssd = (*over_load_SSDs.begin()).second;
 		set<pair<double, int>>::iterator end_pos = _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.end();
 		pair<double, int> element = (*--end_pos); //그 SSD에서 제일 큰 것을 먼저 빼서 다른 데로 옮길예정
 		int from_vid = element.second;
@@ -127,7 +127,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				vector<pair<double, int>>().swap(curr_set); //메모리 해제를 위해
 			} // 사실 이미 저장된거 굳이 뺄 필요는 없다.... 그래서 굳이 안 뺌
 			//정상적 서비스 여부 자체는 알아서 마지막에 계산 해주니까
-			update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &bandwidth_usage_of_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list);
+			update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list);
 			continue;
 			/*for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
@@ -149,7 +149,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			break;
 		}
 
-		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &bandwidth_usage_of_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list);
+		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs, &eliminated_video_list, &is_inserted_eliminated_video_list);
 		migration_num++;
 		under_load_list.clear();
 		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
@@ -161,9 +161,9 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	}*/
 	delete[] is_over_load;
 
-	bandwidth_usage_of_SSDs.clear();
+	over_load_SSDs.clear();
 	eliminated_video_list.clear();
-	set<pair<double, int>, greater<pair<double, int>>>().swap(bandwidth_usage_of_SSDs);
+	set<pair<double, int>, greater<pair<double, int>>>().swap(over_load_SSDs);
 	vector<pair<double, int>>().swap(eliminated_video_list);
 	return migration_num;
 }
@@ -210,9 +210,9 @@ void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double,
 	_SSD_list[to_ssd].ADWD = (_SSD_list[to_ssd].total_write_MB / (_SSD_list[to_ssd].DWPD * _SSD_list[to_ssd].storage_capacity)) / _SSD_list[to_ssd].running_days;
 }
 
-void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, bool* _is_imposible, set<pair<double, int>, greater<pair<double, int>>>* _bandwidth_usage_of_SSDs, int _num_of_SSDs, vector<pair<double, int>>* _eliminated_video_list, bool* _is_inserted_eliminated_video_list) {
+void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, bool* _is_imposible, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs, vector<pair<double, int>>* _eliminated_video_list, bool* _is_inserted_eliminated_video_list) {
 	int _num_of_over_load = 0;
-	(*_bandwidth_usage_of_SSDs).clear();
+	(*_over_load_SSDs).clear();
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		if (_is_imposible[ssd])
 			continue;
@@ -222,12 +222,12 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 				continue;
 			}
 			_is_over_load[ssd] = true;
-			if (_migration_method == MIGRATION_OURS) {
+			if (_migration_method == MIGRATION_OURS) { 
 				double throughput = (_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth) / (_SSD_list[ssd].storage_capacity - _SSD_list[ssd].storage_usage);
-				(*_bandwidth_usage_of_SSDs).insert(make_pair(throughput, ssd));
+				(*_over_load_SSDs).insert(make_pair(throughput, ssd));
 			}
 			else
-				(*_bandwidth_usage_of_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
+				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
 			_num_of_over_load++;
 		}
 		else
@@ -245,8 +245,8 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 		*_is_inserted_eliminated_video_list = true;
 		_num_of_over_load = 1;
 		double throughput = (_SSD_list[VIRTUAL_SSD].total_bandwidth_usage - _SSD_list[VIRTUAL_SSD].maximum_bandwidth) / (_SSD_list[VIRTUAL_SSD].storage_capacity - _SSD_list[VIRTUAL_SSD].storage_usage);
-		(*_bandwidth_usage_of_SSDs).insert(make_pair(throughput, VIRTUAL_SSD));
-		//(*_bandwidth_usage_of_SSDs).insert(make_pair(_SSD_list[VIRTUAL_SSD].total_bandwidth_usage - _SSD_list[VIRTUAL_SSD].maximum_bandwidth, VIRTUAL_SSD));
+		(*_over_load_SSDs).insert(make_pair(throughput, VIRTUAL_SSD));
+		//(*_over_load_SSDs).insert(make_pair(_SSD_list[VIRTUAL_SSD].total_bandwidth_usage - _SSD_list[VIRTUAL_SSD].maximum_bandwidth, VIRTUAL_SSD));
 	}
 	//printf("num_of_over_load : %d\n", _num_of_over_load);
 }

@@ -194,8 +194,6 @@ int main(int argc, char* argv[]) {
 			num_of_request_per_sec = stod(argv[5]);
 
 			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-				if (i == 8)
-					continue;
 				migration_method = i;
 				simulation_migartion();
 			}
@@ -407,8 +405,12 @@ void simulation_migartion() {
 			int migration_num;
 			if(migration_method >= MIGRATION_OURS)
 				migration_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
-			else
+			else {
+				for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
+					SSD_list[ssd].serviced_bandwidth_usage = 0;
+				}
 				migration_num = placement(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
+			}
 
 			//printf("migration_num %d\n", migration_num);
 		}
