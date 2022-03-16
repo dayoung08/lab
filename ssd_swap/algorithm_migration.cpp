@@ -7,7 +7,6 @@ int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration
 	int migration_num = 0;
 	switch (_migration_method) {
 	case MIGRATION_OURS:
-	case MIGRATION_THROUGHPUT_AWARE:
 	case MIGRATION_BANDWIDTH_AWARE:
 	case MIGRATION_STORAGE_SPACE_AWARE:
 	case MIGRATION_LIFETIME_AWARE:
@@ -64,11 +63,6 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				case MIGRATION_OURS:
 					//slope = min(slope_to, slope_from);
 					slope = (remained_bandwidth / remained_storage) / ADWD;
-					break;
-				case MIGRATION_THROUGHPUT_AWARE:
-					//if (remained_storage == 0)
-					//	remained_storage = 0.000001;
-					slope = remained_bandwidth / remained_storage;
 					break;
 				case MIGRATION_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
