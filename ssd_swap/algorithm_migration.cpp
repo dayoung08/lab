@@ -52,6 +52,13 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB / _SSD_list[to_ssd_temp].running_days) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity);
 				double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage;
 				double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
+				if (!is_swap(_SSD_list, _VIDEO_SEGMENT_list, to_ssd_temp, to_vid_temp)) {
+					remained_bandwidth += _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth;
+					remained_storage += _VIDEO_SEGMENT_list[to_vid_temp].size;
+				}
+				else {
+					remained_bandwidth += (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth);
+				}
 				double slope = -INFINITY;
 				switch (_migration_method)
 				{
