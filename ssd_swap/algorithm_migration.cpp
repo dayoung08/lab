@@ -56,7 +56,10 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				switch (_migration_method)
 				{
 				case MIGRATION_OURS:
-					slope = min(slope_to, slope_from);
+					if (from_vid == VIRTUAL_SSD)
+						slope = slope_to;
+					else
+						slope = min(slope_to, slope_from);
 					break;
 				case MIGRATION_THROUGHPUT_AWARE:
 					slope = remained_bandwidth / remained_storage;
