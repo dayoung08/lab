@@ -1,9 +1,7 @@
 #include "header.h"
 #define NUM_OF_DATEs 3  // for simulation 1 3 7 15 30
-#define NUM_OF_TIMEs 3
+#define NUM_OF_TIMEs 4
 
-#define MIN_ADWD 1 // 0.2
-#define MAX_ADWD 1 // 20
 #define MIN_RUNNING_DAY 1
 #define MAX_RUNNING_DAY 30
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
@@ -13,8 +11,8 @@ int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 100만, 200만, (300만), 400만, 500만
-int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
-double num_of_request_per_sec = 5000;
+int num_of_new_videos = 50000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
+double num_of_request_per_sec = 15000;
 
 vector<double> result1;
 vector<double> result2;
@@ -42,12 +40,6 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-			if (i == 8)
-				continue;
-			migration_method = i;
-			simulation_migartion();
-		}
 		migration_method = 1;
 		simulation_migartion();
 
@@ -311,14 +303,15 @@ int main(int argc, char* argv[]) {
 }
 
 void simulation_placement() {
-	srand(SEED);
+	std::mt19937 g(SEED);
+	std::uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY};
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
 
 	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
-		SSD_list[ssd].running_days = (rand() % (MAX_RUNNING_DAY - MIN_RUNNING_DAY + 1)) + MIN_RUNNING_DAY;
-		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD));
+		SSD_list[ssd].running_days = dist_for_running_day(g);
+		SSD_list[ssd].ADWD = 1;
 		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
 	}
 
@@ -353,7 +346,8 @@ void simulation_placement() {
 }
 
 void simulation_migartion() {
-	srand(SEED);
+	std::mt19937 g(SEED);
+	std::uniform_int_distribution<> dist_for_running_day{ MIN_RUNNING_DAY, MAX_RUNNING_DAY };
 	placement_method = PLACEMENT_RANDOM;
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
@@ -364,20 +358,11 @@ void simulation_migartion() {
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
 	//int num_new_ssd = 0;
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
-		SSD_list[ssd].running_days = (rand() % (MAX_RUNNING_DAY - MIN_RUNNING_DAY + 1)) + MIN_RUNNING_DAY;
-		SSD_list[ssd].ADWD = ((double)(rand() % (MAX_ADWD - MIN_ADWD + 1) + MIN_ADWD));
+		SSD_list[ssd].running_days = dist_for_running_day(g);
+		SSD_list[ssd].ADWD = 1;
 		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
-		//printf("[SSD %d] serviced bandwidth %.2f / %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].serviced_bandwidth_usage, SSD_list[ssd].total_bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].serviced_bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
-		//printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
-		//printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 	}
-	/*for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
-		printf("[SSD %d] ADWD %.2f\n", ssd, (SSD_list[ssd].total_write_MB / (SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity)) / SSD_list[ssd].running_days);
-	}*/
-	//cout << SSD_list[1].running_days << endl;
-	//cout << SSD_list[10].running_days << endl;
-	//printf("\n[MIGRATION START]\n\n");
-	//printf("num_new_ssd : %d\n\n", num_new_ssd);
+
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
@@ -484,7 +469,6 @@ void simulation_migartion() {
 }
 
 void testbed_placement() {
-	srand(SEED);
 	SSD* SSD_list = NULL;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = NULL;
 	placed_video_init_for_testbed(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
@@ -496,7 +480,6 @@ void testbed_placement() {
 }
 
 void testbed_migration(bool _has_new_files) {
-	srand(SEED);
 	SSD* SSD_list = NULL;
 	VIDEO_SEGMENT* VIDEO_SEGMENT_list = NULL;
 	VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = NULL;

@@ -19,7 +19,9 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 }
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
-	srand(SEED);
+	std::mt19937 g(SEED);
+	//std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE };
+	std::uniform_int_distribution<> dist_for_storage_space{ 0, 3 };
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].index = ssd_index;
@@ -29,9 +31,9 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			int r = rand() % SSD_TYPE;
-			//int r = ssd % SSD_TYPE;
-			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, rand() % 4 )) + 0.00001; // 0.5, 1, 2TB
+			//int r = dist_for_type(g);
+			int r = ssd % SSD_TYPE;
+			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, dist_for_storage_space(g))) + 0.00001; // 0.25, 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
 			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
 		}
@@ -51,7 +53,6 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 }
 
 void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_videos, int _num_of_request_per_sec) {
-	srand(SEED);
 	double* vid_pop = set_zipf_pop(_num_of_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
 	std::mt19937 g(SEED);
@@ -77,7 +78,6 @@ void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 }
 
 void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _day) {
-	srand(SEED);
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	mt19937 g(SEED + rand_cnt);
@@ -197,7 +197,6 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		}
 	}
 	type_range.push_back(make_pair(type_start, _num_of_existed_videos + _num_of_new_videos - 1));	
-	srand(SEED);
 	mt19937 g(SEED + rand_cnt);
 	shuffle(type_range.begin(), type_range.end(), g);
 

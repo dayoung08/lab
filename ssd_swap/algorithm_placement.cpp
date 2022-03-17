@@ -92,7 +92,6 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 
 
 int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _placement_method, int _num_of_SSDs, int _num_of_videos) {
-	srand(SEED);
 	std::mt19937 g(SEED);
 
 	int placement_num = 0;
