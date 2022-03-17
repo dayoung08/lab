@@ -201,7 +201,8 @@ double get_slope_to(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _fro
 		remained_bandwidth = (_SSD_list[_to_ssd].maximum_bandwidth - (_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth));
 		remained_storage = _SSD_list[_to_ssd].storage_capacity - (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size);
 	}
-	slope_to = difference_bt / ADWD_to;
+	//slope_to = difference_bt / ADWD_to;
+	slope_to = (remained_bandwidth / remained_storage) / ADWD_to;
 	return slope_to;
 }
 
@@ -225,8 +226,8 @@ double get_slope_from(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _f
 		remained_bandwidth = (_SSD_list[_from_ssd].maximum_bandwidth - (_SSD_list[_from_ssd].total_bandwidth_usage - _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth));
 		remained_storage = _SSD_list[_from_ssd].storage_capacity - (_SSD_list[_from_ssd].storage_usage - _VIDEO_SEGMENT_list[_from_vid].size);
 	}
-	slope_from = difference_bt / ADWD_from;
-
+	//slope_from = difference_bt / ADWD_from;
+	slope_from = (remained_bandwidth / remained_storage) / ADWD_from;
 	return slope_from;
 }
 

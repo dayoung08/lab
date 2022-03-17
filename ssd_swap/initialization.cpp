@@ -29,8 +29,8 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			//int r = rand() % SSD_TYPE;
-			int r = ssd % SSD_TYPE;
+			int r = rand() % SSD_TYPE;
+			//int r = ssd % SSD_TYPE;
 			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, rand() % 4 )) + 0.00001; // 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
 			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;

@@ -14,7 +14,7 @@ int migration_method = 7; // 8~11로 바꾸면 비교스킴
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 100만, 200만, (300만), 400만, 500만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
-double num_of_request_per_sec = 15000; 
+double num_of_request_per_sec = 5000;
 
 vector<double> result1;
 vector<double> result2;
@@ -43,6 +43,8 @@ int main(int argc, char* argv[]) {
 	{
 	case 1:
 		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+			//if (i == 8)
+			//	continue;
 			migration_method = i;
 			simulation_migartion();
 		}
@@ -190,6 +192,8 @@ int main(int argc, char* argv[]) {
 			num_of_request_per_sec = stod(argv[5]);
 
 			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+				if (i == 8)
+					continue;
 				migration_method = i;
 				simulation_migartion();
 			}
