@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
 	{
 	case 1:
 		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-			//if (i == 8)
-			//	continue;
+			if (i == 8)
+				continue;
 			migration_method = i;
 			simulation_migartion();
 		}
