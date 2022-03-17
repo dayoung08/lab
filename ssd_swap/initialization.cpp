@@ -29,9 +29,9 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			int r = rand() % SSD_TYPE;
-			//int r = ssd % SSD_TYPE;
-			_SSD_list[ssd_index].storage_capacity = ((double)476837.158203125 * pow(2, rand() % 3)) + 0.00001; // 0.5, 1, 2TB
+			//int r = rand() % SSD_TYPE;
+			int r = ssd % SSD_TYPE;
+			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, rand() % 4 )) + 0.00001; // 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
 			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
 		}
@@ -40,7 +40,7 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].total_bandwidth_usage = 0;
-		_SSD_list[ssd_index].serviced_bandwidth_usage = 0;
+		//_SSD_list[ssd_index].serviced_bandwidth_usage = 0;
 		_SSD_list[ssd_index].ADWD = 0;
 		//_SSD_list[ssd_index].daily_write_MB = 0;
 		_SSD_list[ssd_index].total_write_MB = 0;
@@ -68,7 +68,7 @@ void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 		_VIDEO_SEGMENT_list[video_index].popularity = pop;
 		_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double)_num_of_request_per_sec * _VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 		_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-		_VIDEO_SEGMENT_list[video_index].is_serviced = false;
+		//_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 		_VIDEO_SEGMENT_list[video_index].path = "/segment_" + to_string(video_index) + ".mp4";
 	}
 	delete[] vid_pop;
@@ -89,6 +89,7 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_
 		_SSD_list[ssd_index].total_assigned_VIDEOs_low_bandwidth_first.clear();
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].total_bandwidth_usage = 0;
+		//_SSD_list[ssd_index].serviced_bandwidth_usage = 0;
 		_SSD_list[ssd_index].running_days += _day;
 		_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].DWPD * _SSD_list[ssd_index].storage_capacity)) / _SSD_list[ssd_index].running_days;
 
@@ -106,7 +107,7 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_
 			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
 			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * (double)_num_of_request_per_sec * _existed_VIDEO_SEGMENT_list[video_index].once_bandwidth; //220124
 			int SSD_index = _existed_VIDEO_SEGMENT_list[video_index].assigned_SSD;
-			_existed_VIDEO_SEGMENT_list[video_index].is_serviced = false; // 기존에 있었어도 일단 초기화
+			//_existed_VIDEO_SEGMENT_list[video_index].is_serviced = false; // 기존에 있었어도 일단 초기화
 			
 			if (_migration_method >= MIGRATION_OURS) {
 				if (SSD_index != NONE_ALLOC) {
@@ -129,7 +130,7 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].popularity = pop;
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].requested_bandwidth = pop * (double)_num_of_request_per_sec * _new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].once_bandwidth; //220124
 			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].path = "/segment_" + to_string(video_index) + ".mp4";
-			_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_serviced = false; 
+			//_new_VIDEO_SEGMENT_list[video_index - _num_of_existed_videos].is_serviced = false; 
 
 			//이 아래는 migration scheme 쓸 때 사용함. vitual ssd에 넣어놓음
 			if (_migration_method >= MIGRATION_OURS) {
@@ -294,7 +295,7 @@ void SSD_initalization_for_testbed(SSD* _SSD_list, int& _num_of_SSDs) {
 	_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 	_SSD_list[VIRTUAL_SSD].storage_usage = 0;
 	_SSD_list[VIRTUAL_SSD].total_bandwidth_usage = 0;
-	_SSD_list[VIRTUAL_SSD].serviced_bandwidth_usage = 0;
+	//_SSD_list[VIRTUAL_SSD].serviced_bandwidth_usage = 0;
 	_SSD_list[VIRTUAL_SSD].ADWD = 0;
 	_SSD_list[VIRTUAL_SSD].total_write_MB = 0;
 	_SSD_list[VIRTUAL_SSD].running_days = 1; // 첫 날 = 1이니까
@@ -354,15 +355,16 @@ double* set_zipf_pop(int length, double alpha, double beta) {
 	return pop;
 }
 
-bool is_full_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
-	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
+bool is_swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
+	bool space_condition = (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;;
+	bool bandwidth_condition = (_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) > _SSD_list[_to_ssd].maximum_bandwidth;
+	return space_condition || bandwidth_condition;
 }
 
 void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
-	for (int vid = 0; vid < _num_of_videos; vid++) {
-		_VIDEO_SEGMENT_list[vid].is_serviced = true;
-	}
-	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
+	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
+		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
+			continue; 
 		vector<pair<double, int>> curr_set(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.size());
 		copy(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin(), _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end(), curr_set.begin());
 		reverse(curr_set.begin(), curr_set.end());
@@ -370,14 +372,13 @@ void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 		double curr_bandwidth = _SSD_list[ssd].total_bandwidth_usage;
 		while (curr_bandwidth > _SSD_list[ssd].maximum_bandwidth) {
 			int vid = curr_set.back().second;
-			curr_bandwidth -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
-			_VIDEO_SEGMENT_list[vid].is_serviced = false;
+			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
 			curr_set.pop_back();
 			if (curr_set.empty())
 				break;
 		}
-		_SSD_list[ssd].serviced_bandwidth_usage = curr_bandwidth;
-		vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
+		//vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
 	}
 }
 

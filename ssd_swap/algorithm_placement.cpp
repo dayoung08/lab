@@ -32,7 +32,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		set<pair<double, int>, greater<pair<double, int>>> target_ssd_list_with_ratio_sort;
 
 		for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
-			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index)) {
+			if (!is_swap(_SSD_list, _VIDEO_SEGMENT_list, ssd_temp, video_index)) {
 				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].total_bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
 				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_SEGMENT_list[video_index].size));
 				//double remained_write_MB = ((_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) * _SSD_list[ssd_temp].running_days) - (_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size);
@@ -75,7 +75,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				printf("[SSD %d] Average ADWD %.2f \n", ssd, (_SSD_list[ssd].total_write_MB) / (_SSD_list[ssd].storage_capacity * _SSD_list[ssd].DWPD) / _SSD_list[ssd].running_days);
 			}*/
 			_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-			_VIDEO_SEGMENT_list[video_index].is_serviced = false;
+			//_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 		}
 		/*else {
 			for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
@@ -118,7 +118,7 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 				ssd_index = target_ssd_list[vid % target_ssd_list.size()];
 			}
 
-			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, ssd_index, video_index)) {
+			if (!is_swap(_SSD_list, _VIDEO_SEGMENT_list, ssd_index, video_index)) {
 				int prev_SSD = _VIDEO_SEGMENT_list[video_index].assigned_SSD;
 				double remained_bandwidth = (_SSD_list[ssd_index].maximum_bandwidth - (_SSD_list[ssd_index].total_bandwidth_usage + _VIDEO_SEGMENT_list[video_index].requested_bandwidth));
 				if (remained_bandwidth > 0) {
@@ -157,8 +157,8 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _ssd_index
 		_SSD_list[_ssd_index].total_write_MB += _VIDEO_SEGMENT_list[_video_index].size;
 		_SSD_list[_ssd_index].ADWD = (_SSD_list[_ssd_index].total_write_MB / _SSD_list[_ssd_index].running_days) / (_SSD_list[_ssd_index].DWPD * _SSD_list[_ssd_index].storage_capacity);
 	}
-	_VIDEO_SEGMENT_list[_video_index].is_serviced = true;
-	_SSD_list[_ssd_index].serviced_bandwidth_usage += _VIDEO_SEGMENT_list[_video_index].requested_bandwidth;
+	//_VIDEO_SEGMENT_list[_video_index].is_serviced = true;
+	//_SSD_list[_ssd_index].serviced_bandwidth_usage += _VIDEO_SEGMENT_list[_video_index].requested_bandwidth;
 	/*if (_SSD_list[_ssd_index].total_bandwidth_usage > _SSD_list[_ssd_index].maximum_bandwidth) {
 		_VIDEO_SEGMENT_list[_video_index].is_serviced = false;
 	}
