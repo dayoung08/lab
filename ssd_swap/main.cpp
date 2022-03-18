@@ -1,6 +1,6 @@
 #include "header.h"
 #define NUM_OF_DATEs 1// for simulation 1 3 7 15 30
-#define NUM_OF_TIMEs 4
+#define NUM_OF_TIMEs 1
 
 #define MIN_RUNNING_DAY 1
 #define MAX_RUNNING_DAY 30
@@ -10,9 +10,9 @@ int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
-int num_of_videos = 3000000;// 100만, 200만, (300만), 400만, 500만
+int num_of_videos = 1500000;// 100만, 200만, (300만), 400만, 500만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
-double num_of_request_per_sec = 25000;
+double num_of_request_per_sec = 15000;
 
 vector<double> result1;
 vector<double> result2;
