@@ -40,14 +40,12 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-			if (i == MIGRATION_THROUGHPUT_AWARE)
-				continue;
-			migration_method = i;
-			simulation_migartion();
-		}
-		migration_method = 1;
+		migration_method = 7;
 		simulation_migartion();
+		migration_method = 9;
+		simulation_migartion();
+		//migration_method = 1;
+		//simulation_migartion();
 
 		int cnt;
 		cnt = 0;
@@ -190,8 +188,6 @@ int main(int argc, char* argv[]) {
 			num_of_request_per_sec = stod(argv[5]);
 
 			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-				if (i == MIGRATION_THROUGHPUT_AWARE)
-					continue;
 				migration_method = i;
 				simulation_migartion();
 			}
