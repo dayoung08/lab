@@ -49,7 +49,11 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
 				set<pair<double, int>>::iterator pos = _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin();
-				int to_vid_temp = (*pos).second;
+				int to_vid_temp;
+				if (pos == _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.end())
+					to_vid_temp = NONE_ALLOC;
+				else
+					to_vid_temp = (*pos).second;
 
 				//double slope_to = get_slope_to(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd_temp, from_vid);
 				//double slope_from = get_slope_from(_SSD_list, _VIDEO_SEGMENT_list, from_ssd, to_ssd_temp, from_vid);
@@ -168,7 +172,11 @@ int migration_for_benchmark(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, 
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
 				set<pair<double, int>>::iterator pos = _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin();
-				int to_vid_temp = (*pos).second;
+				int to_vid_temp;
+				if (pos == _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.end())
+					to_vid_temp = NONE_ALLOC;
+				else
+					to_vid_temp = (*pos).second;
 
 				double ADWD = ((_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[from_vid].size) / _SSD_list[to_ssd_temp].running_days) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity);
 				double remained_bandwidth = 0;
