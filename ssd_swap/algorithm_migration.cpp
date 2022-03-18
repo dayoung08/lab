@@ -136,7 +136,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 
 
 int migration_for_benchmark(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_videos) {
-	bool* is_over_load = new bool[_num_of_SSDs +1];
+	bool* is_over_load = new bool[_num_of_SSDs + 1];
 	bool* is_imposible = new bool[_num_of_SSDs + 1];
 	fill(is_imposible, is_imposible + _num_of_SSDs, false);
 
