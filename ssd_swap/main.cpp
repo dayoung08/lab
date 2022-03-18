@@ -12,7 +12,7 @@ int migration_method = 7; // 8~11로 바꾸면 비교스킴
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 100만, 200만, (300만), 400만, 500만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
-double num_of_request_per_sec = 25000;
+double num_of_request_per_sec = 15000;
 
 vector<double> result1;
 vector<double> result2;
@@ -40,9 +40,7 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		//migration_method = 7;
-		//simulation_migartion();
-		migration_method = 8;
+		migration_method = 7;
 		simulation_migartion();
 		migration_method = 9;
 		simulation_migartion();
@@ -447,7 +445,7 @@ void simulation_migartion() {
 		}
 	}
 
-	/*double total_bandwidth_of_alloc_videos = 0;
+	double total_bandwidth_of_alloc_videos = 0;
 	int num_of_alloc_videos = 0;
 	for (int vid = 0; vid < num_of_videos; vid++) {
 		if (VIDEO_SEGMENT_list[vid].assigned_SSD != NONE_ALLOC) {
@@ -465,7 +463,7 @@ void simulation_migartion() {
 		printf("[SSD %d] bandwidth usage %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].total_bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].total_bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
 		printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
-	}*/
+	}
 
 	delete[](SSD_list);
 	delete[](VIDEO_SEGMENT_list);

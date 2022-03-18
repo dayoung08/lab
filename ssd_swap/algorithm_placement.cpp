@@ -69,23 +69,8 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			}
 		}
 		else {
-			/*for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
-				printf("[SSD %d] storage %.2f  / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
-				printf("[SSD %d] Average ADWD %.2f \n", ssd, (_SSD_list[ssd].total_write_MB) / (_SSD_list[ssd].storage_capacity * _SSD_list[ssd].DWPD) / _SSD_list[ssd].running_days);
-			}*/
 			_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-			//_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 		}
-		/*else {
-			for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
-				printf("[SSD %d] storage %.2f  / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
-				printf("[SSD %d] Average ADWD %.2f \n", ssd, (_SSD_list[ssd].total_write_MB) / (_SSD_list[ssd].storage_capacity * _SSD_list[ssd].DWPD) / _SSD_list[ssd].running_days);
-			}
-			//printf("%lf\n", _VIDEO_SEGMENT_list[video_index].requested_bandwidth);
-			printf("video %d 를 저장할 만한 SSD가 없음\n", video_index);
-		}*/
 	}
 	return placement_num;
 }
@@ -99,11 +84,6 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 	for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
 		target_ssd_list.push_back(ssd_temp);
 	}
-
-	/*if (_placement_method == PLACEMENT_RANDOM)
-		std::shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);*/
-	//실수로 특허 때 이 위치 여기였었음. migration 전에 있는 배치는 애초에 어떻게 하든 문제가 되지 않아서 상관은 없는데 (비디오도 이미 대역폭이 랜덤셔플되어있어서 랜덤 할당한 것과 같은 상태)
-	//그래도 사람이 불안하니까 이렇게 적어둔다.
 
 	int cnt = 0;
 	for (int vid = 0; vid < _num_of_videos; vid++) {
