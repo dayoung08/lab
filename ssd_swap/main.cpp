@@ -40,10 +40,14 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_THROUGHPUT_AWARE + 1; i++) {
+		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+			if (i == MIGRATION_THROUGHPUT_AWARE)
+				continue;
 			migration_method = i;
 			simulation_migartion();
 		}
+		migration_method = 1;
+		simulation_migartion();
 
 		int cnt;
 		cnt = 0;
@@ -186,6 +190,8 @@ int main(int argc, char* argv[]) {
 			num_of_request_per_sec = stod(argv[5]);
 
 			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+				if (i == MIGRATION_THROUGHPUT_AWARE)
+					continue;
 				migration_method = i;
 				simulation_migartion();
 			}
@@ -366,6 +372,7 @@ void simulation_migartion() {
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
+			cout << day << "-" << time << endl;
 			//아래는 새로운 비디오 추가 과정
 			if (num_of_new_videos > 0) {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
