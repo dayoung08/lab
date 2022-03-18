@@ -354,10 +354,14 @@ double* set_zipf_pop(int length, double alpha, double beta) {
 	return pop;
 }
 
-bool is_swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
-	bool space_condition = (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;;
-	bool bandwidth_condition = (_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) > _SSD_list[_to_ssd].maximum_bandwidth;
-	return space_condition || bandwidth_condition;
+bool is_replaced(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
+	if (_from_vid != NONE_ALLOC) {
+		bool space_condition_violation = (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
+		bool bandwidth_condition_violation = (_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) > _SSD_list[_to_ssd].maximum_bandwidth;
+		return space_condition_violation || bandwidth_condition_violation;
+	}
+	else
+		return false;
 }
 
 void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
