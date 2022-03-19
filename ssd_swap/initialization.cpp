@@ -322,30 +322,23 @@ double* set_zipf_pop(int length, double alpha, double beta) {
 }
 
 bool is_replaced(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
-	if (_from_vid != NONE_ALLOC) {
-		bool space_condition_violation = (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
-		bool bandwidth_condition_violation = (_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) > _SSD_list[_to_ssd].maximum_bandwidth;
-		return space_condition_violation || bandwidth_condition_violation;
-	}
-	else
-		return false;
+	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
 }
 
 void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
-		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
-			continue; 
-		vector<pair<double, int>> curr_set(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.size());
-		copy(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin(), _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end(), curr_set.begin());
-		reverse(curr_set.begin(), curr_set.end());
+		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
+			_SSD_list[ssd].total_bandwidth_usage = 0;
+			continue;
+		}
 
-		double curr_bandwidth = _SSD_list[ssd].total_bandwidth_usage;
-		while (curr_bandwidth > _SSD_list[ssd].maximum_bandwidth) {
-			int vid = curr_set.back().second;
+		while (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
+			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
 			_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
-			curr_set.pop_back();
-			if (curr_set.empty())
+			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
+			if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
 				break;
 		}
 		//vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
