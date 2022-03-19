@@ -20,7 +20,7 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::mt19937 g(SEED);
-	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 };
+	//std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE };
 	std::uniform_int_distribution<> dist_for_storage_space{ 0, 3 };
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
@@ -31,11 +31,11 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			int r = dist_for_type(g);
-			//int r = ssd % SSD_TYPE;
-			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, dist_for_storage_space(g))); // 0.25, 0.5, 1, 2TB
+			//int r = dist_for_type(g);
+			int r = ssd % SSD_TYPE;
+			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, dist_for_storage_space(g))) + 0.00001; // 0.25, 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
-			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r];
+			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
 		}
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
@@ -81,8 +81,7 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	mt19937 g(SEED + rand_cnt);
-	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
-	shuffle(vid_pop_shuffle.begin()+ _num_of_existed_videos, vid_pop_shuffle.end(), g);
+	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 
 	//우선 전부 제거함. 재계산을 위함.
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
@@ -179,20 +178,56 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 	//기존의 엉상, 추가 영상을 합해서 인기도, 밴드윗 업데이트
 	//아래는 랜덤 대역폭 변화를 위한 인기도 설정
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
-	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
+	int pop_cnt = 0;
+
+	vector<pair<int, int>> type_range;
+	int prev_type = 1;
+	int type_start = 1;
+	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
+		int video_index = vid;
+		int curr_type = -1;
+		if (video_index < _num_of_existed_videos) { // 기존의 파일
+			curr_type = _existed_VIDEO_SEGMENT_list[video_index].type;
+		}
+		else {
+			curr_type = _new_VIDEO_SEGMENT_list[video_index].type;
+		}
+		if (prev_type < curr_type) {
+			type_range.push_back(make_pair(type_start, video_index - 1));
+		}
+	}
+	type_range.push_back(make_pair(type_start, _num_of_existed_videos + _num_of_new_videos - 1));	
 	mt19937 g(SEED + rand_cnt);
-	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
-	shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
+	shuffle(type_range.begin(), type_range.end(), g);
+
+	//페어 맨 뒤에거 뺀 다음에 첫, 마지막 세그먼트 index에 대해 for문을 돌리면서,  맨 뒤에 있는 pop을 빼면서 할당해줌.
+	int video_pos = 0;
+	while (!type_range.empty()) {
+		pair<int, int> range = type_range.back();
+		for (int pop_pos = range.first; pop_pos < range.second + 1; pop_pos++) {
+			double pop = vid_pop[pop_pos];
+			int video_index = video_pos;
+			if (video_index < _num_of_existed_videos) {
+				_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
+				_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * _num_of_request_per_sec * _existed_VIDEO_SEGMENT_list[video_index].once_bandwidth;
+			}
+			else {
+				_new_VIDEO_SEGMENT_list[video_index].popularity = pop;
+				_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = pop * _num_of_request_per_sec * _new_VIDEO_SEGMENT_list[video_index].once_bandwidth;
+			}
+		}
+		video_pos++;
+		if (video_pos == _num_of_existed_videos + _num_of_new_videos)
+			break;
+		type_range.pop_back();
+	}
+	delete[] vid_pop;//여기까지 인기도 설정 완료
 
 	//대역폭 설정 시작
 	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
 		int video_index = vid;
-		double pop = vid_pop_shuffle.back();
-		vid_pop_shuffle.pop_back();
-
 		if (video_index < _num_of_existed_videos) { 
 			// 기존에 있던 영상의 밴드윗 갱신
-			_existed_VIDEO_SEGMENT_list[video_index].popularity = pop;
 			_existed_VIDEO_SEGMENT_list[video_index].requested_bandwidth = _existed_VIDEO_SEGMENT_list[video_index].popularity * _num_of_request_per_sec * _existed_VIDEO_SEGMENT_list[video_index].once_bandwidth;
 
 			//SSD 관련 수치 다시 계산
@@ -211,7 +246,6 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 		}
 		else {	
 			//새로운 영상의 밴드윗 갱신
-			_new_VIDEO_SEGMENT_list[video_index].popularity = pop;
 			_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth = _new_VIDEO_SEGMENT_list[video_index].popularity * _num_of_request_per_sec * _new_VIDEO_SEGMENT_list[video_index].once_bandwidth;
 
 			//새로운 파일들은 가상 스토리지에 삽입함
@@ -221,7 +255,6 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 			_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_new_VIDEO_SEGMENT_list[video_index].requested_bandwidth, video_index));
 		}
 	}
-	delete[] vid_pop;//여기까지 인기도 설정 완료
 }
 
 
@@ -322,27 +355,26 @@ double* set_zipf_pop(int length, double alpha, double beta) {
 }
 
 bool is_swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
-	if (_from_vid != NONE_ALLOC) {
-		return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
-	}
-	else
-		return false;
+	bool space_condition = (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;;
+	bool bandwidth_condition = (_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) > _SSD_list[_to_ssd].maximum_bandwidth;
+	return space_condition || bandwidth_condition;
 }
 
 void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
-		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
-			//_SSD_list[ssd].total_bandwidth_usage = 0;
-			continue;
-		}
+		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
+			continue; 
+		vector<pair<double, int>> curr_set(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.size());
+		copy(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin(), _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end(), curr_set.begin());
+		reverse(curr_set.begin(), curr_set.end());
 
-		while (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
-			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
+		double curr_bandwidth = _SSD_list[ssd].total_bandwidth_usage;
+		while (curr_bandwidth > _SSD_list[ssd].maximum_bandwidth) {
+			int vid = curr_set.back().second;
 			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
-			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
 			_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
-			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
-			if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
+			curr_set.pop_back();
+			if (curr_set.empty())
 				break;
 		}
 		//vector<pair<double, int>>().swap(curr_set); //메모리 삭제용

@@ -1,6 +1,6 @@
 #include "header.h"
 #define NUM_OF_DATEs 1 // for simulation 1 3 7 15 30
-#define NUM_OF_TIMEs 1 
+#define NUM_OF_TIMEs 1
 
 #define MIN_RUNNING_DAY 1
 #define MAX_RUNNING_DAY 30
@@ -10,8 +10,8 @@ int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
-int num_of_videos = 1500000;// 50만, 100만, (150만), 200만, 250만
-int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
+int num_of_videos = 3000000;// 100만, 200만, (300만), 400만, 500만
+int num_of_new_videos = 50000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 15000;
 
 vector<double> result1;
@@ -40,17 +40,9 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-			if (i == MIGRATION_THROUGHPUT_AWARE)
-				continue;
-			migration_method = i;
-			simulation_migartion();
-		}
-		migration_method = 1;
-		simulation_migartion();*/
 		migration_method = 7;
 		simulation_migartion();
-		migration_method = 8;
+		migration_method = 9;
 		simulation_migartion();
 		migration_method = 1;
 		simulation_migartion();
@@ -196,7 +188,7 @@ int main(int argc, char* argv[]) {
 			num_of_request_per_sec = stod(argv[5]);
 
 			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-				if (i == MIGRATION_THROUGHPUT_AWARE)
+				if (i == 8)
 					continue;
 				migration_method = i;
 				simulation_migartion();
@@ -378,7 +370,6 @@ void simulation_migartion() {
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
-			//cout << day << "-" << time << endl;
 			//아래는 새로운 비디오 추가 과정
 			if (num_of_new_videos > 0) {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
@@ -416,6 +407,7 @@ void simulation_migartion() {
 		if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
 			double sum_for_AVG_in_migration = 0;
 			double sum_for_STD_in_migration = 0;
+			//double total_serviced_bandwidth_in_migration = 0;
 			double total_bandwidth_usage_in_migration = 0;
 			for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 				sum_for_AVG_in_migration += SSD_list[ssd].ADWD;
@@ -424,7 +416,9 @@ void simulation_migartion() {
 				total_bandwidth_usage_in_migration += SSD_list[ssd].total_bandwidth_usage;
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
-
+			/*printf("현재 Total serviced bandwidth usage %lf / %lf\n", total_bandwidth_usage_in_migration, ((double)VIDEO_BANDWIDTH * (double)num_of_request_per_sec));
+			printf("각 SSD의 %d일 동안의 Average ADWD %lf\n", day, (sum_for_AVG_in_migration / num_of_SSDs));
+			printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_STD_in_migration / num_of_SSDs));*/
 			if (day == 3) {
 				result1.push_back(total_bandwidth_usage_in_migration);
 				result2.push_back((sum_for_AVG_in_migration / num_of_SSDs));
@@ -465,6 +459,9 @@ void simulation_migartion() {
 			printf("error\n");
 		}
 	}
+	printf("저장된 비디오 총 갯수 %d/%d\n", num_of_alloc_videos, num_of_videos);
+	printf("저장된 비디오의 Total requested bandwidth %lf / %lf\n", total_bandwidth_of_alloc_videos, ((double)VIDEO_BANDWIDTH * (double)num_of_request_per_sec));
+	
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		printf("[SSD %d] bandwidth usage %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].total_bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].total_bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));

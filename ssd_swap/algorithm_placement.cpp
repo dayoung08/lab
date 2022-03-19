@@ -14,6 +14,8 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, i
 		placement_num = placement_basic(_SSD_list, _VIDEO_SEGMENT_list, _method, _num_of_SSDs, _num_of_videos);
 		break;
 	}
+
+	//set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 	return placement_num;
 }
 
@@ -36,9 +38,6 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				//double remained_write_MB = ((_SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].DWPD) * _SSD_list[ssd_temp].running_days) - (_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size);
 				double ADWD = ((_SSD_list[ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[video_index].size) / _SSD_list[ssd_temp].running_days) / (_SSD_list[ssd_temp].DWPD * _SSD_list[ssd_temp].storage_capacity);
 
-				if (remained_bandwidth < 0 || remained_storage < 0)
-					continue;
-
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS:
@@ -51,7 +50,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					slope = remained_storage;
 					break;
 				case PLACEMENT_LIFETIME_AWARE:
-					slope = 1 - ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
+					slope = 1-ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
 					break;
 				}
 				target_ssd_list_with_ratio_sort.insert(make_pair(slope, ssd_temp));
@@ -96,15 +95,15 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 	std::mt19937 g(SEED);
 
 	int placement_num = 0;
-	vector<int> target_ssd_list;
+ 	vector<int> target_ssd_list;
 	for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
 		target_ssd_list.push_back(ssd_temp);
 	}
 
 	/*if (_placement_method == PLACEMENT_RANDOM)
 		std::shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);*/
-		//실수로 특허 때 이 위치 여기였었음. migration 전에 있는 배치는 애초에 어떻게 하든 문제가 되지 않아서 상관은 없는데 (비디오도 이미 대역폭이 랜덤셔플되어있어서 랜덤 할당한 것과 같은 상태)
-		//그래도 사람이 불안하니까 이렇게 적어둔다.
+	//실수로 특허 때 이 위치 여기였었음. migration 전에 있는 배치는 애초에 어떻게 하든 문제가 되지 않아서 상관은 없는데 (비디오도 이미 대역폭이 랜덤셔플되어있어서 랜덤 할당한 것과 같은 상태)
+	//그래도 사람이 불안하니까 이렇게 적어둔다.
 
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
@@ -163,5 +162,6 @@ void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _ssd_index
 		_VIDEO_SEGMENT_list[_video_index].is_serviced = false;
 	}
 	else {
+
 	}*/
 }
