@@ -33,9 +33,9 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 		else {
 			int r = dist_for_type(g);
 			//int r = ssd % SSD_TYPE;
-			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, dist_for_storage_space(g))) + 0.00001; // 0.25, 0.5, 1, 2TB
+			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, dist_for_storage_space(g))); // 0.25, 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
-			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
+			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r];
 		}
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
@@ -321,14 +321,18 @@ double* set_zipf_pop(int length, double alpha, double beta) {
 	return pop;
 }
 
-bool is_replaced(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
-	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
+bool is_swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
+	if (_from_vid != NONE_ALLOC) {
+		return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
+	}
+	else
+		return false;
 }
 
 void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
-			_SSD_list[ssd].total_bandwidth_usage = 0;
+			//_SSD_list[ssd].total_bandwidth_usage = 0;
 			continue;
 		}
 

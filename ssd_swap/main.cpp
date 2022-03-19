@@ -416,7 +416,6 @@ void simulation_migartion() {
 		if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
 			double sum_for_AVG_in_migration = 0;
 			double sum_for_STD_in_migration = 0;
-			//double total_serviced_bandwidth_in_migration = 0;
 			double total_bandwidth_usage_in_migration = 0;
 			for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 				sum_for_AVG_in_migration += SSD_list[ssd].ADWD;
@@ -425,9 +424,7 @@ void simulation_migartion() {
 				total_bandwidth_usage_in_migration += SSD_list[ssd].total_bandwidth_usage;
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
-			/*printf("현재 Total serviced bandwidth usage %lf / %lf\n", total_bandwidth_usage_in_migration, ((double)VIDEO_BANDWIDTH * (double)num_of_request_per_sec));
-			printf("각 SSD의 %d일 동안의 Average ADWD %lf\n", day, (sum_for_AVG_in_migration / num_of_SSDs));
-			printf("각 SSD의 %d일 동안의 Standard deviation ADWD %lf\n\n", day, sqrt(sum_for_STD_in_migration / num_of_SSDs));*/
+
 			if (day == 3) {
 				result1.push_back(total_bandwidth_usage_in_migration);
 				result2.push_back((sum_for_AVG_in_migration / num_of_SSDs));
@@ -468,9 +465,6 @@ void simulation_migartion() {
 			printf("error\n");
 		}
 	}
-	printf("저장된 비디오 총 갯수 %d/%d\n", num_of_alloc_videos, num_of_videos);
-	printf("저장된 비디오의 Total requested bandwidth %lf / %lf\n", total_bandwidth_of_alloc_videos, ((double)VIDEO_BANDWIDTH * (double)num_of_request_per_sec));
-	
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		printf("[SSD %d] bandwidth usage %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].total_bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].total_bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
