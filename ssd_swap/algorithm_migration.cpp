@@ -14,9 +14,9 @@ int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration
 	case MIGRATION_STORAGE_SPACE_AWARE:
 	case MIGRATION_LIFETIME_AWARE:
 		migration_num = migration_for_benchmark(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, _num_of_SSDs, _num_of_videos);
-		set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 		break;
 	}
+	set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 	return migration_num;
 }
 
@@ -122,7 +122,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			allocate(_SSD_list, _VIDEO_SEGMENT_list, element, from_ssd, to_ssd, from_vid);
 			break;
 		case FLAG_DENY:
-			_VIDEO_SEGMENT_list[from_vid].assigned_SSD = NONE_ALLOC;
+			if(from_ssd == VIRTUAL_SSD)
+				_VIDEO_SEGMENT_list[from_vid].assigned_SSD = NONE_ALLOC;
 			break;
 		}
 
