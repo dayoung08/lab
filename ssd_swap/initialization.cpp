@@ -20,7 +20,6 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::mt19937 g(SEED);
-	//std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE };
 	std::uniform_int_distribution<> dist_for_storage_space{ 0, 3 };
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
@@ -31,11 +30,10 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			//int r = dist_for_type(g);
 			int r = ssd % SSD_TYPE;
-			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, dist_for_storage_space(g))) + 0.00001; // 0.25, 0.5, 1, 2TB
+			_SSD_list[ssd_index].storage_capacity = ((double)238418.5791015625 * pow(2, dist_for_storage_space(g))); // 0.25, 0.5, 1, 2TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
-			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
+			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r];
 		}
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
@@ -362,24 +360,24 @@ bool is_swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, in
 
 void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
-		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
-			continue; 
-		vector<pair<double, int>> curr_set(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.size());
-		copy(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin(), _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end(), curr_set.begin());
-		reverse(curr_set.begin(), curr_set.end());
+		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
+			//_SSD_list[ssd].total_bandwidth_usage = 0;
+			continue;
+		}
 
-		double curr_bandwidth = _SSD_list[ssd].total_bandwidth_usage;
-		while (curr_bandwidth > _SSD_list[ssd].maximum_bandwidth) {
-			int vid = curr_set.back().second;
+		while (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
+			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
 			_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
-			curr_set.pop_back();
-			if (curr_set.empty())
+			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
+			if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
 				break;
 		}
 		//vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
 	}
 }
+
 
 //c++은 split 없어서 인터넷에서 복붙했다 ㅋㅋㅋㅋ....
 string* split(string str, char Delimiter) {
