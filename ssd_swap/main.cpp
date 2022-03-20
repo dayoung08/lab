@@ -1,15 +1,15 @@
 #include "header.h"
 #define NUM_OF_DATEs 3 // for simulation 1 3 7 15 30
-#define NUM_OF_TIMEs 3
+#define NUM_OF_TIMEs 4
 
 #define MIN_RUNNING_DAY 1
-#define MAX_RUNNING_DAY 365
+#define MAX_RUNNING_DAY 30
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 30; // 10, 20, (30), 40, 50
+int num_of_SSDs = 10; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 15000;
@@ -41,6 +41,10 @@ int main(int argc, char* argv[]) {
 	{
 	case 1:
 		migration_method = 7;
+		simulation_migartion();
+		migration_method = 8;
+		simulation_migartion();
+		migration_method = 1;
 		simulation_migartion();
 
 		int cnt;
