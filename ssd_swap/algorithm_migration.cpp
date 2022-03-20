@@ -66,7 +66,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				switch (_migration_method)
 				{
 				case MIGRATION_OURS:
-					slope = (remained_bandwidth / remained_storage) / ADWD;
+					slope = (remained_bandwidth * remained_storage) / ADWD;
 					break;
 				case MIGRATION_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
