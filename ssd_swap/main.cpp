@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 3 // for simulation 1 3 7 15 30
+#define NUM_OF_DATEs 30 // for simulation 1 3 7 15 30
 #define NUM_OF_TIMEs 4
 
 #define MIN_RUNNING_DAY 1
@@ -366,7 +366,7 @@ void simulation_migartion() {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
 				growing_cnt();
-				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, day);
+				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, time);
 
 				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
 				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
@@ -379,7 +379,7 @@ void simulation_migartion() {
 			else {
 				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
 				growing_cnt();
-				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, day);
+				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, time);
 			}
 			//migration 수행
 			//printf("%d일-%d ", day, time);

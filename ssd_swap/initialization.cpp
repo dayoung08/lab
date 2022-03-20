@@ -77,7 +77,7 @@ void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 	vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 }
 
-void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _day) {
+void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _time) {
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	mt19937 g(SEED + rand_cnt);
@@ -91,7 +91,8 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _existed_
 		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].total_bandwidth_usage = 0;
 		//_SSD_list[ssd_index].serviced_bandwidth_usage = 0;
-		_SSD_list[ssd_index].running_days = _day;
+		if(_time==1)
+			_SSD_list[ssd_index].running_days++;
 		_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write_MB / (_SSD_list[ssd_index].DWPD * _SSD_list[ssd_index].storage_capacity)) / _SSD_list[ssd_index].running_days;
 
 		if (ssd == VIRTUAL_SSD) {
