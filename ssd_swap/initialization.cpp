@@ -21,7 +21,7 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::mt19937 g(SEED);
 	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
-	std::uniform_int_distribution<> dist_for_storage_space{ 0, 3 };
+	std::uniform_int_distribution<> dist_for_storage_space{ 0, 4 };
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].index = ssd_index;
