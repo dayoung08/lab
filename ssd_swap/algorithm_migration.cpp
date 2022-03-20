@@ -207,24 +207,18 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 			switch (_migration_method)
 			{
 			case MIGRATION_OURS:
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].storage_usage, ssd));
+				(*_over_load_SSDs).insert(make_pair( ( (_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth) / (_SSD_list[ssd].storage_capacity - _SSD_list[ssd].storage_usage) ), ssd));
 				break;
 			case MIGRATION_BANDWIDTH_AWARE:
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage, ssd));
+				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
 				break;
 			case MIGRATION_STORAGE_SPACE_AWARE:
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].storage_usage, ssd));
+				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].storage_capacity - _SSD_list[ssd].storage_usage, ssd));
 				break;
 			case MIGRATION_LIFETIME_AWARE:
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].ADWD, ssd));
 				break;
 			}
-
-
-			if(_migration_method == MIGRATION_OURS)
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].maximum_bandwidth, ssd));
-			else
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage, ssd));
 
 			_num_of_over_load++;
 		}
