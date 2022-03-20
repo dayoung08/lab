@@ -12,16 +12,14 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 	SSD_initalization_for_simulation(_SSD_list, _num_of_SSDs);
 	video_initalization_for_simulation(_VIDEO_SEGMENT_list, _num_of_videos, _num_of_request_per_sec);
 	//printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
-	//cout << _SSD_list[1].storage_capacity << endl;
-	//cout << _SSD_list[10].storage_capacity << endl;
-	//cout << _SSD_list[1].DWPD << endl;
-	//cout << _SSD_list[10].DWPD << endl;
 }
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::mt19937 g(SEED);
 	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
 	std::uniform_int_distribution<> dist_for_storage_space{ 0, 4 };
+	//std::uniform_int_distribution<> dist_for_bandwidth{ 550, 3500 };
+	//std::uniform_int_distribution<> dist_for_DWPD{ 11, 65 };
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].index = ssd_index;
@@ -33,10 +31,11 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 		else {
 			//int r = dist_for_type(g);
 			int r = ssd % SSD_TYPE;
-			//476837.158203125, 238418.5791015625
-			_SSD_list[ssd_index].storage_capacity = ((double)250000 * pow(2, dist_for_storage_space(g))); // 0.5, 1, 2, 4TB
+			_SSD_list[ssd_index].storage_capacity = ((double)250000 * pow(2, dist_for_storage_space(g))) + 0.00001; // 0.5, 1, 2, 4TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
-			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r];
+			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
+			//_SSD_list[ssd_index].DWPD = dist_for_DWPD(g);
+			//_SSD_list[ssd_index].maximum_bandwidth = dist_for_bandwidth(g)/ 100;
 		}
 		//https://tekie.com/blog/hardware/ssd-vs-hdd-speed-lifespan-and-reliability/
 		//https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive
