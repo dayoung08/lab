@@ -70,7 +70,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				switch (_migration_method)
 				{
 				case MIGRATION_OURS:
-					slope = (remained_bandwidth * remained_storage) / ADWD;
+					slope = bt / ADWD;
 					break;
 				case MIGRATION_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
@@ -79,7 +79,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					slope = remained_storage;
 					break;
 				case MIGRATION_LIFETIME_AWARE:
-					slope = 1-ADWD;
+					slope = 1/ADWD;
 					break;
 				}
 				under_load_list.insert(make_pair(slope, to_ssd_temp));
@@ -211,7 +211,7 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 			switch (_migration_method)
 			{
 			case MIGRATION_OURS:
-				(*_over_load_SSDs).insert(make_pair( ( (_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth) / (_SSD_list[ssd].storage_capacity - _SSD_list[ssd].storage_usage) ), ssd));
+				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].maximum_bandwidth, ssd));
 				break;
 			case MIGRATION_BANDWIDTH_AWARE:
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
@@ -220,7 +220,7 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].storage_capacity - _SSD_list[ssd].storage_usage, ssd));
 				break;
 			case MIGRATION_LIFETIME_AWARE:
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].ADWD, ssd));
+				(*_over_load_SSDs).insert(make_pair(1/_SSD_list[ssd].ADWD, ssd));
 				break;
 			}
 

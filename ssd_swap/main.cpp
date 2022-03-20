@@ -1,9 +1,9 @@
 #include "header.h"
-#define NUM_OF_DATEs 30 // for simulation 1 3 7 15 30
+#define NUM_OF_DATEs 3 // for simulation 1 3 7 15 30
 #define NUM_OF_TIMEs 4
 
 #define MIN_RUNNING_DAY 1
-#define MAX_RUNNING_DAY 30
+#define MAX_RUNNING_DAY 90
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
@@ -12,7 +12,7 @@ int migration_method = 7; // 8~11로 바꾸면 비교스킴
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
-double num_of_request_per_sec = 50000; //25000, 37500, 50000, 62500, 75000
+double num_of_request_per_sec = 20000;
 
 vector<double> result1;
 vector<double> result2;
@@ -40,10 +40,10 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		migration_method = 7;
-		simulation_migartion();
-		migration_method = 8;
-		simulation_migartion();
+		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+			migration_method = i;
+			simulation_migartion();
+		}
 		migration_method = 1;
 		simulation_migartion();
 
@@ -407,6 +407,10 @@ void simulation_migartion() {
 				total_bandwidth_usage_in_migration += SSD_list[ssd].total_bandwidth_usage;
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
+			cout << "day" << day << " " << total_bandwidth_usage_in_migration << " " << sum_for_AVG_in_migration / num_of_SSDs << " " << sqrt(sum_for_STD_in_migration / num_of_SSDs) << endl;
+
+
+
 			if (day == 3) {
 				result1.push_back(total_bandwidth_usage_in_migration);
 				result2.push_back((sum_for_AVG_in_migration / num_of_SSDs));
@@ -435,8 +439,8 @@ void simulation_migartion() {
 
 		}
 	}
-
-	/*double total_bandwidth_of_alloc_videos = 0;
+/*
+	double total_bandwidth_of_alloc_videos = 0;
 	int num_of_alloc_videos = 0;
 	for (int vid = 0; vid < num_of_videos; vid++) {
 		if (VIDEO_SEGMENT_list[vid].assigned_SSD != NONE_ALLOC) {
