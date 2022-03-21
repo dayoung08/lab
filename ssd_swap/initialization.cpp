@@ -234,7 +234,7 @@ void SSD_initalization_for_testbed(SSD* _SSD_list, int& _num_of_SSDs) {
 		{
 			if (cnt == 0) {
 				_num_of_SSDs = stoi(str);
-				_SSD_list = new SSD[_num_of_SSDs];
+				_SSD_list = new SSD[_num_of_SSDs + 1];
 			}
 			else {
 				int ssd_index = cnt;

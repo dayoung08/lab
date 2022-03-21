@@ -24,9 +24,9 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		prev_SSD[vid] = _VIDEO_SEGMENT_list[vid].assigned_SSD;
 	}
 
-	bool* is_over_load = new bool[_num_of_SSDs];
-	bool* is_imposible = new bool[_num_of_SSDs];
-	fill(is_imposible, is_imposible + _num_of_SSDs, false);
+	bool* is_over_load = new bool[_num_of_SSDs+1];
+	bool* is_imposible = new bool[_num_of_SSDs+1];
+	fill(is_imposible, is_imposible + _num_of_SSDs+1, false);
 
 	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
 	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
