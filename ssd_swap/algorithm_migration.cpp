@@ -14,7 +14,9 @@ int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration
 		break;
 	}
 
-	set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
+	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
+		set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, ssd, true);
+	}
 	return migration_num;
 }
 
@@ -38,14 +40,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		int from_ssd = (*over_load_SSDs.begin()).second;
 		set<pair<double, int>>::iterator pos;
 		pair<double, int> element;
-		//if (_migration_method != MIGRATION_OURS) {
-			pos = _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.end();
-			element = (*--pos);
-		//}
-		/*else {
-			pos = _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.begin();
-			element = (*pos);
-		}*/
+		pos = _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.end();
+		element = (*--pos);
 		int from_vid = element.second;
 
 		//sort го╠Б
@@ -141,6 +137,9 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					_SSD_list[VIRTUAL_SSD].storage_usage -= _VIDEO_SEGMENT_list[from_vid].size;
 				}
 				else {
+					if (from_ssd != VIRTUAL_SSD && _migration_method == MIGRATION_OURS) {
+						set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false);
+					}
 					is_imposible[from_ssd] = true;
 					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
 				}

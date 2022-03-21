@@ -324,23 +324,30 @@ bool is_full_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, i
 	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
 }
 
-void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
-	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
-		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
-			//_SSD_list[ssd].total_bandwidth_usage = 0;
-			continue;
-		}
-
+void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int ssd, bool flag) {
+	if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
+		_SSD_list[ssd].total_bandwidth_usage = 0;
+	}
+	else {
 		while (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
 			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
 			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
-			_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
 			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
+
+			if (!flag) {
+				_VIDEO_SEGMENT_list[vid].assigned_SSD = VIRTUAL_SSD;
+				_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_SEGMENT_list[vid].requested_bandwidth, vid));
+				_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += _VIDEO_SEGMENT_list[vid].requested_bandwidth;
+				_SSD_list[VIRTUAL_SSD].storage_usage += _VIDEO_SEGMENT_list[vid].size;
+			}
+			else {
+				_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
+			}
+
 			if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
 				break;
 		}
-		//vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
 	}
 }
 

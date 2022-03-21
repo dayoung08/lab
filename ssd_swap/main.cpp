@@ -442,7 +442,7 @@ void simulation_migartion() {
 	double total_bandwidth_of_alloc_videos = 0;
 	int num_of_alloc_videos = 0;
 	for (int vid = 0; vid < num_of_videos; vid++) {
-		if (VIDEO_SEGMENT_list[vid].assigned_SSD != NONE_ALLOC) {
+		if ( !(VIDEO_SEGMENT_list[vid].assigned_SSD == NONE_ALLOC && VIDEO_SEGMENT_list[vid].assigned_SSD == NONE_ALLOC)) {
 			num_of_alloc_videos++;
 			total_bandwidth_of_alloc_videos += VIDEO_SEGMENT_list[vid].requested_bandwidth;
 		}
