@@ -324,6 +324,27 @@ bool is_full_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, i
 	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
 }
 
+void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
+	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
+		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
+			//_SSD_list[ssd].total_bandwidth_usage = 0;
+			continue;
+		}
+
+		while (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
+			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
+			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
+			_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
+			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
+			if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
+				break;
+		}
+		//vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
+	}
+}
+
+
 //c++은 split 없어서 인터넷에서 복붙했다 ㅋㅋㅋㅋ....
 string* split(string str, char Delimiter) {
 	istringstream iss(str);             // istringstream에 str을 담는다.
