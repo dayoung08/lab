@@ -13,7 +13,6 @@ int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration
 		migration_num = migration_resource_aware(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, _num_of_SSDs, _num_of_videos);
 		break;
 	}
-
 	set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos);
 	return migration_num;
 }
@@ -29,7 +28,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	fill(is_imposible, is_imposible + _num_of_SSDs, false);
 
 	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
-	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
+	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs, _num_of_videos);
 	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
 	//여기까지 초기화
 
@@ -118,7 +117,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
 		if (under_load_list.empty() && flag == FLAG_DENY) {
 			is_imposible[from_ssd] = true;
-			update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
+			update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs, _num_of_videos);
 			continue;
 		}
 
@@ -133,7 +132,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			break;
 		}
 
-		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
+		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs, _num_of_videos);
 		migration_num++;
 		under_load_list.clear();
 		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
@@ -198,8 +197,8 @@ void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double,
 	}
 }
 
-void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, bool* _is_imposible, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
-	int _num_of_over_load = 0;
+void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, bool* _is_imposible, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs, int _num_of_videos) {
+	//int _num_of_over_load = 0;
 	(*_over_load_SSDs).clear();
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		if (_is_imposible[ssd])
@@ -213,7 +212,7 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 			switch (_migration_method)
 			{
 			case MIGRATION_OURS:
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].maximum_bandwidth, ssd));
+				(*_over_load_SSDs).insert(make_pair((_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth) / _SSD_list[ssd].maximum_bandwidth, ssd));
 				break;
 			case MIGRATION_BANDWIDTH_AWARE:
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
@@ -225,13 +224,45 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 				(*_over_load_SSDs).insert(make_pair(1/_SSD_list[ssd].ADWD, ssd));
 				break;
 			}
-
-			_num_of_over_load++;
+			//_num_of_over_load++;
 		}
 		else
 			_is_over_load[ssd] = false;
 	}
-	//printf("num_of_over_load : %d\n", _num_of_over_load);
+}
+
+void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos) {
+	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
+		if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
+			//_SSD_list[ssd].total_bandwidth_usage = 0;
+			continue;
+		}
+
+		while (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
+			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
+			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
+			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
+			_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
+
+
+			/*if (_num_of_over_load = 0) {
+				if(_migration_method == MIGRATION_OURS)
+					set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, false);
+				else
+					set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, true);
+				if (!_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
+
+					(*_over_load_SSDs).insert(make_pair(_SSD_list[VIRTUAL_SSD].total_bandwidth_usage / _SSD_list[VIRTUAL_SSD].maximum_bandwidth, VIRTUAL_SSD));
+				}
+			}*/
+			//printf("num_of_over_load : %d\n", _num_of_over_load);
+
+			if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
+				break;
+		}
+		//vector<pair<double, int>>().swap(curr_set); //메모리 삭제용
+	}
 }
 
 int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid) {

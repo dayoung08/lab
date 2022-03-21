@@ -9,10 +9,10 @@
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 30; // 10, 20, (30), 40, 50
+int num_of_SSDs = 50; // 10, 20, (30), 40, 50
 int num_of_videos = 2000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
-double num_of_request_per_sec = 8000;
+double num_of_request_per_sec = 20000; //8000
 
 vector<double> result1;
 vector<double> result2;
@@ -407,8 +407,7 @@ void simulation_migartion() {
 				total_bandwidth_usage_in_migration += SSD_list[ssd].total_bandwidth_usage;
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
-			cout << "day" << day << " " << total_bandwidth_usage_in_migration << " " << sum_for_AVG_in_migration / num_of_SSDs << " " << sqrt(sum_for_STD_in_migration / num_of_SSDs) << endl;
-
+			printf("day%d %lf %lf %lf\n", day, total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs));
 
 
 			if (day == 3) {
