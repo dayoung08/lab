@@ -114,14 +114,6 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			to_vid = NONE_ALLOC;
 		}
 
-
-		//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
-		if (under_load_list.empty() && flag == FLAG_DENY) {
-			is_imposible[from_ssd] = true;
-			update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
-			continue;
-		}
-
 		//찾았으면 할당하기.
 		//int flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, MIGRATION_BANDWIDTH_AWARE, from_ssd, to_ssd, from_vid, to_vid);
 		switch (flag) {
@@ -131,6 +123,13 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		case FLAG_REALLOCATE:
 			reallocate(_SSD_list, _VIDEO_SEGMENT_list, element, from_ssd, to_ssd, from_vid, prev_SSD);
 			break;
+		case FLAG_DENY:
+			if (under_load_list.empty()) {
+				//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
+				is_imposible[from_ssd] = true;
+				update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
+				continue;
+			}
 		}
 
 		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
@@ -212,7 +211,7 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 			_is_over_load[ssd] = true;
 			switch (_migration_method)
 			{
-			case MIGRATION_OURS:
+			case MIGRATION_OURS: 
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].maximum_bandwidth, ssd));
 				break;
 			case MIGRATION_BANDWIDTH_AWARE:
