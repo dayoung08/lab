@@ -51,33 +51,28 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				double bt;
 				double st;
+				double ADWD_from;
 				if (is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, to_ssd_temp, from_vid)) {
 					bt = (_VIDEO_SEGMENT_list[from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[to_vid_temp].requested_bandwidth);
 					st = 0;
+					ADWD_from= (_SSD_list[from_ssd].total_write_MB + _VIDEO_SEGMENT_list[to_vid_temp].size) / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity * _SSD_list[from_ssd].running_days);
 				}
 				else {
 					bt = _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
 					st = _VIDEO_SEGMENT_list[from_vid].size;
+					ADWD_from = _SSD_list[from_ssd].total_write_MB / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity * _SSD_list[from_ssd].running_days);
 				}
-				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 				double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage;
 				double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
-				double ADWD_from = (_SSD_list[from_ssd].total_write_MB + _VIDEO_SEGMENT_list[to_vid_temp].size) / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity * _SSD_list[from_ssd].running_days);
+				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 
-				//double ADWD = _SSD_list[to_ssd_temp].ADWD;
-				//double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage;
-				//double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
 				if (bt < 0)
 					continue;
 
-				//bt /= (_SSD_list[to_ssd_temp].total_bandwidth_usage + bt); // 어떤 상황에서도 이게 bt만 하는 것 보다 나음.
-				//bt /= _SSD_list[to_ssd_temp].maximum_bandwidth랑, 그냥 bt 둘 다 별로임
 				double slope = -INFINITY;
 				switch (_migration_method)
 				{
 				case MIGRATION_OURS:
-					//remained_storage -= st;
-					//slope = (bt * remained_storage) / ADWD;
 					slope = bt / max(ADWD, ADWD_from);
 					break;
 				case MIGRATION_BANDWIDTH_AWARE:
@@ -87,7 +82,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					slope = remained_storage;
 					break;
 				case MIGRATION_LIFETIME_AWARE:
-					slope = 1/ADWD;
+					slope = 1/ _SSD_list[to_ssd_temp].ADWD;
 					break;
 				}
 				under_load_list.insert(make_pair(slope, to_ssd_temp));
@@ -230,10 +225,7 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 			switch (_migration_method)
 			{
 			case MIGRATION_OURS: 
-				if (ssd == VIRTUAL_SSD)
-					(*_over_load_SSDs).insert(make_pair(INFINITY, ssd));
-				else
-					(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
+				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].maximum_bandwidth, ssd));
 				break;
 			case MIGRATION_BANDWIDTH_AWARE:
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));

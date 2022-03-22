@@ -68,23 +68,8 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			}
 		}
 		else {
-			/*for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
-				printf("[SSD %d] storage %.2f  / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
-				printf("[SSD %d] Average ADWD %.2f \n", ssd, (_SSD_list[ssd].total_write_MB) / (_SSD_list[ssd].storage_capacity * _SSD_list[ssd].DWPD) / _SSD_list[ssd].running_days);
-			}*/
 			_VIDEO_SEGMENT_list[video_index].assigned_SSD = NONE_ALLOC;
-			//_VIDEO_SEGMENT_list[video_index].is_serviced = false;
 		}
-		/*else {
-			for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-				printf("[SSD %d] bandwidth %.2f / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].bandwidth_usage, _SSD_list[ssd].maximum_bandwidth, (_SSD_list[ssd].bandwidth_usage * 100 / _SSD_list[ssd].maximum_bandwidth));
-				printf("[SSD %d] storage %.2f  / %.2f (%.2f%%)\n", ssd, _SSD_list[ssd].storage_usage, _SSD_list[ssd].storage_capacity, ((double)_SSD_list[ssd].storage_usage * 100 / _SSD_list[ssd].storage_capacity));
-				printf("[SSD %d] Average ADWD %.2f \n", ssd, (_SSD_list[ssd].total_write_MB) / (_SSD_list[ssd].storage_capacity * _SSD_list[ssd].DWPD) / _SSD_list[ssd].running_days);
-			}
-			//printf("%lf\n", _VIDEO_SEGMENT_list[video_index].requested_bandwidth);
-			printf("video %d 를 저장할 만한 SSD가 없음\n", video_index);
-		}*/
 	}
 	return placement_num;
 }
