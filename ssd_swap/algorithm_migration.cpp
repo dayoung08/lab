@@ -62,6 +62,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 				double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage;
 				double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
+				double ADWD_from = (_SSD_list[from_ssd].total_write_MB + _VIDEO_SEGMENT_list[to_vid_temp].size) / (_SSD_list[from_ssd].DWPD * _SSD_list[from_ssd].storage_capacity * _SSD_list[from_ssd].running_days);
+
 				//double ADWD = _SSD_list[to_ssd_temp].ADWD;
 				//double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage;
 				//double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
@@ -76,7 +78,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				case MIGRATION_OURS:
 					//remained_storage -= st;
 					//slope = (bt * remained_storage) / ADWD;
-					slope = bt / ADWD;
+					slope = bt / max(ADWD, ADWD_from);
 					break;
 				case MIGRATION_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
