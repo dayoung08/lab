@@ -230,7 +230,10 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 			switch (_migration_method)
 			{
 			case MIGRATION_OURS: 
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].maximum_bandwidth, ssd));
+				if (ssd == VIRTUAL_SSD)
+					(*_over_load_SSDs).insert(make_pair(INFINITY, ssd));
+				else
+					(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
 				break;
 			case MIGRATION_BANDWIDTH_AWARE:
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
