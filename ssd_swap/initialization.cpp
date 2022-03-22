@@ -329,7 +329,7 @@ void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 		_SSD_list[ssd].total_bandwidth_usage = 0;
 	}
 	else {
-		while (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
+		while (_SSD_list[ssd].total_bandwidth_usage >= _SSD_list[ssd].maximum_bandwidth) {
 			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
 			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
