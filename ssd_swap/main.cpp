@@ -48,6 +48,10 @@ int main(int argc, char* argv[]) {
 		simulation_migartion();*/
 		migration_method = 7;
 		simulation_migartion();
+		migration_method = 8;
+		simulation_migartion();
+		migration_method = 9;
+		simulation_migartion();
 		migration_method = 10;
 		simulation_migartion();
 
@@ -446,7 +450,6 @@ void simulation_migartion() {
 
 		}
 	}
-/*
 	double total_bandwidth_of_alloc_videos = 0;
 	int num_of_alloc_videos = 0;
 	for (int vid = 0; vid < num_of_videos; vid++) {
@@ -466,7 +469,7 @@ void simulation_migartion() {
 		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
 		printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
 	}
-	*/
+	
 	delete[](SSD_list);
 	delete[](VIDEO_SEGMENT_list);
 }

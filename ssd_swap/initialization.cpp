@@ -56,7 +56,8 @@ void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 	double* vid_pop = set_zipf_pop(_num_of_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
 	std::mt19937 g(SEED);
-	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
+	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_videos, g);
+	std::shuffle(vid_pop_shuffle.begin() + _num_of_videos, vid_pop_shuffle.end(), g);
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		_VIDEO_SEGMENT_list[video_index].index = video_index;
@@ -323,34 +324,6 @@ double* set_zipf_pop(int length, double alpha, double beta) {
 bool is_full_storage_space(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _to_ssd, int _from_vid) {
 	return (_SSD_list[_to_ssd].storage_usage + _VIDEO_SEGMENT_list[_from_vid].size) > _SSD_list[_to_ssd].storage_capacity;
 }
-
-void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_videos, int ssd, bool flag) {
-	if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
-		_SSD_list[ssd].total_bandwidth_usage = 0;
-	}
-	else {
-		while (_SSD_list[ssd].total_bandwidth_usage >= _SSD_list[ssd].maximum_bandwidth) {
-			int vid = (*_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
-			_SSD_list[ssd].total_bandwidth_usage -= _VIDEO_SEGMENT_list[vid].requested_bandwidth;
-			_SSD_list[ssd].storage_usage -= _VIDEO_SEGMENT_list[vid].size;
-			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
-
-			if (!flag) {
-				_VIDEO_SEGMENT_list[vid].assigned_SSD = VIRTUAL_SSD;
-				_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_SEGMENT_list[vid].requested_bandwidth, vid));
-				_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += _VIDEO_SEGMENT_list[vid].requested_bandwidth;
-				_SSD_list[VIRTUAL_SSD].storage_usage += _VIDEO_SEGMENT_list[vid].size;
-			}
-			else {
-				_VIDEO_SEGMENT_list[vid].assigned_SSD = NONE_ALLOC;
-			}
-
-			if (_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty())
-				break;
-		}
-	}
-}
-
 
 //c++은 split 없어서 인터넷에서 복붙했다 ㅋㅋㅋㅋ....
 string* split(string str, char Delimiter) {
