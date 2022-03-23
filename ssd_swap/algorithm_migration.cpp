@@ -304,11 +304,11 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid, bool _virtual_flag) {
 	int flag = FLAG_DENY;
 
-	if (_virtual_flag) {
-		if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) {
+	if (_virtual_flag) { // MIGRATION_OURS이어야 true가 됨.
+		if (_from_ssd == VIRTUAL_SSD) {
 			flag = FLAG_REALLOCATE;
 		}
-		if (_from_ssd != VIRTUAL_SSD)
+		if (_from_ssd != VIRTUAL_SSD)  //만약 꽉 차서 stable 된 SSD가 잠깐 대역폭 넘쳤다면, Flag deny해서 낮은 인기도의 파일을 빼도록 유도함.
 			flag = FLAG_DENY;
 	}
 	else {
