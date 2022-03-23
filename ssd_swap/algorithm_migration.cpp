@@ -218,11 +218,16 @@ void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double,
 }
 
 void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, bool* _is_imposible, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
-	int _num_of_over_load = 0;
 	(*_over_load_SSDs).clear();
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		if (_is_imposible[ssd])
 			continue;
+
+		if ( (_SSD_list[ssd].total_bandwidth_usage <= _SSD_list[ssd].maximum_bandwidth) ||  
+			(ssd == VIRTUAL_SSD && _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty()) ) {
+			_is_over_load[ssd] = false;
+		}
+
 		if (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
 			_is_over_load[ssd] = true;
 			switch (_migration_method)
@@ -240,11 +245,7 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 				(*_over_load_SSDs).insert(make_pair(1/_SSD_list[ssd].ADWD, ssd));
 				break;
 			}
-
-			_num_of_over_load++;
 		}
-		else
-			_is_over_load[ssd] = false;
 	}
 	//printf("num_of_over_load : %d\n", _num_of_over_load);
 }
