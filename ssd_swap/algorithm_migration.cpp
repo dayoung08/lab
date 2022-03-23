@@ -36,7 +36,9 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	//여기까지 초기화
 
 	int migration_num = 0;
-	bool virtual_flag = false; // 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 swap을 하는 것이 아니라, 그냥 allocation 하다가 넘으면 인기도 가장 낮은거 실시간으로 삭제함.
+	bool virtual_flag = false; //virtual file을 옮기기 시작했다는 뜻.
+	// 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 swap을 하는 것이 아니라, 그냥 allocation 하다가 넘으면 인기도 가장 낮은거 삭제함.
+	// 그리고 그 SSD는 이제 안정화가 되었다고 가정하고, 다시는 그 SSD에 할당하지 않으며, 이런식으로 모든 SSD가 안정화가 되면 종료함.
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
 		if (from_ssd == VIRTUAL_SSD) {
@@ -296,8 +298,12 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid, bool _virtual_flag) {
 	int flag = FLAG_DENY;
 
-	if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) {
-		flag = FLAG_REALLOCATE;
+	if (_virtual_flag) {
+		if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) {
+			flag = FLAG_REALLOCATE;
+		}
+		if (_from_ssd != VIRTUAL_SSD)
+			flag = FLAG_DENY;
 	}
 	else {
 		if (_to_vid != NONE_ALLOC) {
