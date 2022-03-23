@@ -131,14 +131,14 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		case FLAG_DENY:
 			if (under_load_list.empty()) {
 				//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
-				if (from_ssd == VIRTUAL_SSD && _migration_method == MIGRATION_OURS && _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.size() > 1) {
+				if (from_ssd == VIRTUAL_SSD && _migration_method == MIGRATION_OURS) {
 					_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.erase(element);
 					_VIDEO_SEGMENT_list[from_vid].assigned_SSD = NONE_ALLOC;
 					_SSD_list[VIRTUAL_SSD].total_bandwidth_usage -= _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
 					_SSD_list[VIRTUAL_SSD].storage_usage -= _VIDEO_SEGMENT_list[from_vid].size;
 				}
 				else {
-					//set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false);
+					set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false);
 					is_imposible[from_ssd] = true;
 					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
 				}
