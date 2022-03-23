@@ -35,7 +35,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	fill(is_exceeded, is_exceeded + _num_of_SSDs+1, false);
 
 	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
-	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs, false);
 	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
 	//여기까지 초기화
 
@@ -153,16 +153,15 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				}
 				else {
 					set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false, prev_SSD);
-					if (virtual_flag)
-						is_exceeded[from_ssd] = true;
-					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+					is_exceeded[from_ssd] = true;
+					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs, virtual_flag);
 				}
 				continue;
 			}
 			break;
 		}
 
-		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs, virtual_flag);
 		migration_num++;
 		under_load_list.clear();
 		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
@@ -269,10 +268,10 @@ void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double,
 	}
 }
 
-void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int* _ssd_load_state, bool* _is_exceeded, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
+void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int* _ssd_load_state, bool* _is_exceeded, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs, bool _virtual_flag) {
 	(*_over_load_SSDs).clear();
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
-		if (_is_exceeded[ssd]) {
+		if (_is_exceeded[ssd] && _virtual_flag) {
 			_ssd_load_state[ssd] = STABLE;
 		}
 		else if ( (_SSD_list[ssd].total_bandwidth_usage <= _SSD_list[ssd].maximum_bandwidth) ||  
@@ -283,8 +282,11 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 			_ssd_load_state[ssd] = OVER_LOAD;
 			switch (_migration_method)
 			{
-			case MIGRATION_OURS: 
-				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage / _SSD_list[ssd].maximum_bandwidth, ssd));
+			case MIGRATION_OURS:
+				if(ssd == VIRTUAL_SSD)
+					(*_over_load_SSDs).insert(make_pair(-INFINITY, ssd));
+				else
+					(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
 				break;
 			case MIGRATION_BANDWIDTH_AWARE:
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
