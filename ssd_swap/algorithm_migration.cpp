@@ -3,6 +3,10 @@
 #define FLAG_SWAP 1
 #define FLAG_DENY -1
 
+#define UNDER_LOAD 0
+#define OVER_LOAD 1
+#define STABLE 2
+
 int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_videos) {
 	int* prev_SSD = new int[_num_of_videos];
 	for (int vid = 0; vid < _num_of_videos; vid++) {
@@ -26,19 +30,20 @@ int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration
 }
 
 int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* prev_SSD) {
-	bool* is_over_load = new bool[_num_of_SSDs+1];
+	int* ssd_load_state = new int[_num_of_SSDs+1];
 	bool* is_exceeded = new bool[_num_of_SSDs+1];
 	fill(is_exceeded, is_exceeded + _num_of_SSDs+1, false);
 
 	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
-	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs);
 	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
 	//여기까지 초기화
 
 	int migration_num = 0;
 	bool virtual_flag = false; //virtual file을 옮기기 시작했다는 뜻.
-	// 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 swap을 하는 것이 아니라, 그냥 allocation 하다가 넘으면 인기도 가장 낮은거 삭제함.
-	// 그리고 그 SSD는 이제 안정화가 되었다고 가정하고, 다시는 그 SSD에 할당하지 않으며, 이런식으로 모든 SSD가 안정화가 되면 종료함.
+	// 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 swap을 하는 것이 아니라, 그냥 allocation 하다가 대역폭 넘으면 인기도 가장 낮은거 삭제함.
+	// 그리고 그 SSD는 이제 안정화가 되었다고 가정하고, 다시는 그 SSD에 할당하지 않음.
+	// 이런식으로 모든 가상 SSD에 있던 파일들에 대해 SSD 자리를 찾아주면서 종료함. 이 때 SSD는 안정화되거나 underload임. overload는 없음.
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
 		if (from_ssd == VIRTUAL_SSD) {
@@ -58,7 +63,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		//sort 하기
 		set<pair<double, int>, greater<pair<double, int>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
-			if (!is_over_load[to_ssd_temp]) {
+			if (!ssd_load_state[to_ssd_temp]) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				double bt;
 				double st;
@@ -150,20 +155,21 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false, prev_SSD);
 					if (virtual_flag)
 						is_exceeded[from_ssd] = true;
-					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs);
 				}
 				continue;
 			}
 			break;
 		}
 
-		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+		update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, ssd_load_state, is_exceeded, &over_load_SSDs, _num_of_SSDs);
 		migration_num++;
 		under_load_list.clear();
 		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
 	}
 
-	delete[] is_over_load;
+	delete[] ssd_load_state;
+	delete[] is_exceeded;
 
 	over_load_SSDs.clear();
 	set<pair<double, int>, greater<pair<double, int>>>().swap(over_load_SSDs);
@@ -263,18 +269,18 @@ void reallocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double,
 	}
 }
 
-void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, bool* _is_over_load, bool* _is_exceeded, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
+void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration_method, int* _ssd_load_state, bool* _is_exceeded, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
 	(*_over_load_SSDs).clear();
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		if (_is_exceeded[ssd]) {
-			_is_over_load[ssd] = true;
+			_ssd_load_state[ssd] = STABLE;
 		}
 		else if ( (_SSD_list[ssd].total_bandwidth_usage <= _SSD_list[ssd].maximum_bandwidth) ||  
 			(ssd == VIRTUAL_SSD && _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty()) ) {
-			_is_over_load[ssd] = false;
+			_ssd_load_state[ssd] = UNDER_LOAD;
 		}
 		else if (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
-			_is_over_load[ssd] = true;
+			_ssd_load_state[ssd] = OVER_LOAD;
 			switch (_migration_method)
 			{
 			case MIGRATION_OURS: 
