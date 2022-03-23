@@ -38,6 +38,10 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	int migration_num = 0;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
+		if (from_ssd == VIRTUAL_SSD && _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
+			break;
+		}
+
 		set<pair<double, int>>::iterator pos;
 		pair<double, int> element;
 		pos = _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.end();
@@ -134,9 +138,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					_SSD_list[VIRTUAL_SSD].storage_usage -= _VIDEO_SEGMENT_list[from_vid].size;
 				}
 				else {
-					if (from_ssd != VIRTUAL_SSD && _migration_method == MIGRATION_OURS) {
-						set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false);
-					}
+					//set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false);
 					is_imposible[from_ssd] = true;
 					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_imposible, &over_load_SSDs, _num_of_SSDs);
 				}
@@ -166,8 +168,13 @@ void swap(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, pair<double, int> 
 	_VIDEO_SEGMENT_list[_from_vid].assigned_SSD = _to_ssd;
 	_SSD_list[_to_ssd].total_bandwidth_usage += (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth);
 
-	_SSD_list[_from_ssd].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_SEGMENT_list[_to_vid].requested_bandwidth, _to_vid));
-	_VIDEO_SEGMENT_list[_to_vid].assigned_SSD = _from_ssd;
+	if (_from_ssd != VIRTUAL_SSD) {
+		_SSD_list[_from_ssd].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_SEGMENT_list[_to_vid].requested_bandwidth, _to_vid));
+		_VIDEO_SEGMENT_list[_to_vid].assigned_SSD = _from_ssd;
+	}
+	else {
+		_VIDEO_SEGMENT_list[_to_vid].assigned_SSD = NONE_ALLOC;
+	}
 	_SSD_list[_from_ssd].total_bandwidth_usage -= (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth);
 
 	/*_SSD_list[from_ssd].storage_usage -= _VIDEO_SEGMENT_list[from_vid].size;
@@ -217,10 +224,6 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 		if (_is_imposible[ssd])
 			continue;
 		if (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
-			if (ssd == VIRTUAL_SSD && _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
-				_is_over_load[ssd] = false;
-				continue;
-			}
 			_is_over_load[ssd] = true;
 			switch (_migration_method)
 			{
@@ -251,16 +254,16 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 
 	if (_to_vid != NONE_ALLOC) {
 		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
-			if(_from_ssd == VIRTUAL_SSD)
-				flag = FLAG_REALLOCATE;
-			else if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) {
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) {
 				flag = FLAG_REALLOCATE;
 			}
+			else if (_from_ssd == VIRTUAL_SSD)
+				flag = FLAG_SWAP;
 		}
 		else if (_to_ssd != NONE_ALLOC) {
-			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) {
-				if(_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth)
-					flag = FLAG_SWAP;
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth &&
+				_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) {
+				flag = FLAG_SWAP;
 			}
 		}
 	}
