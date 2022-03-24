@@ -21,10 +21,8 @@ int migration(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _migration
 		migration_num = migration_resource_aware(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
 		break;
 	}
-	if (_migration_method != MIGRATION_OURS) {
-		for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
-			set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, ssd, true, prev_SSD);
-		}
+	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
+		set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, ssd, true, prev_SSD);
 	}
 	return migration_num;
 }
@@ -41,7 +39,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 
 	int migration_num = 0;
 	bool virtual_flag = false; //virtual file을 옮기기 시작했다는 뜻.
-	// 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 swap을 하는 것이 아니라, 그냥 allocation 하다가 대역폭 넘으면 인기도 가장 낮은거 삭제함.
+	// 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 대역폭 고려 안하다가 대역폭 넘으면 인기도 가장 낮은거 삭제함.
 	// 그리고 그 SSD는 이제 안정화가 되었다고 가정하고, 다시는 그 SSD에 할당하지 않음.
 	// 이런식으로 모든 가상 SSD에 있던 파일들에 대해 SSD 자리를 찾아주면서 종료함. 이 때 SSD는 안정화되거나 underload임. overload는 없음.
 	while (!over_load_SSDs.empty()) {
@@ -63,7 +61,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		//sort 하기
 		set<pair<double, int>, greater<pair<double, int>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
-			if (!ssd_load_state[to_ssd_temp]) {
+			if (ssd_load_state[to_ssd_temp] == UNDER_LOAD) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				double bt;
 				double st;
@@ -83,8 +81,6 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_SEGMENT_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 
 				if (bt < 0)
-					continue;
-				if(!virtual_flag && remained_bandwidth < 0)
 					continue;
 
 				double slope = -INFINITY;
@@ -306,31 +302,22 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid, bool _virtual_flag) {
 	int flag = FLAG_DENY;
 
-	if (_virtual_flag) { // MIGRATION_OURS이어야 true가 됨.
-		if (_from_ssd == VIRTUAL_SSD) {
-			flag = FLAG_REALLOCATE;
+	if (_to_vid != NONE_ALLOC) {
+		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
+			if (_from_ssd == VIRTUAL_SSD && _virtual_flag && _method == MIGRATION_OURS && (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth))
+				flag = FLAG_REALLOCATE;
+			else if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) {
+				flag = FLAG_REALLOCATE;
+			}
 		}
-		if (_from_ssd != VIRTUAL_SSD)  //만약 꽉 차서 stable 된 SSD가 잠깐 대역폭 넘쳤다면, Flag deny해서 낮은 인기도의 파일을 빼도록 유도함.
-			flag = FLAG_DENY;
+		else if (_to_ssd != NONE_ALLOC) {
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth && (_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth)){
+				flag = FLAG_SWAP;
+			}
+		}
 	}
-	else {
-		if (_to_vid != NONE_ALLOC) {
-			if (is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
-				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth &&
-					_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth&& !_virtual_flag) {
-					flag = FLAG_SWAP;
-				}
-			}
-			else {
-				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) {
-					flag = FLAG_REALLOCATE;
-				}
-				else if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth &&
-					_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth&& !_virtual_flag) {
-					flag = FLAG_SWAP;
-				}
-			}
-		}
+	else { // 여기로 오는 경우는 _to_ssd가 빈 경우
+		flag = FLAG_REALLOCATE;
 	}
 	return flag;
 }

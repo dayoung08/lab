@@ -16,7 +16,7 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::mt19937 g(SEED);
-	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
+	//std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
 	std::uniform_int_distribution<> dist_for_storage_space{ 0, 4 };
 	//std::uniform_int_distribution<> dist_for_bandwidth{ 550, 3500 };
 	//std::uniform_int_distribution<> dist_for_DWPD{ 11, 65 };
