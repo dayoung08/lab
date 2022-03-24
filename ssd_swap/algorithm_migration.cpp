@@ -32,7 +32,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	bool* is_over_load = new bool[_num_of_SSDs+1];
 	bool* is_exceeded = new bool[_num_of_SSDs+1];
 	fill(is_exceeded, is_exceeded + _num_of_SSDs+1, false);
-
+	bool virtual_SSD_phase_flag = false;
 	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
 	update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
 	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
@@ -41,6 +41,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	int migration_num = 0;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
+		if (from_ssd == VIRTUAL_SSD)
+			virtual_SSD_phase_flag = true;
 		set<pair<double, int>>::iterator pos;
 		pair<double, int> element;
 		pos = _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.end();
@@ -140,7 +142,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 					if (from_ssd != VIRTUAL_SSD && _migration_method == MIGRATION_OURS) {
 						set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false, _prev_SSD);
 					}
-					is_exceeded[from_ssd] = true;
+					if(virtual_SSD_phase_flag)
+						is_exceeded[from_ssd] = true;
 					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
 				}
 				continue;
