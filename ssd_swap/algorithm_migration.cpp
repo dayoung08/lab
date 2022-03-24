@@ -185,10 +185,8 @@ void set_serviced_video(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 			_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.erase(_SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.begin());
 			
 			// 알고리즘에서 다른 데 할당했다가 또 할당한 것일때.
-			if (_prev_SSD[vid] != ssd && ssd != VIRTUAL_SSD) {
-				_SSD_list[ssd].total_write_MB -= _VIDEO_SEGMENT_list[vid].size; 
-				_SSD_list[ssd].ADWD = _SSD_list[ssd].total_write_MB / (_SSD_list[ssd].DWPD * _SSD_list[ssd].storage_capacity * _SSD_list[ssd].running_days);
-			}
+			_SSD_list[ssd].total_write_MB -= _VIDEO_SEGMENT_list[vid].size; 
+			_SSD_list[ssd].ADWD = _SSD_list[ssd].total_write_MB / (_SSD_list[ssd].DWPD * _SSD_list[ssd].storage_capacity * _SSD_list[ssd].running_days);
 
 			if (!flag) {
 				_VIDEO_SEGMENT_list[vid].assigned_SSD = VIRTUAL_SSD;
