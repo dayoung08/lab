@@ -39,7 +39,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 
 	int migration_num = 0;
 	bool virtual_flag = false; //virtual file을 옮기기 시작했다는 뜻.
-	// 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 대역폭 고려 안하다가 대역폭 넘으면 인기도 가장 낮은거 삭제함.
+	// 우리의 알고리즘은 vitual ssd의 파일들을 옮길때는 공간만 있으면 할당함(스왑은 안 함) 이 때 대역폭 고려 안하다가 대역폭 넘으면 인기도 가장 낮은거 삭제함.
 	// 그리고 그 SSD는 이제 안정화가 되었다고 가정하고, 다시는 그 SSD에 할당하지 않음.
 	// 이런식으로 모든 가상 SSD에 있던 파일들에 대해 SSD 자리를 찾아주면서 종료함. 이 때 SSD는 안정화되거나 underload임. overload는 없음.
 	while (!over_load_SSDs.empty()) {
