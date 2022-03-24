@@ -16,7 +16,7 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGM
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::mt19937 g(SEED);
-	//std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
+	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
 	std::uniform_int_distribution<> dist_for_storage_space{ 0, 4 };
 	//std::uniform_int_distribution<> dist_for_bandwidth{ 550, 3500 };
 	//std::uniform_int_distribution<> dist_for_DWPD{ 11, 65 };
@@ -56,8 +56,7 @@ void video_initalization_for_simulation(VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int 
 	double* vid_pop = set_zipf_pop(_num_of_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
 	std::mt19937 g(SEED);
-	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_videos, g);
-	std::shuffle(vid_pop_shuffle.begin() + _num_of_videos, vid_pop_shuffle.end(), g);
+	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
 		_VIDEO_SEGMENT_list[video_index].index = video_index;

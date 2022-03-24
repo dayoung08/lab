@@ -40,11 +40,15 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+		/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 			migration_method = i;
 			simulation_migartion();
 		}
 		migration_method = 1;
+		simulation_migartion();*/
+		migration_method = 7;
+		simulation_migartion();
+		migration_method = 10;
 		simulation_migartion();
 
 		int cnt;
@@ -187,11 +191,15 @@ int main(int argc, char* argv[]) {
 			num_of_new_videos = stoi(argv[4]) / NUM_OF_TIMEs;
 			num_of_request_per_sec = stod(argv[5]);
 
-			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+			/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 				migration_method = i;
 				simulation_migartion();
 			}
 			migration_method = 1;
+			simulation_migartion();*/
+			migration_method = 7;
+			simulation_migartion();
+			migration_method = 10;
 			simulation_migartion();
 
 			int cnt;
@@ -438,7 +446,8 @@ void simulation_migartion() {
 
 		}
 	}
-	/*double total_bandwidth_of_alloc_videos = 0;
+/*
+	double total_bandwidth_of_alloc_videos = 0;
 	int num_of_alloc_videos = 0;
 	for (int vid = 0; vid < num_of_videos; vid++) {
 		if ( !(VIDEO_SEGMENT_list[vid].assigned_SSD == NONE_ALLOC && VIDEO_SEGMENT_list[vid].assigned_SSD == NONE_ALLOC)) {
@@ -456,8 +465,8 @@ void simulation_migartion() {
 		printf("[SSD %d] bandwidth usage %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].total_bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].total_bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
 		printf("[SSD %d] storage %.2f/ %.2f (%.2f%%)\n", ssd, SSD_list[ssd].storage_usage, SSD_list[ssd].storage_capacity, ((double)SSD_list[ssd].storage_usage * 100 / SSD_list[ssd].storage_capacity));
 		printf("[SSD %d] ADWD %.2f\n", ssd, SSD_list[ssd].ADWD);
-	}*/
-	
+	}
+	*/
 	delete[](SSD_list);
 	delete[](VIDEO_SEGMENT_list);
 }
