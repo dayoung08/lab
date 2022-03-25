@@ -287,11 +287,9 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 				flag = FLAG_REALLOCATE; // HDD에 인기도 높은 파일을 최대한 남기지 않기 위함
 		}
 		else if (_to_ssd != NONE_ALLOC) {
-			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth &&
-				_VIDEO_SEGMENT_list[_from_vid].requested_bandwidth > _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) {
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) 
 				flag = FLAG_SWAP;
-			}
-			else if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS)
+			else if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) 
 				flag = FLAG_SWAP;
 		}
 	}
