@@ -144,7 +144,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				else {
 					if (from_ssd != VIRTUAL_SSD && _migration_method == MIGRATION_OURS)
 						set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false, _prev_SSD);
-					if(v_flag && _migration_method == MIGRATION_OURS)
+					if(v_flag)
 						is_exceeded[from_ssd] = true;
 					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
 				}
