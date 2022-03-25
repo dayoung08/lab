@@ -120,6 +120,10 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 			to_vid = NONE_ALLOC;
 		}
 
+		//if (v_flag && from_ssd != VIRTUAL_SSD && flag != FLAG_DENY)
+		// 여기서 걸리는걸 보니까, BE 페이즈 이후에 overload 되면 다시 그 SSD만 EOS 페이즈를 다시 수행한다. 
+		// 이후 거기서도 할당이 안되면 stable 처리가 되면서 제일 낮은 것들을 빼버리고 최적화 해주고 끝남. //20220325
+
 		//찾았으면 할당하기.
 		//int flag = get_migration_flag(_SSD_list, _VIDEO_SEGMENT_list, MIGRATION_BANDWIDTH_AWARE, from_ssd, to_ssd, from_vid, to_vid);
 		switch (flag) {
