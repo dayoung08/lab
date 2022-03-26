@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 3 // for simulation 1 3 7 15 30
+#define NUM_OF_DATEs 7 // for simulation 1 3 7 15 30
 #define NUM_OF_TIMEs 5
 
 #define MIN_RUNNING_DAY 1
@@ -87,6 +87,25 @@ int main(int argc, char* argv[]) {
 			}
 			printf("\n");
 			result1_day1.clear();
+			
+			cnt = 0;
+			while (cnt < result2.size()) {
+				printf("%lf\n", result2[cnt++]);
+			}
+			printf("\n");
+			result2.clear();
+			cnt = 0;
+			while (cnt < result3.size()) {
+				printf("%lf\n", result3[cnt++]);
+			}
+			printf("\n");
+			result3.clear();
+			cnt = 0;
+			while (cnt < result1.size()) {
+				printf("%lf\n", result1[cnt++]);
+			}
+			printf("\n");
+			result1.clear();
 
 			cnt = 0;
 			while (cnt < result2_day7.size()) {
@@ -234,6 +253,25 @@ int main(int argc, char* argv[]) {
 				}
 				printf("\n");
 				result1_day1.clear();
+
+				cnt = 0;
+				while (cnt < result2.size()) {
+					printf("%lf\n", result2[cnt++]);
+				}
+				printf("\n");
+				result2.clear();
+				cnt = 0;
+				while (cnt < result3.size()) {
+					printf("%lf\n", result3[cnt++]);
+				}
+				printf("\n");
+				result3.clear();
+				cnt = 0;
+				while (cnt < result1.size()) {
+					printf("%lf\n", result1[cnt++]);
+				}
+				printf("\n");
+				result1.clear();
 
 				cnt = 0;
 				while (cnt < result2_day7.size()) {
