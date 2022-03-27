@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 7 // for simulation 1 3 7 15 30
+#define NUM_OF_DATEs 3 // for simulation 1 3 7 15 30
 #define NUM_OF_TIMEs 5
 
 #define MIN_RUNNING_DAY 1
@@ -10,7 +10,7 @@ int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
-int num_of_videos = 2000000;// 50만, 100만, (150만), 200만, 250만
+int num_of_videos = 3000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 20000; //8000
 
@@ -48,27 +48,27 @@ int main(int argc, char* argv[]) {
 		simulation_migartion();
 
 		int cnt;
-		cnt = 0;
-		while (cnt < result2.size()) {
-			printf("%lf\n", result2[cnt++]);
+		if (NUM_OF_DATEs == 3) {
+			cnt = 0;
+			while (cnt < result2.size()) {
+				printf("%lf\n", result2[cnt++]);
+			}
+			printf("\n");
+			result2.clear();
+			cnt = 0;
+			while (cnt < result3.size()) {
+				printf("%lf\n", result3[cnt++]);
+			}
+			printf("\n");
+			result3.clear();
+			cnt = 0;
+			while (cnt < result1.size()) {
+				printf("%lf\n", result1[cnt++]);
+			}
+			printf("\n");
+			result1.clear();
 		}
-		printf("\n");
-		result2.clear();
-		cnt = 0;
-		while (cnt < result3.size()) {
-			printf("%lf\n", result3[cnt++]);
-		}
-		printf("\n");
-		result3.clear();
-		cnt = 0;
-		while (cnt < result1.size()) {
-			printf("%lf\n", result1[cnt++]);
-		}
-		printf("\n");
-		result1.clear();
-
-
-		if (NUM_OF_DATEs != 3) {
+		else {
 			cnt = 0;
 			while (cnt < result2_day1.size()) {
 				printf("%lf\n", result2_day1[cnt++]);
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 			}
 			printf("\n");
 			result1_day1.clear();
-			
+
 			cnt = 0;
 			while (cnt < result2.size()) {
 				printf("%lf\n", result2[cnt++]);
@@ -214,27 +214,27 @@ int main(int argc, char* argv[]) {
 			simulation_migartion();
 
 			int cnt;
-			cnt = 0;
-			while (cnt < result2.size()) {
-				printf("%lf\n", result2[cnt++]);
+			if (NUM_OF_DATEs == 3) {
+				cnt = 0;
+				while (cnt < result2.size()) {
+					printf("%lf\n", result2[cnt++]);
+				}
+				printf("\n");
+				result2.clear();
+				cnt = 0;
+				while (cnt < result3.size()) {
+					printf("%lf\n", result3[cnt++]);
+				}
+				printf("\n");
+				result3.clear();
+				cnt = 0;
+				while (cnt < result1.size()) {
+					printf("%lf\n", result1[cnt++]);
+				}
+				printf("\n");
+				result1.clear();
 			}
-			printf("\n");
-			result2.clear();
-			cnt = 0;
-			while (cnt < result3.size()) {
-				printf("%lf\n", result3[cnt++]);
-			}
-			printf("\n");
-			result3.clear();
-			cnt = 0;
-			while (cnt < result1.size()) {
-				printf("%lf\n", result1[cnt++]);
-			}
-			printf("\n");
-			result1.clear();
-
-
-			if (NUM_OF_DATEs != 3) {
+			else{
 				cnt = 0;
 				while (cnt < result2_day1.size()) {
 					printf("%lf\n", result2_day1[cnt++]);

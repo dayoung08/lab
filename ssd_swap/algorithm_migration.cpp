@@ -42,11 +42,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	//여기까지 초기화
 
 	int migration_num = 0;
-	bool v_flag = false;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
-		if (from_ssd == VIRTUAL_SSD)
-			v_flag = true;
 
 		set<pair<double, int>>::iterator pos;
 		pair<double, int> element;
@@ -136,7 +133,7 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 		case FLAG_DENY:
 			if (under_load_list.empty()) {
 				//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
-				if (from_ssd == VIRTUAL_SSD && _migration_method == MIGRATION_OURS) {
+				if (from_ssd == VIRTUAL_SSD && _migration_method == MIGRATION_OURS) { 
 					_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.erase(element);
 					_VIDEO_SEGMENT_list[from_vid].assigned_SSD = NONE_ALLOC;
 					_SSD_list[VIRTUAL_SSD].total_bandwidth_usage -= _VIDEO_SEGMENT_list[from_vid].requested_bandwidth;
@@ -296,24 +293,29 @@ void update_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid) {
 	int flag = FLAG_DENY;
 
-	if (_to_vid != NONE_ALLOC) {
-		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
-			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) {
-				flag = FLAG_REALLOCATE; // SSD에 인기도 높은 파일은 계속 남기기 위함
-			}
-			else if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS)
-				flag = FLAG_REALLOCATE; // HDD에 인기도 높은 파일을 최대한 남기지 않기 위함
-		}
-		else if (_to_ssd != NONE_ALLOC) {
-			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth) 
-				flag = FLAG_SWAP;
-			else if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) 
-				flag = FLAG_SWAP;
-		}
-	}
-	else { 
+	if (_to_vid == NONE_ALLOC) {
 		flag = FLAG_REALLOCATE;
+		return FLAG_REALLOCATE;
 	}
-	//만약 AVR_ADWD_LIMIT를 지정할 경우, flag를 바꾸기 위해 사용되는 IF문이 있었는데 제대로 동작 안하고, Limit 지정도 안하기로 해서 삭제함
+
+	if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) {
+		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
+			flag = FLAG_REALLOCATE; // HDD에 인기도 높은 파일을 최대한 남기지 않기 위함
+		}
+		else {
+			flag = FLAG_SWAP;
+		}
+	}
+	else {
+		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
+				flag = FLAG_REALLOCATE; // SSD에 인기도 높은 파일은 계속 남기기 위함
+		}
+		else {
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
+				flag = FLAG_SWAP;
+		}
+	}
+
 	return flag;
 }
