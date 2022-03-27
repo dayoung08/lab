@@ -303,6 +303,10 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _
 		flag = FLAG_REALLOCATE;
 		return FLAG_REALLOCATE;
 	}
+	if (_method != MIGRATION_OURS) {
+		flag = FLAG_REALLOCATE;
+		return FLAG_REALLOCATE;
+	}
 
 	if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) {
 		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
