@@ -182,8 +182,7 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VID
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	mt19937 g(SEED + rand_cnt);
-	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
-	shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
+	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 	//대역폭 설정 시작
 	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
 		int video_index = vid;
