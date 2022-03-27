@@ -40,12 +40,16 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+		/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 			migration_method = i;
 			simulation_migartion();
 		}
 		migration_method = 1;
-		simulation_migartion();
+		simulation_migartion();*/
+		for (int i = 8; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+			migration_method = i;
+			simulation_migartion();
+		}
 
 		int cnt;
 		if (NUM_OF_DATEs == 3) {
@@ -206,12 +210,16 @@ int main(int argc, char* argv[]) {
 			num_of_new_videos = stoi(argv[4]) / NUM_OF_TIMEs;
 			num_of_request_per_sec = stod(argv[5]);
 
-			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+			/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 				migration_method = i;
 				simulation_migartion();
 			}
 			migration_method = 1;
-			simulation_migartion();
+			simulation_migartion();*/
+			for (int i = 8; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+				migration_method = i;
+				simulation_migartion();
+			}
 
 			int cnt;
 			if (NUM_OF_DATEs == 3) {
