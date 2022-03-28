@@ -9,9 +9,9 @@
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 40; // 10, 20, (30), 40, 50
+int num_of_SSDs = 30; // 10, 20, (30), 40, 50
 int num_of_videos = 2000000;// 50만, 100만, (150만), 200만, 250만
-int num_of_new_videos = 30000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
+int num_of_new_videos = 50000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 20000; //8000
 
 vector<double> result1;
@@ -40,135 +40,7 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-			migration_method = i;
-			simulation_migartion();
-		}
-		migration_method = 1;
 		simulation_migartion();
-
-		int cnt;
-		if (NUM_OF_DATEs == 3) {
-			cnt = 0;
-			while (cnt < result2.size()) {
-				printf("%lf\n", result2[cnt++]);
-			}
-			printf("\n");
-			result2.clear();
-			cnt = 0;
-			while (cnt < result3.size()) {
-				printf("%lf\n", result3[cnt++]);
-			}
-			printf("\n");
-			result3.clear();
-			cnt = 0;
-			while (cnt < result1.size()) {
-				printf("%lf\n", result1[cnt++]);
-			}
-			printf("\n");
-			result1.clear();
-		}
-		else {
-			cnt = 0;
-			while (cnt < result2_day1.size()) {
-				printf("%lf\n", result2_day1[cnt++]);
-			}
-			printf("\n");
-			result2_day1.clear();
-			cnt = 0;
-			while (cnt < result3_day1.size()) {
-				printf("%lf\n", result3_day1[cnt++]);
-			}
-			printf("\n");
-			result3_day1.clear();
-			cnt = 0;
-			while (cnt < result1_day1.size()) {
-				printf("%lf\n", result1_day1[cnt++]);
-			}
-			printf("\n");
-			result1_day1.clear();
-
-			cnt = 0;
-			while (cnt < result2.size()) {
-				printf("%lf\n", result2[cnt++]);
-			}
-			printf("\n");
-			result2.clear();
-			cnt = 0;
-			while (cnt < result3.size()) {
-				printf("%lf\n", result3[cnt++]);
-			}
-			printf("\n");
-			result3.clear();
-			cnt = 0;
-			while (cnt < result1.size()) {
-				printf("%lf\n", result1[cnt++]);
-			}
-			printf("\n");
-			result1.clear();
-
-			cnt = 0;
-			while (cnt < result2_day7.size()) {
-				printf("%lf\n", result2_day7[cnt++]);
-			}
-			printf("\n");
-			result2_day7.clear();
-			cnt = 0;
-			while (cnt < result3_day7.size()) {
-				printf("%lf\n", result3_day7[cnt++]);
-			}
-			printf("\n");
-			result3_day7.clear();
-			cnt = 0;
-			while (cnt < result1_day7.size()) {
-				printf("%lf\n", result1_day7[cnt++]);
-			}
-			printf("\n");
-			result1_day7.clear();
-
-			cnt = 0;
-			while (cnt < result2_day15.size()) {
-				printf("%lf\n", result2_day15[cnt++]);
-			}
-			printf("\n");
-			result2_day15.clear();
-			cnt = 0;
-			while (cnt < result3_day15.size()) {
-				printf("%lf\n", result3_day15[cnt++]);
-			}
-			printf("\n");
-			result3_day15.clear();
-			cnt = 0;
-			while (cnt < result1_day15.size()) {
-				printf("%lf\n", result1_day15[cnt++]);
-			}
-			printf("\n");
-			result1_day15.clear();
-
-			cnt = 0;
-			while (cnt < result2_day30.size()) {
-				printf("%lf\n", result2_day30[cnt++]);
-			}
-			printf("\n");
-			result2_day30.clear();
-			cnt = 0;
-			while (cnt < result3_day30.size()) {
-				printf("%lf\n", result3_day30[cnt++]);
-			}
-			printf("\n");
-			result3_day30.clear();
-			cnt = 0;
-			while (cnt < result1_day30.size()) {
-				printf("%lf\n", result1_day30[cnt++]);
-			}
-			printf("\n");
-			result1_day30.clear();
-		}
-		break;
-	/*for (int i = 1; i < MIGRATION_OURS; i++) {
-		placement_method = i;
-		simulation_placement();
-	}*/
 	break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
@@ -186,150 +58,25 @@ int main(int argc, char* argv[]) {
 		else
 			printf("command가 올바르지 않습니다. 다시 실행해 주세요.\n");
 		break;
-	case 5:
+	case 6:
 		if (!strcmp(argv[1], "placement")) {
 			num_of_SSDs = stoi(argv[2]);
 			num_of_videos = stoi(argv[3]);
 			num_of_request_per_sec = stod(argv[4]);
-			for (int i = 1; i < MIGRATION_OURS; i++) {
-				placement_method = i;
-				simulation_placement();
-			}
+			placement_method = stod(argv[5]);
+			simulation_placement();
 		}
 		else
 			printf("command가 올바르지 않습니다. 다시 실행해 주세요.\n");
 		break;
-	case 6:
+	case 7:
 		if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
 			num_of_SSDs = stoi(argv[2]);
 			num_of_videos = stoi(argv[3]);
 			num_of_new_videos = stoi(argv[4]);// / NUM_OF_TIMEs;
 			num_of_request_per_sec = stod(argv[5]);
-
-			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-				migration_method = i;
-				simulation_migartion();
-			}
-			migration_method = 1;
+			migration_method = stod(argv[6]);
 			simulation_migartion();
-
-			int cnt;
-			if (NUM_OF_DATEs == 3) {
-				cnt = 0;
-				while (cnt < result2.size()) {
-					printf("%lf\n", result2[cnt++]);
-				}
-				printf("\n");
-				result2.clear();
-				cnt = 0;
-				while (cnt < result3.size()) {
-					printf("%lf\n", result3[cnt++]);
-				}
-				printf("\n");
-				result3.clear();
-				cnt = 0;
-				while (cnt < result1.size()) {
-					printf("%lf\n", result1[cnt++]);
-				}
-				printf("\n");
-				result1.clear();
-			}
-			else{
-				cnt = 0;
-				while (cnt < result2_day1.size()) {
-					printf("%lf\n", result2_day1[cnt++]);
-				}
-				printf("\n");
-				result2_day1.clear();
-				cnt = 0;
-				while (cnt < result3_day1.size()) {
-					printf("%lf\n", result3_day1[cnt++]);
-				}
-				printf("\n");
-				result3_day1.clear();
-				cnt = 0;
-				while (cnt < result1_day1.size()) {
-					printf("%lf\n", result1_day1[cnt++]);
-				}
-				printf("\n");
-				result1_day1.clear();
-
-				cnt = 0;
-				while (cnt < result2.size()) {
-					printf("%lf\n", result2[cnt++]);
-				}
-				printf("\n");
-				result2.clear();
-				cnt = 0;
-				while (cnt < result3.size()) {
-					printf("%lf\n", result3[cnt++]);
-				}
-				printf("\n");
-				result3.clear();
-				cnt = 0;
-				while (cnt < result1.size()) {
-					printf("%lf\n", result1[cnt++]);
-				}
-				printf("\n");
-				result1.clear();
-
-				cnt = 0;
-				while (cnt < result2_day7.size()) {
-					printf("%lf\n", result2_day7[cnt++]);
-				}
-				printf("\n");
-				result2_day7.clear();
-				cnt = 0;
-				while (cnt < result3_day7.size()) {
-					printf("%lf\n", result3_day7[cnt++]);
-				}
-				printf("\n");
-				result3_day7.clear();
-				cnt = 0;
-				while (cnt < result1_day7.size()) {
-					printf("%lf\n", result1_day7[cnt++]);
-				}
-				printf("\n");
-				result1_day7.clear();
-
-				cnt = 0;
-				while (cnt < result2_day15.size()) {
-					printf("%lf\n", result2_day15[cnt++]);
-				}
-				printf("\n");
-				result2_day15.clear();
-				cnt = 0;
-				while (cnt < result3_day15.size()) {
-					printf("%lf\n", result3_day15[cnt++]);
-				}
-				printf("\n");
-				result3_day15.clear();
-				cnt = 0;
-				while (cnt < result1_day15.size()) {
-					printf("%lf\n", result1_day15[cnt++]);
-				}
-				printf("\n");
-				result1_day15.clear();
-
-				cnt = 0;
-				while (cnt < result2_day30.size()) {
-					printf("%lf\n", result2_day30[cnt++]);
-				}
-				printf("\n");
-				result2_day30.clear();
-				cnt = 0;
-				while (cnt < result3_day30.size()) {
-					printf("%lf\n", result3_day30[cnt++]);
-				}
-				printf("\n");
-				result3_day30.clear();
-				cnt = 0;
-				while (cnt < result1_day30.size()) {
-					printf("%lf\n", result1_day30[cnt++]);
-				}
-				printf("\n");
-				result1_day30.clear();
-			}
 		}
 		else
 			printf("command가 올바르지 않습니다. 다시 실행해 주세요.\n");
@@ -343,10 +90,11 @@ int main(int argc, char* argv[]) {
 }
 
 void simulation_placement() {
-	std::mt19937 g(SEED);
+	std::default_random_engine g(SEED);
 	std::uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY};
+	dist_for_running_day.reset();
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
-	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
+	VIDEO_CHUNK* VIDEO_SEGMENT_list = new VIDEO_CHUNK[num_of_videos];
 
 	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
@@ -379,11 +127,12 @@ void simulation_placement() {
 }
 
 void simulation_migartion() {
-	std::mt19937 g(SEED);
+	std::default_random_engine g(SEED);
 	std::uniform_int_distribution<> dist_for_running_day{ MIN_RUNNING_DAY, MAX_RUNNING_DAY };
+	dist_for_running_day.reset();
 	placement_method = PLACEMENT_RANDOM;
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
-	VIDEO_SEGMENT* VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_videos];
+	VIDEO_CHUNK* VIDEO_SEGMENT_list = new VIDEO_CHUNK[num_of_videos];
 	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
 	placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
@@ -400,13 +149,13 @@ void simulation_migartion() {
 		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//아래는 새로운 비디오 추가 과정
+			growing_cnt();
 			if (num_of_new_videos > 0) {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
-				VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = new VIDEO_SEGMENT[num_of_new_videos];
-				growing_cnt();
+				VIDEO_CHUNK* new_VIDEO_SEGMENT_list = new VIDEO_CHUNK[num_of_new_videos];
 				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, time);
 
-				VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
+				VIDEO_CHUNK* _VIDEO_SEGMENT_conbined_list = new VIDEO_CHUNK[num_of_videos + num_of_new_videos];
 				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
 				delete[] VIDEO_SEGMENT_list;
 				copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);
@@ -416,7 +165,6 @@ void simulation_migartion() {
 			}
 			else {
 				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
-				growing_cnt();
 				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, time);
 			}
 			//migration 수행
@@ -424,10 +172,8 @@ void simulation_migartion() {
 			int migration_num;
 			if(migration_method >= MIGRATION_OURS)
 				migration_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
-			else {
+			else 
 				migration_num = placement(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
-			}
-
 			//printf("migration_num %d\n", migration_num);
 		}
 
@@ -446,7 +192,6 @@ void simulation_migartion() {
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
 			printf("day%d %lf %lf %lf\n", day, total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs));
-
 
 			if (day == 3) {
 				result1.push_back(total_bandwidth_usage_in_migration);
@@ -503,7 +248,7 @@ void simulation_migartion() {
 
 void testbed_placement() {
 	SSD* SSD_list = NULL;
-	VIDEO_SEGMENT* VIDEO_SEGMENT_list = NULL;
+	VIDEO_CHUNK* VIDEO_SEGMENT_list = NULL;
 	placed_video_init_for_testbed(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 
 	int placement_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
@@ -514,8 +259,8 @@ void testbed_placement() {
 
 void testbed_migration(bool _has_new_files) {
 	SSD* SSD_list = NULL;
-	VIDEO_SEGMENT* VIDEO_SEGMENT_list = NULL;
-	VIDEO_SEGMENT* new_VIDEO_SEGMENT_list = NULL;
+	VIDEO_CHUNK* VIDEO_SEGMENT_list = NULL;
+	VIDEO_CHUNK* new_VIDEO_SEGMENT_list = NULL;
 	
 	// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 	//새로운 비디오 업데이트 안하고, 인기도만 바꾸기 가능함
@@ -525,7 +270,7 @@ void testbed_migration(bool _has_new_files) {
 		prev_assigned_SSD[vid] = VIDEO_SEGMENT_list[vid].assigned_SSD;
 	}
 
-	VIDEO_SEGMENT* _VIDEO_SEGMENT_conbined_list = new VIDEO_SEGMENT[num_of_videos + num_of_new_videos];
+	VIDEO_CHUNK* _VIDEO_SEGMENT_conbined_list = new VIDEO_CHUNK[num_of_videos + num_of_new_videos];
 	copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
 	delete[] VIDEO_SEGMENT_list;
 	copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);

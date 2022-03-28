@@ -1,6 +1,6 @@
 #include "header.h"
 
-int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_videos) {
+int placement(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_SEGMENT_list, int _method, int _num_of_SSDs, int _num_of_videos) {
 	int placement_num = 0;
 	switch (_method) {
 	case PLACEMENT_OURS:
@@ -19,7 +19,7 @@ int placement(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _method, i
 	return placement_num;
 }
 
-int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _placement_method, int _num_of_SSDs, int _num_of_videos) {
+int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_SEGMENT_list, int _placement_method, int _num_of_SSDs, int _num_of_videos) {
 	set<pair<double, int>, greater<pair<double, int>>> VIDEO_SEGMENT_list_with_bandwidth_sort;
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		VIDEO_SEGMENT_list_with_bandwidth_sort.insert(make_pair(_VIDEO_SEGMENT_list[vid].requested_bandwidth, vid));
@@ -39,7 +39,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 
 				double slope = -INFINITY;
 				switch (_placement_method) {
-				case PLACEMENT_OURS:
+				case PLACEMENT_OURS: 
 					slope = remained_bandwidth / remained_storage;
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
@@ -75,8 +75,8 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 }
 
 
-int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _placement_method, int _num_of_SSDs, int _num_of_videos) {
-	std::mt19937 g(SEED);
+int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_SEGMENT_list, int _placement_method, int _num_of_SSDs, int _num_of_videos) {
+	default_random_engine g(SEED);
 
 	int placement_num = 0;
  	vector<int> target_ssd_list;
@@ -94,7 +94,7 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 		if (!target_ssd_list.empty()) {
 			int ssd_index = NONE_ALLOC;
 			if (_placement_method == PLACEMENT_RANDOM) {
-				std::shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);
+				shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);
 				ssd_index = target_ssd_list.back();
 			}
 			if (_placement_method == PLACEMENT_ROUND_ROBIN) {
@@ -129,7 +129,7 @@ int placement_basic(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _pla
 	return placement_num;
 }
 
-void allocate(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list, int _ssd_index, int _video_index) {
+void allocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_SEGMENT_list, int _ssd_index, int _video_index) {
 	int prev_SSD = _VIDEO_SEGMENT_list[_video_index].assigned_SSD;
 	_VIDEO_SEGMENT_list[_video_index].assigned_SSD = _ssd_index;
 	_SSD_list[_ssd_index].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_VIDEO_SEGMENT_list[_video_index].requested_bandwidth, _video_index));

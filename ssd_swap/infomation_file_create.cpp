@@ -1,6 +1,6 @@
 #include "header.h"
 
-void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _new_VIDEO_SEGMENT_list, int _num_of_new_videos) {
+void create_placement_infomation(SSD* _SSD_list, VIDEO_CHUNK* _new_VIDEO_SEGMENT_list, int _num_of_new_videos) {
 	ofstream fout("placementInfo.in", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
 
 	if (fout.is_open()) {
@@ -22,7 +22,7 @@ void create_placement_infomation(SSD* _SSD_list, VIDEO_SEGMENT* _new_VIDEO_SEGME
 	}
 }
 
-void create_migration_infomation(SSD * _SSD_list, VIDEO_SEGMENT * _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int* _prev_assigned_SSD) {
+void create_migration_infomation(SSD * _SSD_list, VIDEO_CHUNK * _VIDEO_SEGMENT_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int* _prev_assigned_SSD) {
 	
 	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
 		int video_index = vid;
@@ -72,7 +72,7 @@ void create_migration_infomation(SSD * _SSD_list, VIDEO_SEGMENT * _VIDEO_SEGMENT
 	}
 }
 
-void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_SEGMENT* _existed_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos) {
+void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _existed_VIDEO_SEGMENT_list, int _num_of_SSDs, int _num_of_existed_videos) {
 	ofstream fout_ssd("SSD_list.in", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
 	if (fout_ssd.is_open()) {
 		for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
