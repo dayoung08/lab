@@ -8,7 +8,7 @@
 #include <sstream>
 using namespace std;
 
-#define SEED 123
+#define SEED 111
 //#define INFINITY 987654321
 
 #define SSD_TYPE 10
