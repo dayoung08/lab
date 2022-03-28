@@ -14,27 +14,6 @@ int num_of_videos = 2000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 50000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 20000; //8000
 
-vector<double> result1;
-vector<double> result2;
-vector<double> result3;
-
-vector<double> result1_day1;
-vector<double> result2_day1;
-vector<double> result3_day1;
-
-vector<double> result1_day7;
-vector<double> result2_day7;
-vector<double> result3_day7;
-
-vector<double> result1_day15;
-vector<double> result2_day15;
-vector<double> result3_day15;
-
-vector<double> result1_day30;
-vector<double> result2_day30;
-vector<double> result3_day30;
-
-
 int main(int argc, char* argv[]) {
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
 	switch (argc)
@@ -178,8 +157,8 @@ void simulation_migartion() {
 		}
 
 		// 결과 출력 : SSD의 평균, 표준편차 ADWD 출력
-		//if (day == 3) {
-		if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
+		if (day == 3) {
+		//if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
 			double sum_for_AVG_in_migration = 0;
 			double sum_for_STD_in_migration = 0;
 			//double total_serviced_bandwidth_in_migration = 0;
@@ -191,34 +170,7 @@ void simulation_migartion() {
 				total_bandwidth_usage_in_migration += SSD_list[ssd].total_bandwidth_usage;
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
-			printf("day%d %lf %lf %lf\n", day, total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs));
-
-			if (day == 3) {
-				result1.push_back(total_bandwidth_usage_in_migration);
-				result2.push_back((sum_for_AVG_in_migration / num_of_SSDs));
-				result3.push_back(sqrt(sum_for_STD_in_migration / num_of_SSDs));
-			}
-			if (day == 1) {
-				result1_day1.push_back(total_bandwidth_usage_in_migration);
-				result2_day1.push_back((sum_for_AVG_in_migration / num_of_SSDs));
-				result3_day1.push_back(sqrt(sum_for_STD_in_migration / num_of_SSDs));
-			}
-			if (day == 7) {
-				result1_day7.push_back(total_bandwidth_usage_in_migration);
-				result2_day7.push_back((sum_for_AVG_in_migration / num_of_SSDs));
-				result3_day7.push_back(sqrt(sum_for_STD_in_migration / num_of_SSDs));
-			}
-			if (day == 15) {
-				result1_day15.push_back(total_bandwidth_usage_in_migration);
-				result2_day15.push_back((sum_for_AVG_in_migration / num_of_SSDs));
-				result3_day15.push_back(sqrt(sum_for_STD_in_migration / num_of_SSDs));
-			}
-			if (day == 30) {
-				result1_day30.push_back(total_bandwidth_usage_in_migration);
-				result2_day30.push_back((sum_for_AVG_in_migration / num_of_SSDs));
-				result3_day30.push_back(sqrt(sum_for_STD_in_migration / num_of_SSDs));
-			}
-
+			printf("%lf %lf %lf\n", day, total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs));
 		}
 	}
 /*
