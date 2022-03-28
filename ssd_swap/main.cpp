@@ -9,9 +9,9 @@
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 30; // 10, 20, (30), 40, 50
+int num_of_SSDs = 40; // 10, 20, (30), 40, 50
 int num_of_videos = 2000000;// 50만, 100만, (150만), 200만, 250만
-int num_of_new_videos = 0; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
+int num_of_new_videos = 30000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 20000; //8000
 
 vector<double> result1;
@@ -40,16 +40,12 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+		for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 			migration_method = i;
 			simulation_migartion();
 		}
 		migration_method = 1;
-		simulation_migartion();*/
-		for (int i = 8; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-			migration_method = i;
-			simulation_migartion();
-		}
+		simulation_migartion();
 
 		int cnt;
 		if (NUM_OF_DATEs == 3) {
@@ -207,19 +203,15 @@ int main(int argc, char* argv[]) {
 		if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
 			num_of_SSDs = stoi(argv[2]);
 			num_of_videos = stoi(argv[3]);
-			num_of_new_videos = stoi(argv[4]) / NUM_OF_TIMEs;
+			num_of_new_videos = stoi(argv[4]);// / NUM_OF_TIMEs;
 			num_of_request_per_sec = stod(argv[5]);
 
-			/*for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
+			for (int i = MIGRATION_OURS; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
 				migration_method = i;
 				simulation_migartion();
 			}
 			migration_method = 1;
-			simulation_migartion();*/
-			for (int i = 8; i < MIGRATION_LIFETIME_AWARE + 1; i++) {
-				migration_method = i;
-				simulation_migartion();
-			}
+			simulation_migartion();
 
 			int cnt;
 			if (NUM_OF_DATEs == 3) {
