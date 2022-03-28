@@ -42,8 +42,12 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 	//여기까지 초기화
 
 	int migration_num = 0;
+	bool visual_ssd_is_used = false;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
+		if (from_ssd == VIRTUAL_SSD) {
+			visual_ssd_is_used = true;
+		}
 
 		set<pair<double, int>>::iterator pos;
 		pair<double, int> element;
@@ -149,7 +153,8 @@ int migration_resource_aware(SSD* _SSD_list, VIDEO_SEGMENT* _VIDEO_SEGMENT_list,
 				else {
 					if (from_ssd != VIRTUAL_SSD) 
 						set_serviced_video(_SSD_list, _VIDEO_SEGMENT_list, _num_of_SSDs, _num_of_videos, from_ssd, false, _prev_SSD);
-					is_exceeded[from_ssd] = true;
+					if(visual_ssd_is_used)
+						is_exceeded[from_ssd] = true;
 					update_infomation(_SSD_list, _VIDEO_SEGMENT_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
 				}
 				continue;
