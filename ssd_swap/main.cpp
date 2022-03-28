@@ -170,7 +170,7 @@ void simulation_migartion() {
 				total_bandwidth_usage_in_migration += SSD_list[ssd].total_bandwidth_usage;
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
-			printf("%lf %lf %lf\n", day, total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs));
+			printf("%lf %lf %lf\n", total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs));
 		}
 	}
 /*
