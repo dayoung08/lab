@@ -39,7 +39,7 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 		else {
 			//int r = dist_for_type(g);
 			int r = ssd % SSD_TYPE;
-			_SSD_list[ssd_index].storage_capacity = ((double)250000 * pow(2, dist_for_storage_space(g))) + 0.00001; // 0.5, 1, 2, 4TB
+			_SSD_list[ssd_index].storage_capacity = ((double)250000 * pow(2, dist_for_storage_space(g))) + 0.00001; // 0.25, 0.5, 1, 2, 4TB
 			_SSD_list[ssd_index].DWPD = DWPD[r];
 			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
 			//_SSD_list[ssd_index].DWPD = dist_for_DWPD(g);
@@ -89,8 +89,8 @@ void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_VI
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	default_random_engine g(SEED + rand_cnt);
-	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
-	shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
+	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
+	std::shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
 
 	//우선 전부 제거함. 재계산을 위함.
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
@@ -193,8 +193,8 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_CHUNK* _existed_VIDEO
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
 	default_random_engine g(SEED + rand_cnt);
-	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
-	shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
+	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
+	std::shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
 	//대역폭 설정 시작
 	for (int vid = 0; vid < _num_of_existed_videos + _num_of_new_videos; vid++) {
 		int video_index = vid;

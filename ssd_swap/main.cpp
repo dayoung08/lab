@@ -1,6 +1,6 @@
 #include "header.h"
 #define NUM_OF_DATEs 3 // for simulation 1 3 7 15 30
-#define NUM_OF_TIMEs 5
+#define NUM_OF_TIMEs 4
 
 #define MIN_RUNNING_DAY 1
 #define MAX_RUNNING_DAY 90
@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		migration_method = 8;
+		migration_method = 7;
 		simulation_migartion();
 	break;
 	case 2:

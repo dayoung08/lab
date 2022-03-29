@@ -32,8 +32,8 @@ using namespace std;
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
-#define VIDEO_BANDWIDTH 2.5f //비디오가 16000kbps(즉 12Mbps)라고 가정해봅시다.16*0.125=2.0,하나에 2.0MB/s가 듭니다.
-#define VIDEO_SIZE 15.0f; // 2.0MB/s x 10초 20MB
+#define VIDEO_BANDWIDTH 2.5f //비디오가 20000kbps(즉 20Mbps)라고 가정해봅시다.20*0.125=2.5,하나에 2.5MB/s가 듭니다.
+#define VIDEO_SIZE 15.0f; // 2.5MB/s x 6초
 
 struct SSD {
 	int index;

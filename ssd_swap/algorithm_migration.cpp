@@ -272,7 +272,10 @@ void update_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_SEGMENT_list, int _mi
 			_is_over_load[ssd] = true;
 
 			if (ssd == VIRTUAL_SSD)
-				(*_over_load_SSDs).insert(make_pair(-INFINITY, ssd));
+				if(_migration_method == MIGRATION_OURS)
+					(*_over_load_SSDs).insert(make_pair(-INFINITY, ssd));
+				else
+					(*_over_load_SSDs).insert(make_pair(INFINITY, ssd));
 			else {
 				switch (_migration_method)
 				{
@@ -303,26 +306,26 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_SEGMENT_list, int _me
 
 	if (_to_vid == NONE_ALLOC) {
 		flag = FLAG_REALLOCATE;
-		return FLAG_REALLOCATE;
-	}
-
-	if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) {
-		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
-			flag = FLAG_REALLOCATE; // HDD에 인기도 높은 파일을 최대한 남기지 않기 위함
-		}
-		else {
-			flag = FLAG_SWAP;
-		}
 	}
 	else {
-		if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
-			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
-				flag = FLAG_REALLOCATE; // SSD에 인기도 높은 파일은 계속 남기기 위함
+		if (_from_ssd == VIRTUAL_SSD && _method == MIGRATION_OURS) {
+			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
+				flag = FLAG_REALLOCATE; // HDD에 인기도 높은 파일을 최대한 남기지 않기 위함
+			}
+			else {
+				flag = FLAG_SWAP;
+			}
 		}
 		else {
-			if (_method == MIGRATION_OURS) {
-				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
-					flag = FLAG_SWAP;
+			if (!is_full_storage_space(_SSD_list, _VIDEO_SEGMENT_list, _to_ssd, _from_vid)) {
+				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
+					flag = FLAG_REALLOCATE; // SSD에 인기도 높은 파일은 계속 남기기 위함
+			}
+			else {
+				if (_method == MIGRATION_OURS) {
+					if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_SEGMENT_list[_from_vid].requested_bandwidth - _VIDEO_SEGMENT_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
+						flag = FLAG_SWAP;
+				}
 			}
 		}
 	}
