@@ -27,7 +27,7 @@ int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_met
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, ssd, true, &migration_num, prev_SSD);
 	}
-	cout << migration_num << endl;
+	//cout << migration_num << endl;
 	return migration_num;
 }
 
