@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 	switch (argc)
 	{
 	case 1:
-		migration_method = 7;
+		migration_method = 8;
 		simulation_migartion();
 	break;
 	case 2:

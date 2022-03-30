@@ -14,6 +14,7 @@ int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_met
 	case MIGRATION_OURS:
 		migration_num = migration_of_two_phase(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
 		break;
+	case MIGRATION_LIMIT_AWARE:
 	case MIGRATION_BANDWIDTH_AWARE:
 		migration_num = migration_bandwidth_aware(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
 		break;
@@ -75,8 +76,6 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				else {
 					bt = _VIDEO_CHUNK_list[from_vid].requested_bandwidth;				
 				}
-				double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage;
-				double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
 				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 
 				if (bt < 0)
@@ -172,7 +171,7 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, in
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
-				double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth -_SSD_list[to_ssd_temp].total_bandwidth_usage;
+				double remained_bandwidth_rate = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage) / _SSD_list[to_ssd_temp].maximum_bandwidth;
 				double bt;
 				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
 					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);
@@ -184,7 +183,10 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, in
 				if (bt < 0)
 					continue;
 
-				under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
+				if(_migration_method == MIGRATION_LIMIT_AWARE)
+					under_load_list.insert(make_pair(_SSD_list[to_ssd_temp].maximum_bandwidth / _SSD_list[to_ssd_temp].storage_capacity, to_ssd_temp));
+				else
+					under_load_list.insert(make_pair(remained_bandwidth_rate, to_ssd_temp));
 			}
 		}
 
@@ -265,8 +267,8 @@ int migration_space_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _m
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second; 
 				double bt;
 				if (_migration_method == MIGRATION_STORAGE_SPACE_AWARE) {
-					double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
-					under_load_list.insert(make_pair(remained_storage, to_ssd_temp));
+					double remained_storage_rate = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage) / _SSD_list[to_ssd_temp].storage_capacity;
+					under_load_list.insert(make_pair(remained_storage_rate, to_ssd_temp));
 				}
 				else if (_migration_method == MIGRATION_LIFETIME_AWARE) 
 					under_load_list.insert(make_pair(1/_SSD_list[to_ssd_temp].ADWD, to_ssd_temp));
