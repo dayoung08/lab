@@ -1,6 +1,6 @@
 #include "header.h"
 #define NUM_OF_DATEs 3 // for simulation 1 3 7 15 30
-#define NUM_OF_TIMEs 4
+#define NUM_OF_TIMEs 3
 
 #define MIN_RUNNING_DAY 1
 #define MAX_RUNNING_DAY 90
@@ -70,13 +70,13 @@ int main(int argc, char* argv[]) {
 }
 
 void simulation_placement() {
-	std::default_random_engine g(SEED);
-	std::uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY};
+	default_random_engine g(SEED);
+	uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY};
 	dist_for_running_day.reset();
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
-	VIDEO_CHUNK* VIDEO_SEGMENT_list = new VIDEO_CHUNK[num_of_videos];
+	VIDEO_CHUNK* VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
 
-	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
+	placed_video_init_for_simulation(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		SSD_list[ssd].running_days = dist_for_running_day(g);
 		SSD_list[ssd].ADWD = 1;
@@ -84,8 +84,8 @@ void simulation_placement() {
 	}
 
 	//printf("\n[PLACEMENT START]\n\n");
-	int placement_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
-	//int placement_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs);
+	int placement_num = placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos);
+	//int placement_num = migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs);
 
 	double sum_for_AVG_in_placement = 0;
 	double sum_for_STD_in_placement = 0;
@@ -103,19 +103,19 @@ void simulation_placement() {
 	printf("%lf\n", total_bandwidth_usage_in_placement);
 
 	delete[](SSD_list);
-	delete[](VIDEO_SEGMENT_list);
+	delete[](VIDEO_CHUNK_list);
 }
 
 void simulation_migartion() {
-	std::default_random_engine g(SEED);
-	std::uniform_int_distribution<> dist_for_running_day{ MIN_RUNNING_DAY, MAX_RUNNING_DAY };
+	default_random_engine g(SEED);
+	uniform_int_distribution<> dist_for_running_day{ MIN_RUNNING_DAY, MAX_RUNNING_DAY };
 	dist_for_running_day.reset();
 	placement_method = PLACEMENT_RANDOM;
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; //SSD_list[num_of_SSDs] -> vitual ssd;
-	VIDEO_CHUNK* VIDEO_SEGMENT_list = new VIDEO_CHUNK[num_of_videos];
-	placed_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
+	VIDEO_CHUNK* VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
+	placed_video_init_for_simulation(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
-	placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
+	placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos);
 
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
 	//int num_new_ssd = 0;
@@ -125,35 +125,34 @@ void simulation_migartion() {
 		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
 	}
 
+	int total_migration_num = 0;
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
-		int migration_num = 0;
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//아래는 새로운 비디오 추가 과정
 			growing_cnt();
 			if (num_of_new_videos > 0) {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
-				VIDEO_CHUNK* new_VIDEO_SEGMENT_list = new VIDEO_CHUNK[num_of_new_videos];
-				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, time);
+				VIDEO_CHUNK* new_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_new_videos];
+				migrated_video_init_for_simulation(SSD_list, VIDEO_CHUNK_list, new_VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, time);
 
-				VIDEO_CHUNK* _VIDEO_SEGMENT_conbined_list = new VIDEO_CHUNK[num_of_videos + num_of_new_videos];
-				copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
-				delete[] VIDEO_SEGMENT_list;
-				copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);
-				delete[] new_VIDEO_SEGMENT_list;
-				VIDEO_SEGMENT_list = _VIDEO_SEGMENT_conbined_list;
+				VIDEO_CHUNK* _VIDEO_CHUNK_conbined_list = new VIDEO_CHUNK[num_of_videos + num_of_new_videos];
+				copy(VIDEO_CHUNK_list, VIDEO_CHUNK_list + num_of_videos, _VIDEO_CHUNK_conbined_list);
+				delete[] VIDEO_CHUNK_list;
+				copy(new_VIDEO_CHUNK_list, new_VIDEO_CHUNK_list + num_of_new_videos, _VIDEO_CHUNK_conbined_list + num_of_videos);
+				delete[] new_VIDEO_CHUNK_list;
+				VIDEO_CHUNK_list = _VIDEO_CHUNK_conbined_list;
 				num_of_videos += num_of_new_videos;  //기존 비디오 리스트에 새로운 비디오 추가
 			}
 			else {
 				//새로운 비디오 업데이트 안하고, 인기도만 바꿀 때 씀. 
-				migrated_video_init_for_simulation(SSD_list, VIDEO_SEGMENT_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, time);
+				migrated_video_init_for_simulation(SSD_list, VIDEO_CHUNK_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, time);
 			}
 			//migration 수행
 			//printf("%d일-%d ", day, time);
-			int migration_num;
 			if(migration_method >= MIGRATION_OURS)
-				migration_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
+				total_migration_num += migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos);
 			else 
-				migration_num = placement(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos);
+				total_migration_num += placement(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos);
 			//printf("migration_num %d\n", migration_num);
 		}
 
@@ -171,18 +170,18 @@ void simulation_migartion() {
 				total_bandwidth_usage_in_migration += SSD_list[ssd].total_bandwidth_usage;
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
-			printf("%lf\t%lf\t%lf\n", total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs));
+			printf("%lf\t%lf\t%lf\t%d\n", total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs), total_migration_num / (NUM_OF_DATEs * NUM_OF_TIMEs));
 		}
 	}
 /*
 	double total_bandwidth_of_alloc_videos = 0;
 	int num_of_alloc_videos = 0;
 	for (int vid = 0; vid < num_of_videos; vid++) {
-		if ( !(VIDEO_SEGMENT_list[vid].assigned_SSD == NONE_ALLOC && VIDEO_SEGMENT_list[vid].assigned_SSD == NONE_ALLOC)) {
+		if ( !(VIDEO_CHUNK_list[vid].assigned_SSD == NONE_ALLOC && VIDEO_CHUNK_list[vid].assigned_SSD == NONE_ALLOC)) {
 			num_of_alloc_videos++;
-			total_bandwidth_of_alloc_videos += VIDEO_SEGMENT_list[vid].requested_bandwidth;
+			total_bandwidth_of_alloc_videos += VIDEO_CHUNK_list[vid].requested_bandwidth;
 		}
-		if (VIDEO_SEGMENT_list[vid].assigned_SSD == VIRTUAL_SSD) {
+		if (VIDEO_CHUNK_list[vid].assigned_SSD == VIRTUAL_SSD) {
 			printf("error\n");
 		}
 	}
@@ -196,50 +195,50 @@ void simulation_migartion() {
 	}
 	*/
 	delete[](SSD_list);
-	delete[](VIDEO_SEGMENT_list);
+	delete[](VIDEO_CHUNK_list);
 }
 
 void testbed_placement() {
 	SSD* SSD_list = NULL;
-	VIDEO_CHUNK* VIDEO_SEGMENT_list = NULL;
-	placed_video_init_for_testbed(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
+	VIDEO_CHUNK* VIDEO_CHUNK_list = NULL;
+	placed_video_init_for_testbed(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 
-	int placement_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos);
+	int placement_num = placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos);
 
-	create_placement_infomation(SSD_list, VIDEO_SEGMENT_list, num_of_videos);
-	create_SSD_and_video_list(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos);
+	create_placement_infomation(SSD_list, VIDEO_CHUNK_list, num_of_videos);
+	create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos);
 }
 
 void testbed_migration(bool _has_new_files) {
 	SSD* SSD_list = NULL;
-	VIDEO_CHUNK* VIDEO_SEGMENT_list = NULL;
-	VIDEO_CHUNK* new_VIDEO_SEGMENT_list = NULL;
+	VIDEO_CHUNK* VIDEO_CHUNK_list = NULL;
+	VIDEO_CHUNK* new_VIDEO_CHUNK_list = NULL;
 	
 	// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 	//새로운 비디오 업데이트 안하고, 인기도만 바꾸기 가능함
-	migrated_video_init_for_testbed(SSD_list, VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, _has_new_files);
+	migrated_video_init_for_testbed(SSD_list, VIDEO_CHUNK_list, new_VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, _has_new_files);
 	int* prev_assigned_SSD = new int[num_of_videos];
 	for (int vid = 0; vid < num_of_videos; vid++) {
-		prev_assigned_SSD[vid] = VIDEO_SEGMENT_list[vid].assigned_SSD;
+		prev_assigned_SSD[vid] = VIDEO_CHUNK_list[vid].assigned_SSD;
 	}
 
-	VIDEO_CHUNK* _VIDEO_SEGMENT_conbined_list = new VIDEO_CHUNK[num_of_videos + num_of_new_videos];
-	copy(VIDEO_SEGMENT_list, VIDEO_SEGMENT_list + num_of_videos, _VIDEO_SEGMENT_conbined_list);
-	delete[] VIDEO_SEGMENT_list;
-	copy(new_VIDEO_SEGMENT_list, new_VIDEO_SEGMENT_list + num_of_new_videos, _VIDEO_SEGMENT_conbined_list + num_of_videos);
-	delete[] new_VIDEO_SEGMENT_list;
-	VIDEO_SEGMENT_list = _VIDEO_SEGMENT_conbined_list;
+	VIDEO_CHUNK* _VIDEO_CHUNK_conbined_list = new VIDEO_CHUNK[num_of_videos + num_of_new_videos];
+	copy(VIDEO_CHUNK_list, VIDEO_CHUNK_list + num_of_videos, _VIDEO_CHUNK_conbined_list);
+	delete[] VIDEO_CHUNK_list;
+	copy(new_VIDEO_CHUNK_list, new_VIDEO_CHUNK_list + num_of_new_videos, _VIDEO_CHUNK_conbined_list + num_of_videos);
+	delete[] new_VIDEO_CHUNK_list;
+	VIDEO_CHUNK_list = _VIDEO_CHUNK_conbined_list;
 	num_of_videos += num_of_new_videos;  //기존 비디오 리스트에 새로운 비디오 추가
 	
 	//비디오 migration
 	int migration_num;
 	if (migration_method >= MIGRATION_OURS)
-		migration_num = migration(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos + num_of_new_videos);
+		migration_num = migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos + num_of_new_videos);
 	else
-		migration_num = placement(SSD_list, VIDEO_SEGMENT_list, placement_method, num_of_SSDs, num_of_videos + num_of_new_videos);
+		migration_num = placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos + num_of_new_videos);
 
-	create_migration_infomation(SSD_list, VIDEO_SEGMENT_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // 이동 정보 파일 생성
-	create_SSD_and_video_list(SSD_list, VIDEO_SEGMENT_list, num_of_SSDs, num_of_videos + num_of_new_videos);
-	delete[] VIDEO_SEGMENT_list;
+	create_migration_infomation(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // 이동 정보 파일 생성
+	create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos + num_of_new_videos);
+	delete[] VIDEO_CHUNK_list;
 }
 
