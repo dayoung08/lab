@@ -197,8 +197,8 @@ int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_
 					under_load_list.insert(make_pair(remained_bandwidth_rate, to_ssd_temp));
 				}
 				else {
-					double remained_storage_rate = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage) / _SSD_list[to_ssd_temp].maximum_bandwidth;
-					under_load_list.insert(make_pair(remained_storage_rate, to_ssd_temp));
+					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage);
+					under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
 				}
 			}
 		}
@@ -290,7 +290,7 @@ int migration_random_chunk(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 					continue;
 
 				if (_migration_method == MIGRATION_STORAGE_SPACE_AWARE) {
-					double remained_storage_rate = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage) / _SSD_list[to_ssd_temp].storage_capacity;
+					double remained_storage_rate = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage);
 					under_load_list.insert(make_pair(remained_storage_rate, to_ssd_temp));
 				}
 				else if (_migration_method == MIGRATION_LIFETIME_AWARE) 
