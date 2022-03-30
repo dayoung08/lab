@@ -81,9 +81,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (bt < 0)
 					continue;
 
-				double slope = -INFINITY;
-				slope = bt / ADWD;
-				under_load_list.insert(make_pair(slope, to_ssd_temp));
+				under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
 			}
 		}
 
@@ -189,13 +187,13 @@ int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_
 				else {
 					bt = _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
 				}
+				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 
 				if (bt < 0)
 					continue;
 
 				if (_migration_method == MIGRATION_MAXIMUM_AWARE) {
-					double remained_bandwidth_rate = _SSD_list[to_ssd_temp].maximum_bandwidth / _SSD_list[to_ssd_temp].storage_capacity;
-					under_load_list.insert(make_pair(remained_bandwidth_rate, to_ssd_temp));
+					under_load_list.insert(make_pair(_SSD_list[to_ssd_temp].maximum_bandwidth / ADWD, to_ssd_temp));
 				}
 				else {
 					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage);
