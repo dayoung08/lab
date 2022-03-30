@@ -14,14 +14,14 @@ int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_met
 	case MIGRATION_OURS:
 		migration_num = migration_of_two_phase(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
 		break;
-	case MIGRATION_LIMIT_AWARE:
+	case MIGRATION_MAXIMUM_AWARE:
 	case MIGRATION_BANDWIDTH_AWARE:
-		migration_num = migration_bandwidth_aware(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
+		migration_num = migration_highest_bandwidth_chunk_first(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
 		break;
 	case MIGRATION_STORAGE_SPACE_AWARE:
 	case MIGRATION_LIFETIME_AWARE:
 	case MIGRATION_RANDOM:
-		migration_num = migration_space_aware(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
+		migration_num = migration_random_chunk(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
 		break;
 	}
 
@@ -138,7 +138,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	return migration_num;
 }
 
-int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD){
+int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD){
 	bool* is_over_load = new bool[_num_of_SSDs];
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>> videos_in_over_load_SSDs;
 	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
@@ -153,25 +153,34 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, in
 		else
 			is_over_load[ssd] = false;
 	}
+
 	//여기까지 초기화
 	int migration_num = 0;
 	bool visual_ssd_is_used = false;
-	int skip = 0;
 	while (!videos_in_over_load_SSDs.empty()) {
 		int from_ssd = (*videos_in_over_load_SSDs.begin()).second.second;
 		int from_vid = (*videos_in_over_load_SSDs.begin()).second.first;
 		pair<double, int> element = make_pair(_VIDEO_CHUNK_list[from_vid].requested_bandwidth, from_vid);
 		videos_in_over_load_SSDs.erase(*videos_in_over_load_SSDs.begin());
-
-		if (!is_over_load[from_ssd])
+		
+		if (videos_in_over_load_SSDs.empty() && !visual_ssd_is_used) {
+			is_over_load[VIRTUAL_SSD] = true;
+			set<pair<double, int>>::iterator pos = _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.begin();
+			while (pos != _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.end()) {
+				videos_in_over_load_SSDs.insert(make_pair((*pos).first, make_pair((*pos).second, VIRTUAL_SSD)));
+				pos++;
+			}
+			visual_ssd_is_used = true;
+		}
+		if (!is_over_load[from_ssd]) {
 			continue;
+		}
 
 		//sort 하기
 		set<pair<double, int>, greater<pair<double, int>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
-				double remained_bandwidth_rate = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage) / _SSD_list[to_ssd_temp].maximum_bandwidth;
 				double bt;
 				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
 					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);
@@ -183,10 +192,14 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, in
 				if (bt < 0)
 					continue;
 
-				if(_migration_method == MIGRATION_LIMIT_AWARE)
-					under_load_list.insert(make_pair(_SSD_list[to_ssd_temp].maximum_bandwidth / _SSD_list[to_ssd_temp].storage_capacity, to_ssd_temp));
-				else
+				if (_migration_method == MIGRATION_MAXIMUM_AWARE) {
+					double remained_bandwidth_rate = _SSD_list[to_ssd_temp].maximum_bandwidth / _SSD_list[to_ssd_temp].storage_capacity;
 					under_load_list.insert(make_pair(remained_bandwidth_rate, to_ssd_temp));
+				}
+				else {
+					double remained_storage_rate = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage) / _SSD_list[to_ssd_temp].maximum_bandwidth;
+					under_load_list.insert(make_pair(remained_storage_rate, to_ssd_temp));
+				}
 			}
 		}
 
@@ -213,24 +226,14 @@ int migration_bandwidth_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, in
 			migration_num++;
 		under_load_list.clear();
 		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
-
-		//if (skip == 100)
-		//	videos_in_over_load_SSDs.clear();
-		if (videos_in_over_load_SSDs.empty() && !visual_ssd_is_used) {
-			is_over_load[VIRTUAL_SSD] = true;
-			set<pair<double, int>>::iterator pos = _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.begin();
-			while (pos != _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.end()) {
-				videos_in_over_load_SSDs.insert(make_pair((*pos).first, make_pair((*pos).second, VIRTUAL_SSD)));
-				pos++;
-			}
-			visual_ssd_is_used = true;
-		}
 	}
+	videos_in_over_load_SSDs.clear();
+	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>>().swap(videos_in_over_load_SSDs);
 	delete[] is_over_load;
 	return migration_num;
 }
 
-int migration_space_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD) {
+int migration_random_chunk(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD) {
 	default_random_engine g(SEED);
 	bool* is_over_load = new bool[_num_of_SSDs];
 	vector<pair<int, int>> videos_in_over_load_SSDs;
@@ -257,6 +260,16 @@ int migration_space_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _m
 		pair<double, int> element = make_pair(_VIDEO_CHUNK_list[from_vid].requested_bandwidth, from_vid);
 		videos_in_over_load_SSDs.pop_back();
 
+		if (videos_in_over_load_SSDs.empty() && !visual_ssd_is_used) {
+			is_over_load[VIRTUAL_SSD] = true;
+			set<pair<double, int>>::iterator pos = _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.begin();
+			while (pos != _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.end()) {
+				videos_in_over_load_SSDs.push_back(make_pair((*pos).second, VIRTUAL_SSD));
+				pos++;
+			}
+			visual_ssd_is_used = true;
+			shuffle(videos_in_over_load_SSDs.begin(), videos_in_over_load_SSDs.end(), g);
+		}
 		if (!is_over_load[from_ssd])
 			continue;
 
@@ -266,6 +279,16 @@ int migration_space_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _m
 			if (!is_over_load[to_ssd_temp]) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second; 
 				double bt;
+				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
+					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);
+				}
+				else {
+					bt = _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
+				}
+
+				if (bt < 0)
+					continue;
+
 				if (_migration_method == MIGRATION_STORAGE_SPACE_AWARE) {
 					double remained_storage_rate = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage) / _SSD_list[to_ssd_temp].storage_capacity;
 					under_load_list.insert(make_pair(remained_storage_rate, to_ssd_temp));
@@ -276,16 +299,6 @@ int migration_space_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _m
 					uniform_int_distribution<> dist_priority{ 1, _num_of_SSDs };
 					under_load_list.insert(make_pair(dist_priority(g), to_ssd_temp)); // 옮길 SSD를 랜덤 선택하기 위함
 				}
-
-				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
-					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);
-				}
-				else {
-					bt = _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
-				}
-
-				if (bt < 0)
-					continue;
 			}
 		}
 
@@ -312,20 +325,9 @@ int migration_space_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _m
 			migration_num++;
 		under_load_list.clear();
 		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
-
-		//if (skip == 100)
-		//	videos_in_over_load_SSDs.clear();
-		if (videos_in_over_load_SSDs.empty() && !visual_ssd_is_used) {
-			is_over_load[VIRTUAL_SSD] = true;
-			set<pair<double, int>>::iterator pos = _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.begin();
-			while (pos != _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.end()) {
-				videos_in_over_load_SSDs.push_back(make_pair((*pos).second, VIRTUAL_SSD));
-				pos++;
-			}
-			visual_ssd_is_used = true;
-			shuffle(videos_in_over_load_SSDs.begin(), videos_in_over_load_SSDs.end(), g);
-		}
 	}
+	videos_in_over_load_SSDs.clear();
+	vector<pair<int, int>>().swap(videos_in_over_load_SSDs);
 	delete[] is_over_load;
 	return migration_num;
 }
