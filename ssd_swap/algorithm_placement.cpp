@@ -33,14 +33,14 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int
 
 		for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
 			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_temp, video_index)) {
-				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - _SSD_list[ssd_temp].total_bandwidth_usage);
-				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - _SSD_list[ssd_temp].storage_usage);
+				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].total_bandwidth_usage + _VIDEO_CHUNK_list[video_index].requested_bandwidth));
+				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_CHUNK_list[video_index].size));
 				double ADWD = (_SSD_list[ssd_temp].total_write_MB + _VIDEO_CHUNK_list[video_index].size) / (_SSD_list[ssd_temp].DWPD * _SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].running_days);
 
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS: 
-					slope = (remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / (remained_storage - _VIDEO_CHUNK_list[video_index].size);
+					slope = remained_bandwidth / remained_storage;
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
@@ -79,6 +79,11 @@ int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placeme
 	default_random_engine g(SEED);
 
 	int placement_num = 0;
+ 	vector<int> target_ssd_list;
+	for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
+		target_ssd_list.push_back(ssd_temp);
+	}
+
 	/*if (_placement_method == PLACEMENT_RANDOM)
 		std::shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);*/
 	//실수로 특허 때 이 위치 여기였었음. migration 전에 있는 배치는 애초에 어떻게 하든 문제가 되지 않아서 상관은 없는데 (비디오도 이미 대역폭이 랜덤셔플되어있어서 랜덤 할당한 것과 같은 상태)
@@ -86,32 +91,31 @@ int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placeme
 
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
-
-		vector<int> target_ssd_list;
-		for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
-			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_temp, video_index)) 
-				target_ssd_list.push_back(ssd_temp);
-		}
-
 		if (!target_ssd_list.empty()) {
 			int ssd_index = NONE_ALLOC;
 			if (_placement_method == PLACEMENT_RANDOM) {
 				shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);
 				ssd_index = target_ssd_list.back();
-				target_ssd_list.pop_back();
 			}
 			if (_placement_method == PLACEMENT_ROUND_ROBIN) {
 				ssd_index = target_ssd_list[vid % target_ssd_list.size()];
-				target_ssd_list.erase(target_ssd_list.begin() + (vid % target_ssd_list.size()));
 			}
 
-			int prev_SSD = _VIDEO_CHUNK_list[video_index].assigned_SSD;
-			double remained_bandwidth = (_SSD_list[ssd_index].maximum_bandwidth - (_SSD_list[ssd_index].total_bandwidth_usage + _VIDEO_CHUNK_list[video_index].requested_bandwidth));
-			if (remained_bandwidth > 0) {
-				allocate(_SSD_list, _VIDEO_CHUNK_list, ssd_index, video_index);
-				if (prev_SSD != ssd_index) {
-					placement_num++;
+			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_index, video_index)) {
+				int prev_SSD = _VIDEO_CHUNK_list[video_index].assigned_SSD;
+				double remained_bandwidth = (_SSD_list[ssd_index].maximum_bandwidth - (_SSD_list[ssd_index].total_bandwidth_usage + _VIDEO_CHUNK_list[video_index].requested_bandwidth));
+				if (remained_bandwidth > 0) {
+					allocate(_SSD_list, _VIDEO_CHUNK_list, ssd_index, video_index);
+					if (prev_SSD != ssd_index) {
+						placement_num++;
+					}
 				}
+			}
+			else {
+				if (_placement_method == PLACEMENT_RANDOM)
+					target_ssd_list.pop_back();
+				if (_placement_method == PLACEMENT_ROUND_ROBIN)
+					target_ssd_list.erase(target_ssd_list.begin() + (vid % target_ssd_list.size()));
 			}
 		}
 		/*else {
