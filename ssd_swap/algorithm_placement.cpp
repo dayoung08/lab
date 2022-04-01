@@ -33,14 +33,14 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int
 
 		for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
 			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_temp, video_index)) {
-				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].total_bandwidth_usage + _VIDEO_CHUNK_list[video_index].requested_bandwidth));
-				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_CHUNK_list[video_index].size));
+				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - _SSD_list[ssd_temp].total_bandwidth_usage);
+				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - _SSD_list[ssd_temp].storage_usage);
 				double ADWD = (_SSD_list[ssd_temp].total_write_MB + _VIDEO_CHUNK_list[video_index].size) / (_SSD_list[ssd_temp].DWPD * _SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].running_days);
 
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS: 
-					slope = remained_bandwidth / remained_storage;
+					slope = (remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / (remained_storage - _VIDEO_CHUNK_list[video_index].size);
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
