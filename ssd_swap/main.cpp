@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 7 // for simulation 1 3 7 15 30
+#define NUM_OF_DATEs 5 // for simulation 1 3 7 15 30
 #define NUM_OF_TIMEs 3
 
 #define MIN_RUNNING_DAY 1

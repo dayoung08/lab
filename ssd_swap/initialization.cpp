@@ -23,7 +23,7 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::default_random_engine g(SEED);
 	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
-	std::uniform_int_distribution<> dist_for_storage_space{ 0, 3 };
+	std::uniform_int_distribution<> dist_for_storage_space{ 0, 2 }; // 2 아니면 너무 ADWD 커진다
 	dist_for_type.reset();
 	dist_for_storage_space.reset();
 	//std::uniform_int_distribution<> dist_for_bandwidth{ 550, 3500 };
