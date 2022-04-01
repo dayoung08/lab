@@ -3,6 +3,8 @@ for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 30 1500000 12000 %%i >> placem
 for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 30 2000000 12000 %%i >> placement-30-2000000.txt
 for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 30 2500000 12000 %%i >> placement-30-2500000.txt
 for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 30 3000000 12000 %%i >> placement-30-3000000.txt
+for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 30 4000000 12000 %%i >> placement-30-4000000.txt
+for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 30 5000000 12000 %%i >> placement-30-5000000.txt
 for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 10 3000000 12000 %%i >> placement-10-3000000.txt
 for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 20 3000000 12000 %%i >> placement-20-3000000.txt
 for %%i in (1,2,3,4,5,6) do ssd_new.exe placement 40 3000000 12000 %%i >> placement-40-3000000.txt
