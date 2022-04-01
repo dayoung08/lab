@@ -8,7 +8,7 @@
 #include <sstream>
 using namespace std;
 
-#define SEED 111
+#define SEED 12345
 //#define INFINITY 987654321
 
 #define SSD_TYPE 10
@@ -25,17 +25,17 @@ using namespace std;
 #define PLACEMENT_ROUND_ROBIN 6
 
 #define MIGRATION_OURS 7
-#define MIGRATION_MAXIMUM_AWARE 8
-#define MIGRATION_BANDWIDTH_AWARE 9
-#define MIGRATION_STORAGE_SPACE_AWARE 10
-#define MIGRATION_LIFETIME_AWARE 11
-#define MIGRATION_RANDOM 12
+#define MIGRATION_BANDWIDTH_AWARE 8
+#define MIGRATION_STORAGE_SPACE_AWARE 9
+#define MIGRATION_LIFETIME_AWARE 10
+#define MIGRATION_RANDOM 11
+#define MIGRATION_ROUND_ROBIN 12
 
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
-#define VIDEO_BANDWIDTH 2.5f //비디오가 20000kbps(즉 20Mbps)라고 가정해봅시다.20*0.125=2.5,하나에 2.5MB/s가 듭니다.
-#define VIDEO_SIZE 15.0f; // 2.5MB/s x 6초
+#define VIDEO_BANDWIDTH 2.5f 
+#define VIDEO_SIZE 15.0f;
 
 struct SSD {
 	int index;
@@ -101,7 +101,7 @@ void allocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _ssd_index, in
 int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos);
 int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD);
 int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD);
-int migration_random_chunk(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD);
+int migration_others(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD);
 
 pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, set<pair<double, int>, greater<pair<double, int>>>* under_load_list, int _from_ssd, int _from_vid);
 void set_serviced_video(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, int ssd, bool flag, int* _migration_num, int* _prev_SSD);
