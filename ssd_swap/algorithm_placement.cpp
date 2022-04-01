@@ -91,14 +91,16 @@ int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placeme
 
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
-		if (!target_ssd_list.empty()) {
+		while (!target_ssd_list.empty()) {
 			int ssd_index = NONE_ALLOC;
 			if (_placement_method == PLACEMENT_RANDOM) {
 				shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);
 				ssd_index = target_ssd_list.back();
+				target_ssd_list.pop_back();
 			}
 			if (_placement_method == PLACEMENT_ROUND_ROBIN) {
 				ssd_index = target_ssd_list[vid % target_ssd_list.size()];
+				target_ssd_list.erase(target_ssd_list.begin() + (vid % target_ssd_list.size()));
 			}
 
 			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_index, video_index)) {
@@ -109,13 +111,8 @@ int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placeme
 					if (prev_SSD != ssd_index) {
 						placement_num++;
 					}
+					break;
 				}
-			}
-			else {
-				if (_placement_method == PLACEMENT_RANDOM)
-					target_ssd_list.pop_back();
-				if (_placement_method == PLACEMENT_ROUND_ROBIN)
-					target_ssd_list.erase(target_ssd_list.begin() + (vid % target_ssd_list.size()));
 			}
 		}
 		/*else {
