@@ -79,11 +79,6 @@ int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placeme
 	default_random_engine g(SEED);
 
 	int placement_num = 0;
- 	vector<int> target_ssd_list;
-	for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
-		target_ssd_list.push_back(ssd_temp);
-	}
-
 	/*if (_placement_method == PLACEMENT_RANDOM)
 		std::shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);*/
 	//실수로 특허 때 이 위치 여기였었음. migration 전에 있는 배치는 애초에 어떻게 하든 문제가 되지 않아서 상관은 없는데 (비디오도 이미 대역폭이 랜덤셔플되어있어서 랜덤 할당한 것과 같은 상태)
@@ -91,7 +86,14 @@ int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placeme
 
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
-		while (!target_ssd_list.empty()) {
+
+		vector<int> target_ssd_list;
+		for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
+			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_temp, video_index)) 
+				target_ssd_list.push_back(ssd_temp);
+		}
+
+		if (!target_ssd_list.empty()) {
 			int ssd_index = NONE_ALLOC;
 			if (_placement_method == PLACEMENT_RANDOM) {
 				shuffle(target_ssd_list.begin(), target_ssd_list.end(), g);
@@ -103,15 +105,12 @@ int placement_basic(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placeme
 				target_ssd_list.erase(target_ssd_list.begin() + (vid % target_ssd_list.size()));
 			}
 
-			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_index, video_index)) {
-				int prev_SSD = _VIDEO_CHUNK_list[video_index].assigned_SSD;
-				double remained_bandwidth = (_SSD_list[ssd_index].maximum_bandwidth - (_SSD_list[ssd_index].total_bandwidth_usage + _VIDEO_CHUNK_list[video_index].requested_bandwidth));
-				if (remained_bandwidth > 0) {
-					allocate(_SSD_list, _VIDEO_CHUNK_list, ssd_index, video_index);
-					if (prev_SSD != ssd_index) {
-						placement_num++;
-					}
-					break;
+			int prev_SSD = _VIDEO_CHUNK_list[video_index].assigned_SSD;
+			double remained_bandwidth = (_SSD_list[ssd_index].maximum_bandwidth - (_SSD_list[ssd_index].total_bandwidth_usage + _VIDEO_CHUNK_list[video_index].requested_bandwidth));
+			if (remained_bandwidth > 0) {
+				allocate(_SSD_list, _VIDEO_CHUNK_list, ssd_index, video_index);
+				if (prev_SSD != ssd_index) {
+					placement_num++;
 				}
 			}
 		}
