@@ -152,8 +152,9 @@ int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_
 				case MIGRATION_STORAGE_SPACE_AWARE:
 				case MIGRATION_LIFETIME_AWARE:
 				case MIGRATION_RANDOM:
-				case MIGRATION_ROUND_ROBIN:
 					videos_in_over_load_SSDs.insert(make_pair(priority(g), make_pair((*pos).second, ssd)));
+				case MIGRATION_ROUND_ROBIN:
+					videos_in_over_load_SSDs.insert(make_pair(1/ (*pos).second, make_pair((*pos).second, ssd)));
 					break;
 				}
 				pos++;
@@ -219,7 +220,7 @@ int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_
 					under_load_list.insert(make_pair(dist_priority(g), to_ssd_temp)); // 옮길 SSD를 랜덤 선택하기 위함
 					break;
 				case MIGRATION_ROUND_ROBIN:
-					under_load_list.insert(make_pair(1 / to_ssd_temp, to_ssd_temp));
+					under_load_list.insert(make_pair(1/to_ssd_temp, to_ssd_temp));
 					break;
 				}
 			}

@@ -35,7 +35,7 @@ using namespace std;
 #define BETA  1
 
 #define VIDEO_BANDWIDTH 2.5f 
-#define VIDEO_SIZE 10.0f;
+#define VIDEO_SIZE 20.0f;
 
 struct SSD {
 	int index;
