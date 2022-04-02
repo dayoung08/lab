@@ -153,6 +153,7 @@ int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_
 				case MIGRATION_LIFETIME_AWARE:
 				case MIGRATION_RANDOM:
 					videos_in_over_load_SSDs.insert(make_pair(priority(g), make_pair((*pos).second, ssd)));
+					break;
 				case MIGRATION_ROUND_ROBIN:
 					videos_in_over_load_SSDs.insert(make_pair(1/ (*pos).second, make_pair((*pos).second, ssd)));
 					break;
