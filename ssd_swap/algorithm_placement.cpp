@@ -33,14 +33,16 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int
 
 		for (int ssd_temp = 1; ssd_temp <= _num_of_SSDs; ssd_temp++) {
 			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, ssd_temp, video_index)) {
-				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - (_SSD_list[ssd_temp].total_bandwidth_usage + _VIDEO_CHUNK_list[video_index].requested_bandwidth));
-				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - (_SSD_list[ssd_temp].storage_usage + _VIDEO_CHUNK_list[video_index].size));
-				double ADWD = (_SSD_list[ssd_temp].total_write_MB + _VIDEO_CHUNK_list[video_index].size) / (_SSD_list[ssd_temp].DWPD * _SSD_list[ssd_temp].storage_capacity * _SSD_list[ssd_temp].running_days);
+				double remained_bandwidth = (_SSD_list[ssd_temp].maximum_bandwidth - _SSD_list[ssd_temp].total_bandwidth_usage);
+				double remained_storage = (_SSD_list[ssd_temp].storage_capacity - _SSD_list[ssd_temp].storage_usage);
 
 				double slope = -INFINITY;
 				switch (_placement_method) {
-				case PLACEMENT_OURS: 
-					slope = remained_bandwidth / remained_storage;
+				case PLACEMENT_OURS:
+					if ((remained_storage - _VIDEO_CHUNK_list[video_index].size) == 0)
+						slope = -INFINITY;
+					else
+						slope = (remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / (remained_storage - _VIDEO_CHUNK_list[video_index].size);
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
@@ -49,7 +51,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int
 					slope = remained_storage;
 					break;
 				case PLACEMENT_LIFETIME_AWARE:
-					slope = 1/ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
+					slope = 1/ _SSD_list[ssd_temp].ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.
 					break;
 				}
 				target_ssd_list_with_ratio_sort.insert(make_pair(slope, ssd_temp));
