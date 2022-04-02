@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 7 // for simulation 1 3 7 15 30
+#define NUM_OF_DATEs 3 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 3
 
 #define MIN_RUNNING_DAY 1
@@ -9,7 +9,7 @@
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 30; // 10, 20, (30), 40, 50
+int num_of_SSDs = 10; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 30000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 12000; //8000
@@ -156,8 +156,8 @@ void simulation_migartion() {
 		}
 
 		// 결과 출력 : SSD의 평균, 표준편차 ADWD 출력
-		if (day == NUM_OF_DATEs) {
-		//if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
+		//if (day == NUM_OF_DATEs) {
+		if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
 			double sum_for_AVG_in_migration = 0;
 			double sum_for_STD_in_migration = 0;
 			//double total_serviced_bandwidth_in_migration = 0;

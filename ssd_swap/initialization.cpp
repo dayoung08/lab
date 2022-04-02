@@ -43,7 +43,7 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			_SSD_list[ssd_index].storage_capacity = (double)500000 * pow(2, dist_for_storage_space(g)) + 0.00001;
 
 			_SSD_list[ssd_index].DWPD = DWPD[r];
-			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r] + 0.00001;
+			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r];
 			//_SSD_list[ssd_index].DWPD = dist_for_DWPD(g);
 			//_SSD_list[ssd_index].maximum_bandwidth = dist_for_bandwidth(g)/ 100;
 		}
