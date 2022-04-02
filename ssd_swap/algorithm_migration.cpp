@@ -302,7 +302,7 @@ int migration_others(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migrat
 					under_load_list.insert(make_pair(dist_priority(g), to_ssd_temp)); // 옮길 SSD를 랜덤 선택하기 위함
 				}
 				else
-					under_load_list.insert(make_pair(1/to_ssd_temp, 0));
+					under_load_list.insert(make_pair(1/to_ssd_temp, to_ssd_temp));
 			}
 		}
 
