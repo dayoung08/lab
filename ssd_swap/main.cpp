@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 5 // for simulation 1 5 15 30
+#define NUM_OF_DATEs 3 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 3
 
 #define MIN_RUNNING_DAY 1
@@ -156,8 +156,8 @@ void simulation_migartion() {
 		}
 
 		// 결과 출력 : SSD의 평균, 표준편차 ADWD 출력
-		//if (day == NUM_OF_DATEs) {
-		if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
+		if (day == NUM_OF_DATEs) {
+		//if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
 			double sum_for_AVG_in_migration = 0;
 			double sum_for_STD_in_migration = 0;
 			//double total_serviced_bandwidth_in_migration = 0;
