@@ -19,7 +19,7 @@ int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_met
 	case MIGRATION_LIFETIME_AWARE:
 	case MIGRATION_RANDOM:
 	case MIGRATION_ROUND_ROBIN:
-		migration_num = migration_highest_bandwidth_chunk_first(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
+		migration_num = migration_others(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _num_of_SSDs, _num_of_videos, prev_SSD);
 		break;
 	}
 
@@ -134,7 +134,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	return migration_num;
 }
 
-int migration_highest_bandwidth_chunk_first(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD){
+int migration_others(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD){
 	bool* is_over_load = new bool[_num_of_SSDs+1];
 	default_random_engine g(SEED);
 	uniform_int_distribution<> priority{ 1, _num_of_videos };

@@ -21,8 +21,19 @@ int placement(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _method, int _
 
 int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _placement_method, int _num_of_SSDs, int _num_of_videos) {
 	set<pair<double, int>, greater<pair<double, int>>> VIDEO_CHUNK_list_with_bandwidth_sort;
+	default_random_engine g(SEED);
+	uniform_int_distribution<> priority{ 1, _num_of_videos };
 	for (int vid = 0; vid < _num_of_videos; vid++) {
-		VIDEO_CHUNK_list_with_bandwidth_sort.insert(make_pair(_VIDEO_CHUNK_list[vid].requested_bandwidth, vid));
+		switch (_placement_method) {
+		case PLACEMENT_OURS:
+		case PLACEMENT_BANDWIDTH_AWARE:
+			VIDEO_CHUNK_list_with_bandwidth_sort.insert(make_pair(_VIDEO_CHUNK_list[vid].requested_bandwidth, vid));
+			break;
+		case PLACEMENT_STORAGE_SPACE_AWARE:
+		case PLACEMENT_LIFETIME_AWARE:
+			VIDEO_CHUNK_list_with_bandwidth_sort.insert(make_pair(priority(g), vid));
+			break;
+		}
 	}
 
 	int placement_num = 0;
@@ -39,10 +50,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS:
-					if ((remained_storage - _VIDEO_CHUNK_list[video_index].size) == 0)
-						slope = -INFINITY;
-					else
-						slope = (remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / (remained_storage - _VIDEO_CHUNK_list[video_index].size);
+					slope = (remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / (remained_storage - _VIDEO_CHUNK_list[video_index].size);
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
 					slope = remained_bandwidth;
