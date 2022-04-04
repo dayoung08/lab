@@ -2,14 +2,15 @@
 #define NUM_OF_DATEs 3 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 2
 
-#define MIN_RUNNING_DAY 1
-#define MAX_RUNNING_DAY 100
+//#define MIN_RUNNING_DAY 1
+//#define MAX_RUNNING_DAY 100
+#define RUNNING_DAY 30
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
-int migration_method = 7; // 8~11로 바꾸면 비교스킴
+int migration_method = 12; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 30; // 10, 20, (30), 40, 50
+int num_of_SSDs = 10; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 30000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 12000; //8000
@@ -70,14 +71,13 @@ int main(int argc, char* argv[]) {
 
 void simulation_placement() {
 	default_random_engine g(SEED);
-	uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY};
-	dist_for_running_day.reset();
+	//uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY};
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; 
 	VIDEO_CHUNK* VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
 
 	placed_video_init_for_simulation(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
-		SSD_list[ssd].running_days = dist_for_running_day(g);
+		SSD_list[ssd].running_days = RUNNING_DAY;
 		SSD_list[ssd].ADWD = 1;
 		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
 	}
@@ -107,8 +107,7 @@ void simulation_placement() {
 
 void simulation_migartion() {
 	default_random_engine g(SEED);
-	uniform_int_distribution<> dist_for_running_day{ MIN_RUNNING_DAY, MAX_RUNNING_DAY };
-	dist_for_running_day.reset();
+	//uniform_int_distribution<> dist_for_running_day{ MIN_RUNNING_DAY, MAX_RUNNING_DAY };
 	placement_method = PLACEMENT_RANDOM;
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; 
 	VIDEO_CHUNK* VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
@@ -119,7 +118,7 @@ void simulation_migartion() {
 	//랜덤으로 ADWD, running_day, total_write_MB, 현재 비디오 할당을 만들어준다.
 	//int num_new_ssd = 0;
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
-		SSD_list[ssd].running_days = dist_for_running_day(g);
+		SSD_list[ssd].running_days = RUNNING_DAY;
 		SSD_list[ssd].ADWD = 1;
 		SSD_list[ssd].total_write_MB = SSD_list[ssd].ADWD * ((SSD_list[ssd].DWPD * SSD_list[ssd].storage_capacity) * SSD_list[ssd].running_days);
 	}
