@@ -51,7 +51,8 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
 		if (from_ssd == VIRTUAL_SSD) {
-			visual_ssd_is_used = true;
+			if(!visual_ssd_is_used)
+				visual_ssd_is_used = true;
 			if (_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty())
 				break;
 		}
@@ -107,18 +108,16 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		case FLAG_DENY:
 			if (under_load_list.empty()) {
 				//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
-				if (visual_ssd_is_used && from_ssd == VIRTUAL_SSD) {
+				if (from_ssd == VIRTUAL_SSD) {
 					_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.erase(element);
 					_VIDEO_CHUNK_list[from_vid].assigned_SSD = NONE_ALLOC;
 					_SSD_list[VIRTUAL_SSD].total_bandwidth_usage -= _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
 					_SSD_list[VIRTUAL_SSD].storage_usage -= _VIDEO_CHUNK_list[from_vid].size;
 				}
 				else {
-					if (from_ssd != VIRTUAL_SSD) {
-						set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, from_ssd, false, &migration_num, _prev_SSD);
-						if (visual_ssd_is_used)
-							is_full[from_ssd] = true;
-					}
+					set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, from_ssd, false, &migration_num, _prev_SSD);
+					if (visual_ssd_is_used)
+						is_full[from_ssd] = true;
 				}
 			}
 			break;
@@ -225,7 +224,7 @@ int overload_elimination(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mi
 					under_load_list.insert(make_pair(dist_priority(g), to_ssd_temp)); // 옮길 SSD를 랜덤 선택하기 위함
 					break;
 				case MIGRATION_ROUND_ROBIN:
-					under_load_list.insert(make_pair((double)1/to_ssd_temp, to_ssd_temp));
+					under_load_list.insert(make_pair((double)1 / to_ssd_temp, to_ssd_temp));
 					break;
 				}
 			}
@@ -390,7 +389,7 @@ void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		}
 		if (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
 			_is_over_load[ssd] = true;
-			if (_migration_method == MIGRATION_OURS) {
+			if (_over_load_SSDs != NULL) {
 				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
 			}
 		}
@@ -398,8 +397,10 @@ void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			_is_over_load[ssd] = false;
 	}
 	//만약 오버로드 된 SSD가 없다면
-	if ((*_over_load_SSDs).empty()) {
-		(*_over_load_SSDs).insert(make_pair(-INFINITY, VIRTUAL_SSD));
+	if (_over_load_SSDs != NULL) {
+		if ((*_over_load_SSDs).empty()) {
+			(*_over_load_SSDs).insert(make_pair(-INFINITY, VIRTUAL_SSD));
+		}
 	}
 }
 
