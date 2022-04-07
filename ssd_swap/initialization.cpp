@@ -6,7 +6,7 @@
 int bandwidth[SSD_TYPE] = { 3500, 3100, 2400, 1800, 560, 560, 560, 560, 550, 550 };
 double DWPD[SSD_TYPE] = { 0.410958904, 0.328767123, 0.290958904, 0.109589041, 0.646575342, 0.328767123, 0.306849315, 0.197260274, 0.109589041, 0.153424658 };
 
-int rand_cnt;
+int rand_cnt = 0;
 
 SSD::~SSD() {
 	total_assigned_VIDEOs_low_bandwidth_first.clear();
@@ -14,7 +14,6 @@ SSD::~SSD() {
 }
 
 void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, int _num_of_request_per_sec) {
-	rand_cnt = 0;
 	SSD_initalization_for_simulation(_SSD_list, _num_of_SSDs);
 	video_initalization_for_simulation(_VIDEO_CHUNK_list, _num_of_videos, _num_of_request_per_sec);
 	//printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
@@ -90,7 +89,7 @@ void video_initalization_for_simulation(VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num
 void migrated_video_init_for_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_VIDEO_CHUNK_list, VIDEO_CHUNK* _new_VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_existed_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _time) {
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
-	default_random_engine g(SEED + rand_cnt);
+	default_random_engine g(SEED + rand_cnt++);
 	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
 	std::shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
 
@@ -170,7 +169,7 @@ void placed_video_init_for_testbed(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_lis
 
 	double* vid_pop = set_zipf_pop(_num_of_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_videos);
-	default_random_engine g(SEED + rand_cnt);
+	default_random_engine g(SEED + rand_cnt++);
 	shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.end(), g);
 	for (int vid = 0; vid < _num_of_videos; vid++) {
 		int video_index = vid;
@@ -194,7 +193,7 @@ void migrated_video_init_for_testbed(SSD* _SSD_list, VIDEO_CHUNK* _existed_VIDEO
 	//아래는 랜덤 대역폭 변화를 위한 인기도 설정
 	double* vid_pop = set_zipf_pop(_num_of_existed_videos + _num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + _num_of_existed_videos + _num_of_new_videos);
-	default_random_engine g(SEED + rand_cnt);
+	default_random_engine g(SEED + rand_cnt++);
 	std::shuffle(vid_pop_shuffle.begin(), vid_pop_shuffle.begin() + _num_of_existed_videos, g);
 	std::shuffle(vid_pop_shuffle.begin() + _num_of_existed_videos, vid_pop_shuffle.end(), g);
 	//대역폭 설정 시작
@@ -355,8 +354,4 @@ string* split(string str, char Delimiter) {
 	result.clear();
 	vector<string>().swap(result); //메모리 해제를 위해
 	return result_array;
-}
-
-void growing_cnt() {
-	rand_cnt++;
 }

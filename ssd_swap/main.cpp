@@ -11,7 +11,7 @@ int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
-int num_of_videos = 3000000;// 50만, 100만, (150만), 200만, 250만
+int num_of_videos = 5000000;// 50만, 100만, (150만), 200만, 250만
 int num_of_new_videos = 30000; // 10000, 20000, (30000), 40000, 50000 에서 나누기 NUM_OF_TIMEs
 double num_of_request_per_sec = 12000; //8000
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 }
 
 void simulation_placement() {
-	default_random_engine g(SEED+2);
+	default_random_engine g(SEED);
 	uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY};
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; 
 	VIDEO_CHUNK* VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
@@ -106,7 +106,7 @@ void simulation_placement() {
 }
 
 void simulation_migartion() {
-	default_random_engine g(SEED+2);
+	default_random_engine g(SEED);
 	uniform_int_distribution<> dist_for_running_day{ MIN_RUNNING_DAY, MAX_RUNNING_DAY };
 	placement_method = PLACEMENT_RANDOM;
 	SSD* SSD_list = new SSD[num_of_SSDs + 1]; 
@@ -127,7 +127,6 @@ void simulation_migartion() {
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
 			//아래는 새로운 비디오 추가 과정
-			growing_cnt();
 			if (num_of_new_videos > 0) {
 				// 새로운 비디오 추가에 따라 비디오 정보들을 업데이트 해줌.
 				VIDEO_CHUNK* new_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_new_videos];
@@ -146,7 +145,7 @@ void simulation_migartion() {
 				migrated_video_init_for_simulation(SSD_list, VIDEO_CHUNK_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, time);
 			}
 			//migration 수행
-			//printf("%d일-%d ", day, time);
+			printf("%d일-%d ", day, time);
 			if(migration_method >= MIGRATION_OURS)
 				total_migration_num += migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos);
 			else 
