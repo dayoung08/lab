@@ -145,7 +145,7 @@ void simulation_migartion() {
 				migrated_video_init_for_simulation(SSD_list, VIDEO_CHUNK_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, time);
 			}
 			//migration 수행
-			printf("%d일-%d ", day, time);
+			//printf("%d일-%d ", day, time);
 			if(migration_method >= MIGRATION_OURS)
 				total_migration_num += migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos);
 			else 
