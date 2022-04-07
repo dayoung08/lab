@@ -80,7 +80,10 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (bt < 0)
 					continue;
 
-				under_load_list.insert(make_pair(remained_bandwidth / ADWD, to_ssd_temp));
+				if (from_ssd != VIRTUAL_SSD) 
+					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
+				else
+					under_load_list.insert(make_pair(remained_bandwidth / ADWD, to_ssd_temp));
 			}
 		}
 
@@ -88,7 +91,12 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		int to_vid = mig_info.second.second;
 		int to_ssd = mig_info.second.first;
 		int flag = mig_info.first;
+		//if (v_flag && from_ssd != VIRTUAL_SSD && flag != FLAG_DENY)
+		//int flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, MIGRATION_BANDWIDTH_AWARE, from_ssd, to_ssd, from_vid, to_vid);
+		// 여기서 걸리는걸 보니까, BE 페이즈 이후에 overload 되면 다시 그 SSD만 다시 마이그레이션을 수행한다. 
+		// 이후 거기서도 할당이 안되면 stable 처리가 되면서 제일 낮은 것들을 빼버리고 최적화 해주고 끝남. //20220325
 
+		//찾았으면 할당하기.
 		switch (flag) {
 		case FLAG_SWAP:
 			swap(_SSD_list, _VIDEO_CHUNK_list, element, from_ssd, to_ssd, from_vid, to_vid, &migration_num, _prev_SSD);
@@ -375,27 +383,23 @@ void reallocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int
 void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, bool* _is_over_load, bool* _is_exceeded, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
 	if (_over_load_SSDs != NULL)
 		(*_over_load_SSDs).clear();
-	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
+	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 		if (_is_exceeded != NULL) {
 			if (_is_exceeded[ssd])
 				continue;
 		}
 		if (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
-			if (ssd == VIRTUAL_SSD && _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.empty()) {
-				_is_over_load[ssd] = false;
-				continue;
-			}
 			_is_over_load[ssd] = true;
-
 			if (_migration_method == MIGRATION_OURS) {
-				if (ssd == VIRTUAL_SSD)
-					(*_over_load_SSDs).insert(make_pair(-INFINITY, ssd));
-				else
-					(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
+				(*_over_load_SSDs).insert(make_pair(_SSD_list[ssd].total_bandwidth_usage - _SSD_list[ssd].maximum_bandwidth, ssd));
 			}
 		}
 		else
 			_is_over_load[ssd] = false;
+	}
+	//만약 오버로드 된 SSD가 없다면
+	if ((*_over_load_SSDs).empty()) {
+		(*_over_load_SSDs).insert(make_pair(-INFINITY, VIRTUAL_SSD));
 	}
 }
 
