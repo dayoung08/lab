@@ -38,11 +38,11 @@ int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_met
 
 int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD) {
 	bool* is_over_load = new bool[_num_of_SSDs+1];
-	bool* is_exceeded = new bool[_num_of_SSDs+1];
-	fill(is_exceeded, is_exceeded + _num_of_SSDs+1, false);
+	bool* is_full = new bool[_num_of_SSDs+1];
+	fill(is_full, is_full + _num_of_SSDs+1, false);
 
 	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
-	update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+	update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
 	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
 	//여기까지 초기화
 
@@ -65,7 +65,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		//sort 하기
 		set<pair<double, int>, greater<pair<double, int>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
-			if (!is_over_load[to_ssd_temp] && !is_exceeded[to_ssd_temp]) {
+			if (!is_over_load[to_ssd_temp] && !is_full[to_ssd_temp]) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				double bt;
 				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
@@ -117,14 +117,14 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 					if (from_ssd != VIRTUAL_SSD) {
 						set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, from_ssd, false, &migration_num, _prev_SSD);
 						if (visual_ssd_is_used)
-							is_exceeded[from_ssd] = true;
+							is_full[from_ssd] = true;
 					}
 				}
 			}
 			break;
 		}
 
-		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_exceeded, &over_load_SSDs, _num_of_SSDs);
+		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
 		if (flag != FLAG_DENY)
 			migration_num++;
 		under_load_list.clear();
@@ -380,12 +380,12 @@ void reallocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int
 	}
 }
 
-void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, bool* _is_over_load, bool* _is_exceeded, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
+void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, bool* _is_over_load, bool* _is_full, set<pair<double, int>, greater<pair<double, int>>>* _over_load_SSDs, int _num_of_SSDs) {
 	if (_over_load_SSDs != NULL)
 		(*_over_load_SSDs).clear();
 	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-		if (_is_exceeded != NULL) {
-			if (_is_exceeded[ssd])
+		if (_is_full != NULL) {
+			if (_is_full[ssd])
 				continue;
 		}
 		if (_SSD_list[ssd].total_bandwidth_usage > _SSD_list[ssd].maximum_bandwidth) {
