@@ -118,8 +118,6 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			}
 			break;
 		}
-		if (visual_SSD_phase && _SSD_list[to_ssd].total_bandwidth_usage > _SSD_list[to_ssd].maximum_bandwidth)
-			set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, to_ssd, true, &migration_num, _prev_SSD);
 
 		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
 		if (flag != FLAG_DENY)
@@ -409,23 +407,13 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migr
 		flag = FLAG_REALLOCATE;
 	}
 	else {
-		if (_visual_SSD_phase) {
-			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, _to_ssd, _from_vid)) {
-				flag = FLAG_REALLOCATE; // HDD에 인기도 높은 파일을 최대한 남기지 않기 위함
-			}
-			else {
-				flag = FLAG_SWAP;
-			}
+		if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, _to_ssd, _from_vid)) {
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_CHUNK_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
+				flag = FLAG_REALLOCATE; // SSD에 인기도 높은 파일은 계속 남기기 위함
 		}
 		else {
-			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, _to_ssd, _from_vid)) {
-				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_CHUNK_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
-					flag = FLAG_REALLOCATE; // SSD에 인기도 높은 파일은 계속 남기기 위함
-			}
-			else {
-				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_CHUNK_list[_from_vid].requested_bandwidth - _VIDEO_CHUNK_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
-					flag = FLAG_SWAP;
-			}
+			if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_CHUNK_list[_from_vid].requested_bandwidth - _VIDEO_CHUNK_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
+				flag = FLAG_SWAP;
 		}
 	}
 
