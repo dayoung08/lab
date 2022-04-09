@@ -53,9 +53,6 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		if (from_ssd == VIRTUAL_SSD) {
 			if (!visual_SSD_phase) {
 				visual_SSD_phase = true;
-				for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
-					set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, ssd, false, &migration_num, _prev_SSD);
-				}
 			}
 		}
 		if (visual_SSD_phase && _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty())
