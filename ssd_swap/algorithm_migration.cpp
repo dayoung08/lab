@@ -119,7 +119,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			break;
 		}
 		if (visual_SSD_phase && _SSD_list[to_ssd].total_bandwidth_usage > _SSD_list[to_ssd].maximum_bandwidth)
-			set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, to_ssd, false, &migration_num, _prev_SSD);
+			set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, to_ssd, true, &migration_num, _prev_SSD);
 
 		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
 		if (flag != FLAG_DENY)
