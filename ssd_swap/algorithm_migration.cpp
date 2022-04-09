@@ -47,19 +47,19 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	//여기까지 초기화
 
 	int migration_num = 0;
-	bool visual_ssd_is_used = false;
+	bool visual_SSD_phase = false;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
 		if (from_ssd == VIRTUAL_SSD) {
-			if(!visual_ssd_is_used)
-				visual_ssd_is_used = true;
-			if (_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty())
-				break;
+			if (!visual_SSD_phase) {
+				visual_SSD_phase = true;
+				for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
+					set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, ssd, false, &migration_num, _prev_SSD);
+				}
+			}
 		}
-		else {
-			if (visual_ssd_is_used)
-				printf("error\n");
-		}
+		if (visual_SSD_phase && _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty())
+			break;
 
 		set<pair<double, int>>::iterator pos;
 		pair<double, int> element;
@@ -85,14 +85,14 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (bt < 0)
 					continue;
 
-				if (from_ssd != VIRTUAL_SSD) 
+				if (!visual_SSD_phase)
 					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
 				else
 					under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
 			}
 		}
 
-		pair<int, pair<int, int>> mig_info = determine_migration_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, &under_load_list, from_ssd, from_vid);
+		pair<int, pair<int, int>> mig_info = determine_migration_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, &under_load_list, from_ssd, from_vid, visual_SSD_phase);
 		int to_vid = mig_info.second.second;
 		int to_ssd = mig_info.second.first;
 		int flag = mig_info.first;
@@ -112,7 +112,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		case FLAG_DENY:
 			if (under_load_list.empty()) {
 				//스왑이 불가능한 상황일 경우 어떻게 할 것인가?를 생각할 차례가 왔음.
-				if (from_ssd == VIRTUAL_SSD) {
+				if (visual_SSD_phase) {
 					_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.erase(element);
 					_VIDEO_CHUNK_list[from_vid].assigned_SSD = NONE_ALLOC;
 					_SSD_list[VIRTUAL_SSD].total_bandwidth_usage -= _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
@@ -121,7 +121,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			}
 			break;
 		}
-		if (visual_ssd_is_used && _SSD_list[to_ssd].total_bandwidth_usage > _SSD_list[to_ssd].maximum_bandwidth)
+		if (visual_SSD_phase && _SSD_list[to_ssd].total_bandwidth_usage > _SSD_list[to_ssd].maximum_bandwidth)
 			set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, to_ssd, false, &migration_num, _prev_SSD);
 
 		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
@@ -171,21 +171,21 @@ int overload_elimination(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mi
 
 	//여기까지 초기화
 	int migration_num = 0;
-	//bool visual_ssd_is_used = false;
+	//bool visual_SSD_phase = false;
 	while (!videos_in_over_load_SSDs.empty()) {
 		int from_ssd = (*videos_in_over_load_SSDs.begin()).second.second;
 		int from_vid = (*videos_in_over_load_SSDs.begin()).second.first;
 		pair<double, int> element = make_pair(_VIDEO_CHUNK_list[from_vid].requested_bandwidth, from_vid);
 		videos_in_over_load_SSDs.erase(*videos_in_over_load_SSDs.begin());
 		
-		/*if (videos_in_over_load_SSDs.empty() && !visual_ssd_is_used) {
+		/*if (videos_in_over_load_SSDs.empty() && !visual_SSD_phase) {
 			is_over_load[VIRTUAL_SSD] = true;
 			set<pair<double, int>>::iterator pos = _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.begin();
 			while (pos != _SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.end()) {
 				videos_in_over_load_SSDs.insert(make_pair((*pos).first, make_pair((*pos).second, VIRTUAL_SSD)));
 				pos++;
 			}
-			visual_ssd_is_used = true;
+			visual_SSD_phase = true;
 		}*/
 		if (!is_over_load[from_ssd]) {
 			continue;
@@ -231,7 +231,7 @@ int overload_elimination(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mi
 			}
 		}
 
-		pair<int, pair<int, int>> mig_info = determine_migration_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, &under_load_list, from_ssd, from_vid);
+		pair<int, pair<int, int>> mig_info = determine_migration_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, &under_load_list, from_ssd, from_vid, false);
 		int to_vid = mig_info.second.second;
 		int to_ssd = mig_info.second.first;
 		int flag = mig_info.first;
@@ -261,7 +261,7 @@ int overload_elimination(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mi
 	return migration_num;
 }
 
-pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, set<pair<double, int>, greater<pair<double, int>>>* under_load_list, int _from_ssd, int _from_vid) {
+pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, set<pair<double, int>, greater<pair<double, int>>>* under_load_list, int _from_ssd, int _from_vid, bool _visual_SSD_phase) {
 	int to_vid = NONE_ALLOC;
 	int to_ssd = NONE_ALLOC;
 	int flag = FLAG_DENY;
@@ -276,10 +276,10 @@ pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_C
 
 		if (_SSD_list[to_ssd].total_assigned_VIDEOs_low_bandwidth_first.size()) { // 옮겼을때 할당 가능한 경우들
 			to_vid = (*_SSD_list[to_ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
-			flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _from_ssd, to_ssd, _from_vid, to_vid);
+			flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _from_ssd, to_ssd, _from_vid, to_vid, _visual_SSD_phase);
 		}
 		else {
-			flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _from_ssd, to_ssd, _from_vid, NONE_ALLOC);
+			flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _from_ssd, to_ssd, _from_vid, NONE_ALLOC, _visual_SSD_phase);
 		}
 		if (flag != FLAG_DENY) 
 			break;
@@ -405,14 +405,14 @@ void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	}
 }
 
-int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid) {
+int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid, bool _visual_SSD_phase) {
 	int flag = FLAG_DENY;
 
 	if (_to_vid == NONE_ALLOC) {
 		flag = FLAG_REALLOCATE;
 	}
 	else {
-		if (_from_ssd == VIRTUAL_SSD && _migration_method == MIGRATION_OURS) {
+		if (_visual_SSD_phase) {
 			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, _to_ssd, _from_vid)) {
 				flag = FLAG_REALLOCATE; // HDD에 인기도 높은 파일을 최대한 남기지 않기 위함
 			}
