@@ -86,7 +86,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (from_ssd != VIRTUAL_SSD) 
 					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
 				else
-					under_load_list.insert(make_pair( (remained_bandwidth * remained_storage) / ADWD, to_ssd_temp));
+					under_load_list.insert(make_pair(remained_bandwidth * remained_storage, to_ssd_temp));
 			}
 		}
 
