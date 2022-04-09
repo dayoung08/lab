@@ -56,6 +56,10 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			if (_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty())
 				break;
 		}
+		else {
+			if (visual_ssd_is_used)
+				printf("error\n");
+		}
 
 		set<pair<double, int>>::iterator pos;
 		pair<double, int> element;
@@ -114,14 +118,11 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 					_SSD_list[VIRTUAL_SSD].total_bandwidth_usage -= _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
 					_SSD_list[VIRTUAL_SSD].storage_usage -= _VIDEO_CHUNK_list[from_vid].size;
 				}
-				else {
-					set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, from_ssd, false, &migration_num, _prev_SSD);
-					if (visual_ssd_is_used)
-						is_full[from_ssd] = true;
-				}
 			}
 			break;
 		}
+		if (visual_ssd_is_used && _SSD_list[to_ssd].total_bandwidth_usage > _SSD_list[to_ssd].maximum_bandwidth)
+			set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, to_ssd, false, &migration_num, _prev_SSD);
 
 		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
 		if (flag != FLAG_DENY)
