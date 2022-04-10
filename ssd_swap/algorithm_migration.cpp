@@ -41,25 +41,28 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	bool* is_full = new bool[_num_of_SSDs+1];
 	fill(is_full, is_full + _num_of_SSDs+1, false);
 
+	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
+	update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
+	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
+	//여기까지 초기화
+
 	int migration_num = 0;
 	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 		set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, ssd, false, &migration_num, _prev_SSD);
 	}
-	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
-	update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
-	//여기까지 초기화
-
+	//bool visual_ssd_is_used = false;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
 		if (from_ssd == VIRTUAL_SSD) {
 			if (_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty())
 				break;
+			/*if (!visual_ssd_is_used)
+				visual_ssd_is_used = true;*/
 		}
 
 		set<pair<double, int>>::iterator pos;
-		pair<double, int> element;
 		pos = _SSD_list[from_ssd].total_assigned_VIDEOs_low_bandwidth_first.end();
-		element = (*--pos);
+		pair<double, int> element = (*--pos);
 		int from_vid = element.second;
 
 		//sort 하기
@@ -67,26 +70,44 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp] && !is_full[to_ssd_temp]) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
-				double bt, st;
+				double bt;
 				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
-					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);		
-					st = 0;
+					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);				
 				}
 				else {
 					bt = _VIDEO_CHUNK_list[from_vid].requested_bandwidth;				
-					st = _VIDEO_CHUNK_list[from_vid].size;
 				}
-				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
-				//double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage - bt) / _SSD_list[to_ssd_temp].maximum_bandwidth;
-				//double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage - st) / _SSD_list[to_ssd_temp].storage_capacity;
 
 				if (bt < 0)
 					continue;
 
-				//if (from_ssd != VIRTUAL_SSD) 
+				if (from_ssd != VIRTUAL_SSD) {
+					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
-				//else
-				//	under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
+				}
+				else {
+					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage - bt);
+					if (remained_bandwidth < 0) {
+						pos = _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.end();
+						bool bt_remove = false;
+						while (remained_bandwidth > _SSD_list[to_ssd_temp].maximum_bandwidth) {
+							int vid = (*--pos).second;
+							if (!bt_remove) {
+								if (_VIDEO_CHUNK_list[vid].requested_bandwidth > _VIDEO_CHUNK_list[from_vid].requested_bandwidth) {
+									remained_bandwidth -= _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
+									bt_remove = true;
+								}
+								else {
+									remained_bandwidth -= _VIDEO_CHUNK_list[vid].requested_bandwidth;
+								}
+							}
+							else
+								remained_bandwidth -= _VIDEO_CHUNK_list[vid].requested_bandwidth;
+							pos--;
+						}
+					}
+					under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
+				}
 			}
 		}
 
@@ -117,6 +138,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			}
 			else {
 				set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, from_ssd, false, &migration_num, _prev_SSD);
+				//if (visual_ssd_is_used)
 				is_full[from_ssd] = true;
 			}
 			break;
