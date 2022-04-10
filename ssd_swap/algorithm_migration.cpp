@@ -86,13 +86,13 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage - bt);
 					if (remained_bandwidth < 0) {
 						pos = _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.end();
-						bool bt_remove = false;
+						bool from_vid_is_remove = false;
 						while (remained_bandwidth > _SSD_list[to_ssd_temp].maximum_bandwidth) {
 							int vid = (*--pos).second;
-							if (!bt_remove) {
+							if (!from_vid_is_remove) {
 								if (_VIDEO_CHUNK_list[vid].requested_bandwidth > _VIDEO_CHUNK_list[from_vid].requested_bandwidth) {
 									remained_bandwidth -= _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
-									bt_remove = true;
+									from_vid_is_remove = true;
 								}
 								else {
 									remained_bandwidth -= _VIDEO_CHUNK_list[vid].requested_bandwidth;
