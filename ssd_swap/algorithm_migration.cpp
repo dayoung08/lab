@@ -47,17 +47,14 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	//여기까지 초기화
 
 	int migration_num = 0;
-	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-		set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, ssd, false, &migration_num, _prev_SSD);
-	}
-	//bool visual_ssd_is_used = false;
+	bool visual_ssd_is_used = false;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
 		if (from_ssd == VIRTUAL_SSD) {
 			if (_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.empty())
 				break;
-			/*if (!visual_ssd_is_used)
-				visual_ssd_is_used = true;*/
+			if (!visual_ssd_is_used)
+				visual_ssd_is_used = true;
 		}
 
 		set<pair<double, int>>::iterator pos;
@@ -138,8 +135,8 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			}
 			else {
 				set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, from_ssd, false, &migration_num, _prev_SSD);
-				//if (visual_ssd_is_used)
-				is_full[from_ssd] = true;
+				if (visual_ssd_is_used)
+					is_full[from_ssd] = true;
 			}
 			break;
 		}
