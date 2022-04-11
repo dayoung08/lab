@@ -50,13 +50,13 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int
 				double slope = -INFINITY;
 				switch (_placement_method) {
 				case PLACEMENT_OURS:
-					slope = (remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / (remained_storage - _VIDEO_CHUNK_list[video_index].size);
+					slope = ((remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / _SSD_list[ssd_temp].maximum_bandwidth) / ((remained_storage - _VIDEO_CHUNK_list[video_index].size) / _SSD_list[ssd_temp].storage_capacity);
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
-					slope = remained_bandwidth;
+					slope = remained_bandwidth / _SSD_list[ssd_temp].maximum_bandwidth;
 					break;
 				case PLACEMENT_STORAGE_SPACE_AWARE:
-					slope = remained_storage;
+					slope = remained_storage / _SSD_list[ssd_temp].storage_capacity;
 					break;
 				case PLACEMENT_LIFETIME_AWARE:
 					slope = (double)1/_SSD_list[ssd_temp].ADWD; // 수명 많이 남은 게 너무 일찍 차버리면서 , 결국 수명 얼마 안 남은(DWPD 낮은) SSD에 할당을 더 많이 하게 되는 부작용 발생.

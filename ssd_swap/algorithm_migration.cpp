@@ -88,16 +88,14 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (bt < 0)
 					continue;
 
-				double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage - bt);
-				double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage - st) / _SSD_list[to_ssd_temp].storage_capacity;
-
-				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _SSD_list[to_ssd_temp].total_write_MB + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 				if (from_ssd != VIRTUAL_SSD) {
-					if (remained_bandwidth < 0)
-						continue;
+					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _SSD_list[to_ssd_temp].total_write_MB + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
 				}
 				else {
+					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage - bt);
+					double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage - st) / _SSD_list[to_ssd_temp].storage_capacity;
+
 					if (remained_bandwidth < 0) {
 						pos = _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.end();
 						bool from_vid_is_remove = false;
@@ -121,7 +119,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 							pos--;
 						}
 					}
-					//remained_bandwidth /= _SSD_list[to_ssd_temp].maximum_bandwidth;
+					remained_bandwidth /= _SSD_list[to_ssd_temp].maximum_bandwidth;
 					under_load_list.insert(make_pair(remained_bandwidth / remained_storage, to_ssd_temp));
 				}
 			}
