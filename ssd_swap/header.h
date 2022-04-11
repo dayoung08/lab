@@ -8,7 +8,7 @@
 #include <sstream>
 using namespace std;
 
-#define SEED 1111
+#define SEED 12345
 //#define INFINITY 987654321
 
 #define SSD_TYPE 10
@@ -34,7 +34,7 @@ using namespace std;
 #define ALPHA 0.729 //0.729 // 보통 비디오는 0.729임. 1-세타. 인기도 - 지프 분포에 사용하는 알파 베타 값
 #define BETA  1
 
-#define VIDEO_BANDWIDTH 2.5f 
+#define VIDEO_BANDWIDTH 1.0f 
 #define VIDEO_SIZE 10.0f;
 
 struct SSD {
