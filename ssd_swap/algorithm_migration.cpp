@@ -34,11 +34,11 @@ int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_met
 	return migration_num;
 }
 
-// ¿ì¸®ÀÇ ¾Ë°í¸®ÁòÀº vitual ssdÀÇ ÆÄÀÏµéÀ» ¿Å±æ¶§´Â °ø°£¸¸ ÀÖÀ¸¸é ÇÒ´çÇÔ. ÀÌ ¶§ ´ë¿ªÆø °í·Á ¾ÈÇÔ.
-// ¸¸¾à ÀÌ·¯´Ù°¡ SSDÀÇ °ø°£ÀÌ ¾ø´Ù¸é, ±× SSD´Â ´Ù¸¥ SSD¿Í swap ÇØÁÜ(ÀÌ target ssdÀÇ °¡Àå ³·Àº ¹öÀüÀº vitual·Î µé¾î°¥ ¼öµµ ÀÖÀ½)
-//                                                                 ±×·¸°Ô swapÇØÁÙ (¿Å°ÜÁÙ) SSD Á¶Â÷ ¾ø´Ù¸é, ±× source SSDÀÇ ³·Àº ¹öÀüµéÀÌ ÀüºÎ »èÁ¦µÊ.
-// ±×¸®°í ±× SSD´Â ÀÌÁ¦ ¾ÈÁ¤È­°¡ µÇ¾ú´Ù°í °¡Á¤ÇÏ°í, ´Ù½Ã´Â ±× SSD¿¡ ÇÒ´çÇÏÁö ¾ÊÀ½.
-// ÀÌ·±½ÄÀ¸·Î ¸ğµç °¡»ó SSD¿¡ ÀÖ´ø ÆÄÀÏµé¿¡ ´ëÇØ SSD ÀÚ¸®¸¦ Ã£¾ÆÁÖ¸é¼­ Á¾·áÇÔ. ÀÌ ¶§ SSD´Â ¾ÈÁ¤È­µÇ°Å³ª underloadÀÓ. overload´Â ¾øÀ½.
+// ìš°ë¦¬ì˜ ì•Œê³ ë¦¬ì¦˜ì€ vitual ssdì˜ íŒŒì¼ë“¤ì„ ì˜®ê¸¸ë•ŒëŠ” ê³µê°„ë§Œ ìˆìœ¼ë©´ í• ë‹¹í•¨. ì´ ë•Œ ëŒ€ì—­í­ ê³ ë ¤ ì•ˆí•¨.
+// ë§Œì•½ ì´ëŸ¬ë‹¤ê°€ SSDì˜ ê³µê°„ì´ ì—†ë‹¤ë©´, ê·¸ SSDëŠ” ë‹¤ë¥¸ SSDì™€ swap í•´ì¤Œ(ì´ target ssdì˜ ê°€ì¥ ë‚®ì€ ë²„ì „ì€ vitualë¡œ ë“¤ì–´ê°ˆ ìˆ˜ë„ ìˆìŒ)
+//                                                                 ê·¸ë ‡ê²Œ swapí•´ì¤„ (ì˜®ê²¨ì¤„) SSD ì¡°ì°¨ ì—†ë‹¤ë©´, ê·¸ source SSDì˜ ë‚®ì€ ë²„ì „ë“¤ì´ ì „ë¶€ ì‚­ì œë¨.
+// ê·¸ë¦¬ê³  ê·¸ SSDëŠ” ì´ì œ ì•ˆì •í™”ê°€ ë˜ì—ˆë‹¤ê³  ê°€ì •í•˜ê³ , ë‹¤ì‹œëŠ” ê·¸ SSDì— í• ë‹¹í•˜ì§€ ì•ŠìŒ.
+// ì´ëŸ°ì‹ìœ¼ë¡œ ëª¨ë“  ê°€ìƒ SSDì— ìˆë˜ íŒŒì¼ë“¤ì— ëŒ€í•´ SSD ìë¦¬ë¥¼ ì°¾ì•„ì£¼ë©´ì„œ ì¢…ë£Œí•¨. ì´ ë•Œ SSDëŠ” ì•ˆì •í™”ë˜ê±°ë‚˜ underloadì„. overloadëŠ” ì—†ìŒ.
 
 int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD, double* _MB_write) {
 	bool* is_over_load = new bool[_num_of_SSDs+1];
@@ -48,7 +48,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 	set<pair<double, int>, greater<pair<double, int>>> over_load_SSDs; 
 	update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
 	//printf("num_of_over_load : %d\n", over_load_SSDs.size());
-	//¿©±â±îÁö ÃÊ±âÈ­
+	//ì—¬ê¸°ê¹Œì§€ ì´ˆê¸°í™”
 
 	int migration_num = 0;
 
@@ -70,7 +70,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		pair<double, int> element = (*--pos);
 		int from_vid = element.second;
 
-		//sort ÇÏ±â
+		//sort í•˜ê¸°
 		set<pair<double, int>, greater<pair<double, int>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp] && !is_full[to_ssd_temp]) {
@@ -89,7 +89,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 					continue;
 
 				if (from_ssd != VIRTUAL_SSD) {
-					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _SSD_list[to_ssd_temp].total_write_MB + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
+					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
 				}
 				else {
@@ -131,10 +131,10 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		int flag = mig_info.first;
 		//if (v_flag && from_ssd != VIRTUAL_SSD && flag != FLAG_DENY)
 		//int flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, MIGRATION_BANDWIDTH_AWARE, from_ssd, to_ssd, from_vid, to_vid);
-		// ¿©±â¼­ °É¸®´Â°É º¸´Ï±î, BE ÆäÀÌÁî ÀÌÈÄ¿¡ overload µÇ¸é ´Ù½Ã ±× SSD¸¸ ´Ù½Ã ¸¶ÀÌ±×·¹ÀÌ¼ÇÀ» ¼öÇàÇÑ´Ù. 
-		// ÀÌÈÄ °Å±â¼­µµ ÇÒ´çÀÌ ¾ÈµÇ¸é stable Ã³¸®°¡ µÇ¸é¼­ Á¦ÀÏ ³·Àº °ÍµéÀ» »©¹ö¸®°í ÃÖÀûÈ­ ÇØÁÖ°í ³¡³². //20220325
+		// ì—¬ê¸°ì„œ ê±¸ë¦¬ëŠ”ê±¸ ë³´ë‹ˆê¹Œ, BE í˜ì´ì¦ˆ ì´í›„ì— overload ë˜ë©´ ë‹¤ì‹œ ê·¸ SSDë§Œ ë‹¤ì‹œ ë§ˆì´ê·¸ë ˆì´ì…˜ì„ ìˆ˜í–‰í•œë‹¤. 
+		// ì´í›„ ê±°ê¸°ì„œë„ í• ë‹¹ì´ ì•ˆë˜ë©´ stable ì²˜ë¦¬ê°€ ë˜ë©´ì„œ ì œì¼ ë‚®ì€ ê²ƒë“¤ì„ ë¹¼ë²„ë¦¬ê³  ìµœì í™” í•´ì£¼ê³  ëë‚¨. //20220325
 
-		//Ã£¾ÒÀ¸¸é ÇÒ´çÇÏ±â.
+		//ì°¾ì•˜ìœ¼ë©´ í• ë‹¹í•˜ê¸°.
 		switch (flag) {
 		case FLAG_SWAP:
 			swap(_SSD_list, _VIDEO_CHUNK_list, element, from_ssd, to_ssd, from_vid, to_vid, &migration_num, _prev_SSD, _MB_write);
@@ -143,7 +143,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			reallocate(_SSD_list, _VIDEO_CHUNK_list, element, from_ssd, to_ssd, from_vid, &migration_num, _prev_SSD, _MB_write);
 			break;
 		case FLAG_DENY:
-			//½º¿ÒÀÌ ºÒ°¡´ÉÇÑ »óÈ²ÀÏ °æ¿ì ¾î¶»°Ô ÇÒ °ÍÀÎ°¡?¸¦ »ı°¢ÇÒ Â÷·Ê°¡ ¿ÔÀ½.
+			//ìŠ¤ì™‘ì´ ë¶ˆê°€ëŠ¥í•œ ìƒí™©ì¼ ê²½ìš° ì–´ë–»ê²Œ í•  ê²ƒì¸ê°€?ë¥¼ ìƒê°í•  ì°¨ë¡€ê°€ ì™”ìŒ.
 			if (from_ssd == VIRTUAL_SSD) {
 				_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.erase(element);
 				_VIDEO_CHUNK_list[from_vid].assigned_SSD = NONE_ALLOC;
@@ -162,7 +162,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		if (flag != FLAG_DENY)
 			migration_num++;
 		under_load_list.clear();
-		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
+		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
 	}
 
 	delete[] is_over_load;
@@ -207,7 +207,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 			is_over_load[ssd] = false;
 	}
 
-	//¿©±â±îÁö ÃÊ±âÈ­
+	//ì—¬ê¸°ê¹Œì§€ ì´ˆê¸°í™”
 	while (!videos_in_over_load_SSDs.empty()) {
 		int from_ssd = (*videos_in_over_load_SSDs.begin()).second.second;
 		int from_vid = (*videos_in_over_load_SSDs.begin()).second.first;
@@ -218,7 +218,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 			continue;
 		}
 
-		//sort ÇÏ±â
+		//sort í•˜ê¸°
 		set<pair<double, int>, greater<pair<double, int>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp]) {
@@ -237,7 +237,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 					under_load_list.insert(make_pair(_SSD_list[to_ssd_temp].DWPD, to_ssd_temp));
 					break;
 				case MIGRATION_RANDOM:
-					under_load_list.insert(make_pair(dist_priority(g), to_ssd_temp)); // ¿Å±æ SSD¸¦ ·£´ı ¼±ÅÃÇÏ±â À§ÇÔ
+					under_load_list.insert(make_pair(dist_priority(g), to_ssd_temp)); // ì˜®ê¸¸ SSDë¥¼ ëœë¤ ì„ íƒí•˜ê¸° ìœ„í•¨
 					break;
 				case MIGRATION_ROUND_ROBIN:
 					under_load_list.insert(make_pair((double)1 / to_ssd_temp, to_ssd_temp));
@@ -251,7 +251,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 		int to_ssd = mig_info.second.first;
 		int flag = mig_info.first;
 
-		//Ã£¾ÒÀ¸¸é ÇÒ´çÇÏ±â.
+		//ì°¾ì•˜ìœ¼ë©´ í• ë‹¹í•˜ê¸°.
 		switch (flag) {
 		case FLAG_SWAP:
 			swap(_SSD_list, _VIDEO_CHUNK_list, element, from_ssd, to_ssd, from_vid, to_vid, &migration_num, _prev_SSD, _MB_write);
@@ -267,7 +267,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 		if (flag != FLAG_DENY)
 			migration_num++;
 		under_load_list.clear();
-		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //¸Ş¸ğ¸® ÇØÁ¦¸¦ À§ÇØ
+		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //ë©”ëª¨ë¦¬ í•´ì œë¥¼ ìœ„í•´
 	}
 	videos_in_over_load_SSDs.clear();
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>>().swap(videos_in_over_load_SSDs);
@@ -288,7 +288,7 @@ pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_C
 			continue;
 		}
 
-		if (_SSD_list[to_ssd].total_assigned_VIDEOs_low_bandwidth_first.size()) { // ¿Å°åÀ»¶§ ÇÒ´ç °¡´ÉÇÑ °æ¿ìµé
+		if (_SSD_list[to_ssd].total_assigned_VIDEOs_low_bandwidth_first.size()) { // ì˜®ê²¼ì„ë•Œ í• ë‹¹ ê°€ëŠ¥í•œ ê²½ìš°ë“¤
 			to_vid = (*_SSD_list[to_ssd].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 			flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, _migration_method, _from_ssd, to_ssd, _from_vid, to_vid);
 		}
@@ -328,7 +328,7 @@ void set_serviced_video(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num
 				_VIDEO_CHUNK_list[vid].assigned_SSD = NONE_ALLOC;
 			}
 
-			//ÀÌÀü¿¡ ´Ù¸¥ SSD¿¡¼­ ÀÌ¹Ì ¿Å°ÜÁ³´ø °Å¶ó¸é
+			//ì´ì „ì— ë‹¤ë¥¸ SSDì—ì„œ ì´ë¯¸ ì˜®ê²¨ì¡Œë˜ ê±°ë¼ë©´
 			if (_prev_SSD[vid] != ssd && ssd != VIRTUAL_SSD) {
 				_MB_write[ssd] -= _VIDEO_CHUNK_list[vid].size;
 				_migration_num--;
@@ -362,7 +362,7 @@ void swap(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int> _ele
 	_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
 	_MB_write[VIRTUAL_SSD] += _VIDEO_CHUNK_list[_to_vid].size;
 
-	//ÀÌÀü¿¡ ´Ù¸¥ SSD¿¡¼­ ÀÌ¹Ì ¿Å°ÜÁ³´ø °Å¶ó¸é
+	//ì´ì „ì— ë‹¤ë¥¸ SSDì—ì„œ ì´ë¯¸ ì˜®ê²¨ì¡Œë˜ ê±°ë¼ë©´
 	if (_prev_SSD[_from_vid] != _from_ssd && _from_ssd != VIRTUAL_SSD) {
 		_MB_write[_from_ssd] -= _VIDEO_CHUNK_list[_from_vid].size;
 		_migration_num--;
@@ -381,7 +381,7 @@ void reallocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int
 
 	_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
 
-	//ÀÌÀü¿¡ ´Ù¸¥ SSD¿¡¼­ ÀÌ¹Ì ¿Å°ÜÁ³´ø °Å¶ó¸é
+	//ì´ì „ì— ë‹¤ë¥¸ SSDì—ì„œ ì´ë¯¸ ì˜®ê²¨ì¡Œë˜ ê±°ë¼ë©´
 	if (_prev_SSD[_from_vid] != _from_ssd && _from_ssd != VIRTUAL_SSD) {
 		_MB_write[_from_ssd] -= _VIDEO_CHUNK_list[_from_vid].size;
 		_migration_num--;
@@ -406,7 +406,7 @@ void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		else
 			_is_over_load[ssd] = false;
 	}
-	//¸¸¾à ¿À¹ö·Îµå µÈ SSD°¡ ¾ø´Ù¸é
+	//ë§Œì•½ ì˜¤ë²„ë¡œë“œ ëœ SSDê°€ ì—†ë‹¤ë©´
 	if (_over_load_SSDs != NULL) {
 		if ((*_over_load_SSDs).empty()) {
 			(*_over_load_SSDs).insert(make_pair(-INFINITY, VIRTUAL_SSD));
@@ -423,7 +423,7 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migr
 	else {
 		if (_from_ssd == VIRTUAL_SSD && _migration_method == MIGRATION_OURS) {
 			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, _to_ssd, _from_vid)) {
-				flag = FLAG_REALLOCATE; // HDD¿¡ ÀÎ±âµµ ³ôÀº ÆÄÀÏÀ» ÃÖ´ëÇÑ ³²±âÁö ¾Ê±â À§ÇÔ
+				flag = FLAG_REALLOCATE; // HDDì— ì¸ê¸°ë„ ë†’ì€ íŒŒì¼ì„ ìµœëŒ€í•œ ë‚¨ê¸°ì§€ ì•Šê¸° ìœ„í•¨
 			}
 			else {
 				flag = FLAG_SWAP;
@@ -432,7 +432,7 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migr
 		else {
 			if (!is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, _to_ssd, _from_vid)) {
 				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_CHUNK_list[_from_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
-					flag = FLAG_REALLOCATE; // SSD¿¡ ÀÎ±âµµ ³ôÀº ÆÄÀÏÀº °è¼Ó ³²±â±â À§ÇÔ
+					flag = FLAG_REALLOCATE; // SSDì— ì¸ê¸°ë„ ë†’ì€ íŒŒì¼ì€ ê³„ì† ë‚¨ê¸°ê¸° ìœ„í•¨
 			}
 			else {
 				if ((_SSD_list[_to_ssd].total_bandwidth_usage + _VIDEO_CHUNK_list[_from_vid].requested_bandwidth - _VIDEO_CHUNK_list[_to_vid].requested_bandwidth) <= _SSD_list[_to_ssd].maximum_bandwidth)
