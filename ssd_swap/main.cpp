@@ -1,5 +1,5 @@
 #include "header.h"
-#define NUM_OF_DATEs 3 // for simulation 1 5 15 30
+#define NUM_OF_DATEs 5 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 4
 
 #define MIN_RUNNING_DAY 1
@@ -154,7 +154,7 @@ void simulation_migartion() {
 		}
 
 		// 결과 출력 : SSD의 평균, 표준편차 ADWD 출력
-		//if (day == NUM_OF_DATEs) {
+		if (day == NUM_OF_DATEs) {
 		//if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
 			double sum_for_AVG_in_migration = 0;
 			double sum_for_STD_in_migration = 0;
@@ -168,8 +168,8 @@ void simulation_migartion() {
 				sum_for_STD_in_migration += pow(SSD_list[ssd].ADWD - (sum_for_AVG_in_migration / num_of_SSDs), 2);
 			}
 			printf("%lf\t%lf\t%lf\t%d\n", total_bandwidth_usage_in_migration, sum_for_AVG_in_migration / num_of_SSDs, sqrt(sum_for_STD_in_migration / num_of_SSDs), total_migration_num / (NUM_OF_DATEs * NUM_OF_TIMEs));
-			printf("day%d\n", day);
-		//}
+			//printf("day%d\n", day);
+		}
 	}
 /*
 	double total_bandwidth_of_alloc_videos = 0;
