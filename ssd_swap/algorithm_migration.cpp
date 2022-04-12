@@ -88,11 +88,10 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (bt < 0)
 					continue;
 
-				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
-
 				if (from_ssd != VIRTUAL_SSD) {
-					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp)); // ADWD를 고려하니 오히려 더 안 좋았음.
-					//under_load_list.insert(make_pair(bt, to_ssd_temp));
+					//double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
+					//under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp)); // ADWD를 고려하니 오히려 더 안 좋았음.
+					under_load_list.insert(make_pair(bt, to_ssd_temp));
 				}
 				else {
 					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage - bt);
@@ -121,7 +120,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 						}
 					}
 					//remained_bandwidth /= _SSD_list[to_ssd_temp].maximum_bandwidth;*/
-					under_load_list.insert(make_pair( (remained_bandwidth / remained_storage) / ADWD, to_ssd_temp));
+					under_load_list.insert(make_pair(remained_bandwidth / remained_storage, to_ssd_temp));
 				}
 			}
 		}
