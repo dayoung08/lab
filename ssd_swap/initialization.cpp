@@ -23,8 +23,6 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::default_random_engine g(SEED);
 	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
 	std::uniform_int_distribution<> dist_for_storage_space{ 0, 3 }; // 2 아니면 너무 ADWD 커진다
-	dist_for_type.reset();
-	dist_for_storage_space.reset();
 	//std::uniform_int_distribution<> dist_for_bandwidth{ 550, 3500 };
 	//std::uniform_int_distribution<> dist_for_DWPD{ 11, 65 };
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {

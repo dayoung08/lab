@@ -1,9 +1,9 @@
 #include "header.h"
-#define NUM_OF_DATEs 5 // for simulation 1 5 15 30
+#define NUM_OF_DATEs 3 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 4
 
 #define MIN_RUNNING_DAY 1
-#define MAX_RUNNING_DAY 100
+#define MAX_RUNNING_DAY 70
 //#define RUNNING_DAY 20
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 

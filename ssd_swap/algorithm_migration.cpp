@@ -120,7 +120,8 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 						}
 					}
 					//remained_bandwidth /= _SSD_list[to_ssd_temp].maximum_bandwidth;*/
-					under_load_list.insert(make_pair(remained_bandwidth / remained_storage, to_ssd_temp));
+					under_load_list.insert(make_pair(remained_bandwidth * remained_storage, to_ssd_temp));
+					//remained_bandwidth / remained_storage로 하면 오히려 결과 더 안 좋다.
 				}
 			}
 		}
