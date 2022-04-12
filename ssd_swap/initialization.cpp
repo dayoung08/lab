@@ -37,7 +37,7 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			int r = dist_for_type(g);
 			//int r = ssd % SSD_TYPE;
 			//https://mapoo.net/os/oswindows/hdd-ssd-%EC%9A%A9%EB%9F%89-%EA%B3%84%EC%82%B0/
-			_SSD_list[ssd_index].storage_capacity = (double)500000 * 0.9313 * pow(2, dist_for_storage_space(g)) + 0.00001;
+			_SSD_list[ssd_index].storage_capacity = (double)500000 * 0.9313 * pow(2, dist_for_storage_space(g));
 
 			_SSD_list[ssd_index].DWPD = DWPD[r];
 			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r];
