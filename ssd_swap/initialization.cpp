@@ -21,8 +21,8 @@ void placed_video_init_for_simulation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_
 
 void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 	std::default_random_engine g(SEED);
-	std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
-	std::uniform_int_distribution<> dist_for_storage_space{ 0, 4 }; // 2 아니면 너무 ADWD 커진다
+	//std::uniform_int_distribution<> dist_for_type{ 0, SSD_TYPE-1 }; 
+	std::uniform_int_distribution<> dist_for_storage_space{ 0, 3 }; // 2 아니면 너무 ADWD 커진다
 	//std::uniform_int_distribution<> dist_for_bandwidth{ 550, 3500 };
 	//std::uniform_int_distribution<> dist_for_DWPD{ 11, 65 };
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
@@ -34,10 +34,10 @@ void SSD_initalization_for_simulation(SSD* _SSD_list, int _num_of_SSDs) {
 			_SSD_list[VIRTUAL_SSD].maximum_bandwidth = -INFINITY;
 		}
 		else {
-			int r = dist_for_type(g);
-			//int r = ssd % SSD_TYPE;
+			//int r = dist_for_type(g);
+			int r = ssd % SSD_TYPE;
 			//https://mapoo.net/os/oswindows/hdd-ssd-%EC%9A%A9%EB%9F%89-%EA%B3%84%EC%82%B0/
-			_SSD_list[ssd_index].storage_capacity = (double)250000 * 0.9313 * pow(2, dist_for_storage_space(g));
+			_SSD_list[ssd_index].storage_capacity = (double)500000 * 0.9313 * pow(2, dist_for_storage_space(g));
 
 			_SSD_list[ssd_index].DWPD = DWPD[r];
 			_SSD_list[ssd_index].maximum_bandwidth = bandwidth[r];

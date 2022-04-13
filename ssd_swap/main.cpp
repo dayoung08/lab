@@ -43,7 +43,6 @@ int main(int argc, char* argv[]) {
 			num_of_SSDs = stoi(argv[2]);
 			num_of_videos = stoi(argv[3]);
 			num_of_request_per_sec = stod(argv[4]);
-			num_of_request_per_sec *= 2;
 			placement_method = stod(argv[5]);
 			simulation_placement();
 		}
@@ -56,7 +55,6 @@ int main(int argc, char* argv[]) {
 			num_of_videos = stoi(argv[3]);
 			num_of_new_videos = stoi(argv[4]); // NUM_OF_TIMEs;
 			num_of_request_per_sec = stod(argv[5]);
-			num_of_request_per_sec *= 2;
 			migration_method = stod(argv[6]);
 			simulation_migartion();
 		}
