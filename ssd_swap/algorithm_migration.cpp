@@ -52,9 +52,6 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 
 	int migration_num = 0;
 
-	/*for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-		set_serviced_video(_SSD_list, _VIDEO_CHUNK_list, _num_of_SSDs, _num_of_videos, ssd, false, &migration_num, _prev_SSD, _MB_write);
-	}*/
 	bool visual_ssd_is_used = false;
 	while (!over_load_SSDs.empty()) {
 		int from_ssd = (*over_load_SSDs.begin()).second;
@@ -79,6 +76,9 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
 					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);
 					st = 0;
+					if (from_ssd == VIRTUAL_SSD) {
+						continue;
+					}
 				}
 				else {
 					bt = _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
@@ -89,40 +89,12 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 					continue;
 
 				if (from_ssd != VIRTUAL_SSD) {
-					//double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
-					//under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp)); // ADWD를 고려하니 오히려 더 안 좋았음.
-					under_load_list.insert(make_pair(bt, to_ssd_temp));
+					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
+					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp)); // ADWD를 고려하니 오히려 더 안 좋았음.
 				}
 				else {
 					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage);
-					double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage); // _SSD_list[to_ssd_temp].storage_capacity;
-					/*if (remained_bandwidth < 0) {
-						pos = _SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.end();
-						bool from_vid_is_remove = false;
-						while (remained_bandwidth >= 0) {
-							int vid = (*--pos).second;
-							if (!from_vid_is_remove) {
-								if (_VIDEO_CHUNK_list[vid].requested_bandwidth > _VIDEO_CHUNK_list[from_vid].requested_bandwidth) {
-									remained_bandwidth -= _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
-									remained_storage -= _VIDEO_CHUNK_list[from_vid].size;
-									from_vid_is_remove = true;
-								}
-								else {
-									remained_bandwidth -= _VIDEO_CHUNK_list[vid].requested_bandwidth;
-									remained_storage -= _VIDEO_CHUNK_list[vid].size;
-								}
-							}
-							else {
-								remained_bandwidth -= _VIDEO_CHUNK_list[vid].requested_bandwidth;
-								remained_storage -= _VIDEO_CHUNK_list[vid].size;
-							}
-							pos--;
-						}
-					}*/
-					//remained_bandwidth /= _SSD_list[to_ssd_temp].maximum_bandwidth;
-					under_load_list.insert(make_pair(remained_bandwidth * remained_storage, to_ssd_temp));
-					//remained_bandwidth / remained_storage로 하면 제일 밴드윗은 높게 되는데, ADWD가 emained_bandwidth * remained_storage에 비해 거의 1/3정도 더 높다. 그에 비해 밴드윗 이 더 높긴 해도 차이는 별로 안나서... 
-				}
+					under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));				}
 			}
 		}
 
@@ -130,10 +102,6 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		int to_vid = mig_info.second.second;
 		int to_ssd = mig_info.second.first;
 		int flag = mig_info.first;
-		//if (v_flag && from_ssd != VIRTUAL_SSD && flag != FLAG_DENY)
-		//int flag = get_migration_flag(_SSD_list, _VIDEO_CHUNK_list, MIGRATION_BANDWIDTH_AWARE, from_ssd, to_ssd, from_vid, to_vid);
-		// 여기서 걸리는걸 보니까, BE 페이즈 이후에 overload 되면 다시 그 SSD만 다시 마이그레이션을 수행한다. 
-		// 이후 거기서도 할당이 안되면 stable 처리가 되면서 제일 낮은 것들을 빼버리고 최적화 해주고 끝남. //20220325
 
 		//찾았으면 할당하기.
 		switch (flag) {
@@ -360,7 +328,10 @@ void swap(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int> _ele
 	_SSD_list[VIRTUAL_SSD].total_bandwidth_usage -= _VIDEO_CHUNK_list[_to_vid].requested_bandwidth;
 	_SSD_list[VIRTUAL_SSD].storage_usage += _VIDEO_CHUNK_list[VIRTUAL_SSD].size;
 
-	_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
+	//이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것일 때
+	if (_prev_SSD[_from_vid] == _to_ssd) {
+		_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
+	}
 	_MB_write[VIRTUAL_SSD] += _VIDEO_CHUNK_list[_to_vid].size;
 
 	//이전에 다른 SSD에서 이미 옮겨졌던 거라면
@@ -380,8 +351,10 @@ void reallocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int
 	_SSD_list[_to_ssd].total_bandwidth_usage += _VIDEO_CHUNK_list[_from_vid].requested_bandwidth;
 	_SSD_list[_to_ssd].storage_usage += _VIDEO_CHUNK_list[_from_vid].size;
 
-	_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
-
+	//이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것일 때
+	if (_prev_SSD[_from_vid] == _to_ssd) {
+		_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
+	}
 	//이전에 다른 SSD에서 이미 옮겨졌던 거라면
 	if (_prev_SSD[_from_vid] != _from_ssd) {
 		_MB_write[_from_ssd] -= _VIDEO_CHUNK_list[_from_vid].size;
