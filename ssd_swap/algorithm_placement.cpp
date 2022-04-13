@@ -51,7 +51,7 @@ int placement_resource_aware(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int
 				switch (_placement_method) {
 				case PLACEMENT_OURS:
 					//slope = ((remained_bandwidth - _VIDEO_CHUNK_list[video_index].requested_bandwidth) / _SSD_list[ssd_temp].maximum_bandwidth) / ((remained_storage - _VIDEO_CHUNK_list[video_index].size) / _SSD_list[ssd_temp].storage_capacity);
-					slope = remained_bandwidth / remained_storage;
+					slope = remained_bandwidth * remained_storage;
 					break;
 				case PLACEMENT_BANDWIDTH_AWARE:
 					slope = remained_bandwidth / _SSD_list[ssd_temp].maximum_bandwidth;

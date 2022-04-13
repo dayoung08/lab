@@ -118,10 +118,10 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 							}
 							pos--;
 						}
-					}
-					//remained_bandwidth /= _SSD_list[to_ssd_temp].maximum_bandwidth;*/
+					}*/
+					//remained_bandwidth /= _SSD_list[to_ssd_temp].maximum_bandwidth;
 					under_load_list.insert(make_pair(remained_bandwidth * remained_storage, to_ssd_temp));
-					//remained_bandwidth / remained_storage로 하면 오히려 결과 더 안 좋다.
+					//remained_bandwidth / remained_storage로 하면 제일 밴드윗은 높게 되는데, ADWD가 emained_bandwidth * remained_storage에 비해 거의 1/3정도 더 높다. 그에 비해 밴드윗 이 더 높긴 해도 차이는 별로 안나서... 
 				}
 			}
 		}
