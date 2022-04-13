@@ -73,16 +73,16 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 			if (!is_over_load[to_ssd_temp] && !is_full[to_ssd_temp]) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				double bt, st;
-				bool is_alloc;
+				bool is_full;
 				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
 					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);
 					st = 0;
-					is_alloc = false;
+					is_full = true;
 				}
 				else {
 					bt = _VIDEO_CHUNK_list[from_vid].requested_bandwidth;
 					st = _VIDEO_CHUNK_list[from_vid].size;
-					is_alloc = true;
+					is_full = false;
 				}
 
 				if (bt < 0)
@@ -90,11 +90,12 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 
 				if (from_ssd != VIRTUAL_SSD) {
 					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
-					under_load_list.insert(make_pair(is_alloc, make_pair(bt / ADWD, to_ssd_temp))); // ADWD를 고려하니 오히려 더 안 좋았음.
+					under_load_list.insert(make_pair(false, make_pair(bt / ADWD, to_ssd_temp))); // ADWD를 고려하니 오히려 더 안 좋았음.
 				}
 				else {
 					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage);
-					under_load_list.insert(make_pair(is_alloc, make_pair(remained_bandwidth, to_ssd_temp)));
+					double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage);
+					under_load_list.insert(make_pair(!is_full, make_pair(remained_bandwidth, to_ssd_temp)));
 				}
 			}
 		}
@@ -129,8 +130,10 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		}
 
 		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, is_full, &over_load_SSDs, _num_of_SSDs);
-		if (flag != FLAG_DENY)
-			migration_num++;
+		if (flag != FLAG_DENY){
+			if (_prev_SSD[from_vid] != to_ssd) //이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것이 아니라면
+				migration_num++;
+		}
 		under_load_list.clear();
 		set<pair<bool, pair<double, int>>, greater<pair<bool, pair<double, int>>>>().swap(under_load_list); //메모리 해제를 위해
 	}
@@ -234,8 +237,10 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 		}
 
 		update_SSD_infomation(_SSD_list, _VIDEO_CHUNK_list, _migration_method, is_over_load, NULL, NULL, _num_of_SSDs);
-		if (flag != FLAG_DENY)
-			migration_num++;
+		if (flag != FLAG_DENY) {
+			if (_prev_SSD[from_vid] != to_ssd) //이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것이 아니라면
+				migration_num++;
+		}
 		under_load_list.clear();
 		set<pair<bool, pair<double, int>>, greater<pair<bool, pair<double, int>>>>().swap(under_load_list); //메모리 해제를 위해
 	}
@@ -329,8 +334,8 @@ void swap(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int> _ele
 	_SSD_list[VIRTUAL_SSD].total_bandwidth_usage -= _VIDEO_CHUNK_list[_to_vid].requested_bandwidth;
 	_SSD_list[VIRTUAL_SSD].storage_usage += _VIDEO_CHUNK_list[VIRTUAL_SSD].size;
 
-	//이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것일 때
-	if (_prev_SSD[_from_vid] == _to_ssd) {
+	//이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것이 아닐때
+	if (_prev_SSD[_from_vid] != _to_ssd) {
 		_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
 	}
 	_MB_write[VIRTUAL_SSD] += _VIDEO_CHUNK_list[_to_vid].size;
@@ -352,8 +357,8 @@ void reallocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int
 	_SSD_list[_to_ssd].total_bandwidth_usage += _VIDEO_CHUNK_list[_from_vid].requested_bandwidth;
 	_SSD_list[_to_ssd].storage_usage += _VIDEO_CHUNK_list[_from_vid].size;
 
-	//이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것일 때
-	if (_prev_SSD[_from_vid] == _to_ssd) {
+	//이전에 다른데로 옮겨졌다가, 다시 원래 저장되어있던 SSD로 옮겨진 것이 아닐때
+	if (_prev_SSD[_from_vid] != _to_ssd) {
 		_MB_write[_to_ssd] += _VIDEO_CHUNK_list[_from_vid].size;
 	}
 	//이전에 다른 SSD에서 이미 옮겨졌던 거라면
