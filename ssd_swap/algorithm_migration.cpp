@@ -158,10 +158,10 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 			while (pos != _SSD_list[ssd].total_assigned_VIDEOs_low_bandwidth_first.end()) {
 				switch (_migration_method) {
 				case MIGRATION_BANDWIDTH_AWARE:
-					videos_in_over_load_SSDs.insert(make_pair((*pos).first, make_pair((*pos).second, ssd)));
-					break;
 				case MIGRATION_STORAGE_SPACE_AWARE:
 				case MIGRATION_LIFETIME_AWARE:
+					videos_in_over_load_SSDs.insert(make_pair((*pos).first, make_pair((*pos).second, ssd)));
+					break;
 				case MIGRATION_RANDOM:
 					videos_in_over_load_SSDs.insert(make_pair(priority(g), make_pair((*pos).second, ssd)));
 					break;
