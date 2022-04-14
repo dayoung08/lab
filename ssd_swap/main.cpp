@@ -8,7 +8,7 @@
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
-int migration_method = 8; // 8~11로 바꾸면 비교스킴
+int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 30; // 10, 20, (30), 40, 50
 int num_of_videos = 3000000;// 50만, 100만, (150만), 200만, 250만
