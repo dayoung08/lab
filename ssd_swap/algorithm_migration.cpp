@@ -70,7 +70,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		//sort 하기
 		set<pair<bool, pair<double, int>>, greater<pair<bool, pair<double, int>>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
-			if (!is_over_load[to_ssd_temp] && !is_full[to_ssd_temp]) {
+			if (!is_over_load[to_ssd_temp] && !is_full[to_ssd_temp] && from_ssd != to_ssd_temp) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				double bt, st;
 				bool is_full; // is_full이 false라서, swap을 안 하는 것에 우선 순위를 줌.
@@ -88,8 +88,9 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (bt < 0)
 					continue;
 
+				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
+
 				if (from_ssd != VIRTUAL_SSD) {
-					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 					under_load_list.insert(make_pair(!is_full, make_pair(bt / ADWD, to_ssd_temp)));
 				}
 				else {
@@ -193,7 +194,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 		//sort 하기
 		set<pair<bool, pair<double, int>>, greater<pair<bool, pair<double, int>>>>  under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
-			if (!is_over_load[to_ssd_temp]) {
+			if (!is_over_load[to_ssd_temp] && from_ssd != to_ssd_temp) {
 				double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage) / _SSD_list[to_ssd_temp].maximum_bandwidth;
 				double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage) / _SSD_list[to_ssd_temp].storage_capacity;
 				uniform_int_distribution<> dist_priority{ 1, _num_of_SSDs };
