@@ -8,7 +8,7 @@
 #include <sstream>
 using namespace std;
 
-#define SEED 1234567 
+#define SEED 1234
 //#define INFINITY 987654321
 
 #define SSD_TYPE 10
@@ -35,7 +35,7 @@ using namespace std;
 #define BETA  1
 
 #define VIDEO_BANDWIDTH 2.5f 
-#define VIDEO_SIZE 12.5f;
+#define VIDEO_SIZE 15.0f;
 
 struct SSD {
 	int index;
