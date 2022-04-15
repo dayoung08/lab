@@ -3,7 +3,7 @@
 #define NUM_OF_TIMEs 3
 
 #define MIN_RUNNING_DAY 1
-#define MAX_RUNNING_DAY 70
+#define MAX_RUNNING_DAY 105
 //#define RUNNING_DAY 20
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
