@@ -84,17 +84,16 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				if (bt < 0)
 					continue;
 
-				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
-
-				if (from_ssd != VIRTUAL_SSD) {
+				if (!visual_ssd_is_used) {
+					double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 					under_load_list.insert(make_pair(0, make_pair(bt / ADWD, to_ssd_temp)));
 				}
 				else {
 					int priority; // 높을수록 우선순위 큼
-					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage);
+					double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage - bt;
 					//double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage);
-					if ((remained_bandwidth - bt) >= 0) {
-						if(!is_full)
+					if (remained_bandwidth >= 0) {
+						if (!is_full)
 							priority = 3;
 						else
 							priority = 2;
