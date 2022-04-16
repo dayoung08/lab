@@ -68,12 +68,13 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 		int from_vid = element.second;
 
 		//sort 하기
-		set<pair<double, int>, greater<pair<double, int>>> under_load_list;
+		set<pair<int, pair<double, int>>, greater<pair<int, pair<double, int>>>> under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp] && !is_full[to_ssd_temp] && from_ssd != to_ssd_temp) {
 				int to_vid_temp = (*_SSD_list[to_ssd_temp].total_assigned_VIDEOs_low_bandwidth_first.begin()).second;
 				double bt;
-				if (is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid)) {
+				bool is_full = is_full_storage_space(_SSD_list, _VIDEO_CHUNK_list, to_ssd_temp, from_vid);
+				if (is_full) {
 					bt = (_VIDEO_CHUNK_list[from_vid].requested_bandwidth - _VIDEO_CHUNK_list[to_vid_temp].requested_bandwidth);
 				}
 				else {
@@ -86,12 +87,25 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				double ADWD = (_SSD_list[to_ssd_temp].total_write_MB + _MB_write[to_ssd_temp] + _VIDEO_CHUNK_list[from_vid].size) / (_SSD_list[to_ssd_temp].DWPD * _SSD_list[to_ssd_temp].storage_capacity * _SSD_list[to_ssd_temp].running_days);
 
 				if (from_ssd != VIRTUAL_SSD) {
-					under_load_list.insert(make_pair(bt / ADWD, to_ssd_temp));
+					under_load_list.insert(make_pair(0, make_pair(bt / ADWD, to_ssd_temp)));
 				}
 				else {
+					int priority; // 높을수록 우선순위 큼
 					double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage);
 					//double remained_storage = (_SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage);
-					under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
+					if ((remained_bandwidth - bt) >= 0) {
+						if(!is_full)
+							priority = 3;
+						else
+							priority = 2;
+					}
+					else {
+						if (!is_full)
+							priority = 1;
+						else
+							priority = 0;
+					}
+					under_load_list.insert(make_pair(priority, make_pair(remained_bandwidth, to_ssd_temp)));
 				}
 			}
 		}
@@ -131,7 +145,7 @@ int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 				migration_num++;
 		}
 		under_load_list.clear();
-		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
+		set<pair<int, pair<double, int>>, greater<pair<int, pair<double, int>>>>().swap(under_load_list); //메모리 해제를 위해
 	}
 
 	delete[] is_over_load;
@@ -188,7 +202,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 		}
 
 		//sort 하기
-		set<pair<double, int>, greater<pair<double, int>>>  under_load_list;
+		set<pair<int, pair<double, int>>, greater<pair<int, pair<double, int>>>>  under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp] && from_ssd != to_ssd_temp) {
 				double remained_bandwidth = (_SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage) / _SSD_list[to_ssd_temp].maximum_bandwidth;
@@ -197,19 +211,19 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 
 				switch (_migration_method) {
 				case MIGRATION_BANDWIDTH_AWARE:
-					under_load_list.insert(make_pair(remained_bandwidth, to_ssd_temp));
+					under_load_list.insert(make_pair(0, make_pair(remained_bandwidth, to_ssd_temp)));
 					break;
 				case MIGRATION_STORAGE_SPACE_AWARE:
-					under_load_list.insert(make_pair(remained_storage, to_ssd_temp));
+					under_load_list.insert(make_pair(0, make_pair(remained_storage, to_ssd_temp)));
 					break;
 				case MIGRATION_LIFETIME_AWARE:
-					under_load_list.insert(make_pair(_SSD_list[to_ssd_temp].DWPD, to_ssd_temp));
+					under_load_list.insert(make_pair(0, make_pair(_SSD_list[to_ssd_temp].DWPD, to_ssd_temp)));
 					break;
 				case MIGRATION_RANDOM:
-					under_load_list.insert(make_pair(dist_priority(g), to_ssd_temp)); // 옮길 SSD를 랜덤 선택하기 위함
+					under_load_list.insert(make_pair(0, make_pair(dist_priority(g), to_ssd_temp))); // 옮길 SSD를 랜덤 선택하기 위함
 					break;
 				case MIGRATION_ROUND_ROBIN:
-					under_load_list.insert(make_pair((double)1 / to_ssd_temp, to_ssd_temp));
+					under_load_list.insert(make_pair(0, make_pair((double)1 / to_ssd_temp, to_ssd_temp)));
 					break;
 				}
 			}
@@ -238,7 +252,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 				migration_num++;
 		}
 		under_load_list.clear();
-		set<pair<double, int>, greater<pair<double, int>>>().swap(under_load_list); //메모리 해제를 위해
+		set<pair<int, pair<double, int>>, greater<pair<int, pair<double, int>>>>().swap(under_load_list); //메모리 해제를 위해
 	}
 	videos_in_over_load_SSDs.clear();
 	set<pair<double, pair<int, int>>, greater<pair<double, pair<int, int>>>>().swap(videos_in_over_load_SSDs);
@@ -246,12 +260,12 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 	return migration_num;
 }
 
-pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, set<pair<double, int>, greater<pair<double, int>>>* under_load_list, int _from_ssd, int _from_vid) {
+pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, set<pair<int, pair<double, int>>, greater<pair<int, pair<double, int>>>>* under_load_list, int _from_ssd, int _from_vid) {
 	int to_vid = NONE_ALLOC;
 	int to_ssd = NONE_ALLOC;
 	int flag = FLAG_DENY;
 	while (!(*under_load_list).empty()) {
-		to_ssd = (*(*under_load_list).begin()).second;
+		to_ssd = (*(*under_load_list).begin()).second.second;
 		(*under_load_list).erase(*(*under_load_list).begin());
 
 		if (to_ssd == _from_ssd) {
