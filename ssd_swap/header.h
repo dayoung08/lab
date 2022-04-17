@@ -8,7 +8,7 @@
 #include <sstream>
 using namespace std;
 
-#define SEED 1234567890
+#define SEED 1234567
 //#define INFINITY 987654321
 
 #define SSD_TYPE 10
@@ -101,7 +101,7 @@ int migration(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_met
 int migration_of_two_phase(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD, double* _MB_write);
 int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_videos, int* _prev_SSD, double* _MB_write);
 
-pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, set<pair<int, pair<double, int>>, greater<pair<int, pair<double, int>>>>* under_load_list, int _from_ssd, int _from_vid);
+pair<int, pair<int, int>> determine_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, set<pair<int, pair<double, pair<double, int>>>, greater<pair<int, pair<double, pair<double, int>>>>>* under_load_list, int _from_ssd, int _from_vid);
 void set_serviced_video(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, int ssd, bool flag, int* _migration_num, int* _prev_SSD, double* _MB_write);
 void swap(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int> _element, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid, int* _migration_num, int* _prev_SSD, double* _MB_write);
 void reallocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, pair<double, int> _element, int _from_ssd, int _to_ssd, int _from_vid, int* _migration_num, int* _prev_SSD, double* _MB_write);
