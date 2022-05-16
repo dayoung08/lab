@@ -6,12 +6,11 @@
 #include <string>
 #include <fstream>   
 #include <sstream>
+#include <queue>
 using namespace std;
 
 #define SEED 1234567
 //#define INFINITY 987654321
-
-#define SSD_TYPE 10
 
 #define NONE_ALLOC -1
 #define VIRTUAL_SSD 0

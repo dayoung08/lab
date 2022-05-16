@@ -209,8 +209,8 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 		set<pair<int, pair<double, pair<double, int>>>, greater<pair<int, pair<double, pair<double, int>>>>>  under_load_list;
 		for (int to_ssd_temp = 1; to_ssd_temp <= _num_of_SSDs; to_ssd_temp++) {
 			if (!is_over_load[to_ssd_temp] && from_ssd != to_ssd_temp) {
-				double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage;
-				double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage;
+				double remained_bandwidth = _SSD_list[to_ssd_temp].maximum_bandwidth - _SSD_list[to_ssd_temp].total_bandwidth_usage / _SSD_list[to_ssd_temp].maximum_bandwidth;
+				double remained_storage = _SSD_list[to_ssd_temp].storage_capacity - _SSD_list[to_ssd_temp].storage_usage / _SSD_list[to_ssd_temp].storage_capacity;
 				uniform_int_distribution<> dist_priority{ 1, _num_of_SSDs };
 				int slope;
 				switch (_migration_method) {
@@ -221,7 +221,7 @@ int migration_benchmark(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _mig
 					slope = remained_storage;
 					break;
 				case MIGRATION_LIFETIME_AWARE:
-					slope = _SSD_list[to_ssd_temp].DWPD;
+					slope = _SSD_list[to_ssd_temp].ADWD;
 					break;
 				case MIGRATION_RANDOM:
 					slope = dist_priority(g); // 옮길 SSD를 랜덤 선택하기 위함

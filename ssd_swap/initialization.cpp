@@ -1,4 +1,5 @@
 #include "header.h"
+#define SSD_TYPE 10
 //initalization : 기존에 있던 SSD와 video 정보 가져오기
 //update_new_video: 새로운 비디오 정보 가져오면서, 기존에 있던 video의 인기도, 대역폭도 함께 갱신
 //testbed 쪽 함수 고쳐야함...
