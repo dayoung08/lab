@@ -147,8 +147,8 @@ void allocate(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _ssd_index, in
 	_SSD_list[_ssd_index].total_bandwidth_usage += _VIDEO_CHUNK_list[_video_index].requested_bandwidth;
 
 	if (prev_SSD != _ssd_index) {
-		_SSD_list[_ssd_index].total_write_MB += _VIDEO_CHUNK_list[_video_index].size;
-		_SSD_list[_ssd_index].ADWD = _SSD_list[_ssd_index].total_write_MB / (_SSD_list[_ssd_index].DWPD * _SSD_list[_ssd_index].storage_capacity * _SSD_list[_ssd_index].running_days);
+		_SSD_list[_ssd_index].total_write += _VIDEO_CHUNK_list[_video_index].size;
+		_SSD_list[_ssd_index].ADWD = _SSD_list[_ssd_index].total_write / (_SSD_list[_ssd_index].DWPD * _SSD_list[_ssd_index].storage_capacity * _SSD_list[_ssd_index].age);
 	}
 	//_VIDEO_CHUNK_list[_video_index].is_serviced = true;
 	//_SSD_list[_ssd_index].serviced_bandwidth_usage += _VIDEO_CHUNK_list[_video_index].requested_bandwidth;
