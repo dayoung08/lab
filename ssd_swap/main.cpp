@@ -8,13 +8,16 @@
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
-int migration_method = 7; // 8~11로 바꾸면 비교스킴
+int migration_method = MIGRATION_RANDOM; // 8~11로 바꾸면 비교스킴
 
-int num_of_SSDs = 24; 
+int num_of_SSDs = 20; 
 int num_of_videos = 4;
 int num_of_new_videos = 0;
+
+
 double num_of_request_per_sec = 500; // (560 * 24) / 2.5 = 5376...
-//그러나 한 파일당 대역폭이 최대 560을 넘어선 안되므로 조절 결과 적당히 500으로 함(임시값). 
+//그러나 한 파일당 대역폭이 최대 560을 넘어선 안되므로 조절 결과 적당히 500으로 함 (임시값). 
+//마이그레이션때는 적당히 1000으로 했음 (임시값).
 //이는 현재 파일 4개일 때이므로, 파일 1000개일 때는 또 다르게 수행해야 함.
 
 int main(int argc, char* argv[]) {
@@ -24,7 +27,8 @@ int main(int argc, char* argv[]) {
 	case 1:
 		//migartion_in_simulation();
 		//placement(true);
-		placement(false);
+		//placement(false);
+		migration_in_testbed(1);
 	break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
@@ -85,7 +89,7 @@ void placement(bool _is_simulation) {
 	else {
 		int dummy = 0;
 		SSD_list = SSD_initalization_for_testbed(num_of_SSDs);
-		VIDEO_CHUNK_list = video_initalization_for_testbed(dummy, num_of_videos, num_of_request_per_sec, -INFINITY, false); // dummy와 -INFINITY 넣어준건 이유 없음... 안 쓰니까
+		VIDEO_CHUNK_list = video_initalization_for_testbed(dummy, num_of_videos, num_of_SSDs, num_of_request_per_sec, -INFINITY, false); // dummy와 -INFINITY 넣어준건 이유 없음... 안 쓰니까
 		setting_for_placement_in_testbed(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	}
 
@@ -106,7 +110,12 @@ void placement(bool _is_simulation) {
 	if(_is_simulation)
 		printf("%lf\n", total_bandwidth_usage_in_placement);
 	else {
-		create_placement_infomation(SSD_list, VIDEO_CHUNK_list, num_of_videos);
+		for (int vid = 0; vid < num_of_videos + num_of_new_videos; vid++) {
+			if (VIDEO_CHUNK_list[vid].assigned_SSD <= 0) {
+				VIDEO_CHUNK_list[vid].assigned_SSD = 21 + rand() % 4;
+			}
+		}
+		create_placement_infomation(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos);
 		create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, false);
 	}
 	
@@ -197,7 +206,7 @@ void migartion_in_simulation() {
 
 void migration_in_testbed(int _time) {
 	SSD* SSD_list = SSD_initalization_for_testbed(num_of_SSDs);
-	VIDEO_CHUNK* VIDEO_CHUNK_list = video_initalization_for_testbed(num_of_videos, num_of_new_videos, num_of_request_per_sec, migration_method, true);
+	VIDEO_CHUNK* VIDEO_CHUNK_list = video_initalization_for_testbed(num_of_videos, num_of_new_videos, num_of_SSDs, num_of_request_per_sec, migration_method, true);
 
 	setting_for_migration_in_testbed(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, _time);
 	//기존에 저장되어있던 비디오와, 새로운 비디오의 정보를 읽어옴
@@ -205,6 +214,16 @@ void migration_in_testbed(int _time) {
 	int* prev_assigned_SSD = new int[num_of_videos];
 	for (int vid = 0; vid < num_of_videos; vid++) {
 		prev_assigned_SSD[vid] = VIDEO_CHUNK_list[vid].assigned_SSD;
+		
+		//데이터노드6을 HDD 존으로 사용할 것이기 때문에, 알고리즘에서는 HDD 존을 하나로 묶어 쓰므로
+		if (VIDEO_CHUNK_list[vid].assigned_SSD > num_of_SSDs){
+			if (migration_method >= MIGRATION_OURS) {
+				VIDEO_CHUNK_list[vid].assigned_SSD = VIRTUAL_SSD;
+			}
+			else {
+				VIDEO_CHUNK_list[vid].assigned_SSD = NONE_ALLOC;
+			}
+		}
 	}
 	
 	//비디오 migration
@@ -213,6 +232,14 @@ void migration_in_testbed(int _time) {
 		migration_num = migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos + num_of_new_videos);
 	else
 		migration_num = placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos + num_of_new_videos);
+
+	//datanode 6을 HDD 존으로 사용하기 위함. 어떤 스토리지에 들어갈지는 랜덤 선택 
+	//(중요한게 아니라서 이렇게 적당히 구현했는데, 실제로는 HDD의 스토리지 용량이 얼마나 남았는지 계산해서 넣어야함)
+	for (int vid = 0; vid < num_of_videos + num_of_new_videos; vid++) {
+		if (VIDEO_CHUNK_list[vid].assigned_SSD <= 0) {
+			VIDEO_CHUNK_list[vid].assigned_SSD = 21 + rand() % 4;
+		}
+	}
 
 	create_migration_infomation(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // 이동 정보 파일 생성
 	create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos + num_of_new_videos, true);

@@ -104,6 +104,7 @@ void setting_for_migration_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_V
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].total_assigned_VIDEOs_low_bandwidth_first.clear();
+		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].total_bandwidth_usage = 0;
 		//_SSD_list[ssd_index].serviced_bandwidth_usage = 0;
 		if(_time==1)
@@ -128,11 +129,13 @@ void setting_for_migration_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_V
 			
 			if (_migration_method >= MIGRATION_OURS) {
 				if (SSD_index != NONE_ALLOC) {
+					_SSD_list[SSD_index].storage_usage += _existed_VIDEO_CHUNK_list[video_index].size;
 					_SSD_list[SSD_index].total_bandwidth_usage += _existed_VIDEO_CHUNK_list[video_index].requested_bandwidth;
 					_SSD_list[SSD_index].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_CHUNK_list[video_index].requested_bandwidth, video_index));
 				}
 				else {
 					_existed_VIDEO_CHUNK_list[video_index].assigned_SSD = VIRTUAL_SSD;
+					_SSD_list[VIRTUAL_SSD].storage_usage += _existed_VIDEO_CHUNK_list[video_index].size;
 					_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += _existed_VIDEO_CHUNK_list[video_index].requested_bandwidth;
 					_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(_existed_VIDEO_CHUNK_list[video_index].requested_bandwidth, video_index));
 				}
@@ -186,11 +189,13 @@ SSD* SSD_initalization_for_testbed(int& _num_of_SSDs) {
 				string* ssd_info = split(str, '\t');
 				_SSD_list[ssd_index].node_hostname = ssd_info[0]; // datanode 이름임. TLC 1개, QLC 3개가 같은 datanode hostname을 가짐
 				_SSD_list[ssd_index].storage_folder_name = ssd_info[1]; // 각 stroage의 directory의 폴더 이름
-				_SSD_list[ssd_index].storage_capacity = stod(ssd_info[2]) * 0.95; //검색해서 미리 입력해놓기
-				_SSD_list[ssd_index].maximum_bandwidth = stod(ssd_info[3]) * 0.95; //검색해서 미리 입력해놓기
+				_SSD_list[ssd_index].storage_capacity = stod(ssd_info[2]); //검색해서 미리 입력해놓기
+				_SSD_list[ssd_index].maximum_bandwidth = stod(ssd_info[3]); //검색해서 미리 입력해놓기
 				_SSD_list[ssd_index].DWPD = stod(ssd_info[4]); //검색해서 미리 입력해놓기
-				_SSD_list[ssd_index].total_write = stod(ssd_info[5]); // smartctl -a /dev/sda로 읽어오기 가능함 Total_LBAs_Written
-				_SSD_list[ssd_index].age = stoi(ssd_info[6]); // smartctl -a /dev/sda로 읽어오기 가능함 Power_On_Hours
+				_SSD_list[ssd_index].storage_usage = stod(ssd_info[5]); 
+				_SSD_list[ssd_index].total_bandwidth_usage = stod(ssd_info[6]); 
+				_SSD_list[ssd_index].total_write = stod(ssd_info[7]); // smartctl -a /dev/sda로 읽어오기 가능함 Total_LBAs_Written
+				_SSD_list[ssd_index].age = stoi(ssd_info[8]); // smartctl -a /dev/sda로 읽어오기 가능함 Power_On_Hours
 				_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD)) / _SSD_list[ssd_index].age;
 			}
 			cnt++;
@@ -213,7 +218,7 @@ SSD* SSD_initalization_for_testbed(int& _num_of_SSDs) {
 	return _SSD_list;
 }
 
-VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _migration_method, bool _is_migration) {
+VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& num_of_new_videos, int _num_of_SSDs, int _num_of_request_per_sec, int _migration_method, bool _is_migration) {
 	VIDEO_CHUNK* _VIDEO_CHUNK_list = NULL;
 	ifstream fin_existing_video("existing_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
 	ifstream fin_new_video("new_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
@@ -256,11 +261,13 @@ VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& n
 				ssd_num_temp = 1;
 			else if (video_info[4] == "qlc01")
 				ssd_num_temp = 2;
-			else if (video_info[4] == "qlc01")
+			else if (video_info[4] == "qlc02")
 				ssd_num_temp = 3;
-			else if (video_info[4] == "qlc01")
+			else if (video_info[4] == "qlc03")
 				ssd_num_temp = 4;
-			_VIDEO_CHUNK_list[video_index].assigned_SSD = (datanode_num - 1) * 4 + ssd_num_temp;
+
+			int ssd_num = (datanode_num - 1) * 4 + ssd_num_temp;
+			_VIDEO_CHUNK_list[video_index].assigned_SSD = ssd_num;
 
 			cnt++;
 		}
@@ -320,8 +327,8 @@ void setting_for_migration_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* VIDEO_CHUNK_l
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;
 		_SSD_list[ssd_index].total_assigned_VIDEOs_low_bandwidth_first.clear();
+		_SSD_list[ssd_index].storage_usage = 0;
 		_SSD_list[ssd_index].total_bandwidth_usage = 0;
-		//_SSD_list[ssd_index].serviced_bandwidth_usage = 0;
 		if (_time == 1)
 			_SSD_list[ssd_index].age++;
 		_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write / (_SSD_list[ssd_index].DWPD * _SSD_list[ssd_index].storage_capacity)) / _SSD_list[ssd_index].age;
@@ -330,7 +337,7 @@ void setting_for_migration_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* VIDEO_CHUNK_l
 			_SSD_list[ssd_index].total_write = 0;
 		}
 	}
-	
+
 	double* vid_pop = set_zipf_pop(num_of_existing_videos + num_of_new_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + num_of_existing_videos + num_of_new_videos);
 	default_random_engine g(SEED + rand_cnt++);
@@ -347,12 +354,16 @@ void setting_for_migration_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* VIDEO_CHUNK_l
 		//SSD에 기존에 저장되어있던 파일들의 밴드윗 변화를 기반으로, SSD의 사용 밴드윗을 재 계산함.
 		if (_migration_method >= MIGRATION_OURS) {
 			int SSD_index = VIDEO_CHUNK_list[video_index].assigned_SSD;
-			if (SSD_index != NONE_ALLOC) {
+			if (SSD_index != NONE_ALLOC && SSD_index <= _num_of_SSDs) {
+				_SSD_list[SSD_index].storage_usage += VIDEO_CHUNK_list[video_index].size;
 				_SSD_list[SSD_index].total_bandwidth_usage += VIDEO_CHUNK_list[video_index].requested_bandwidth;
 				_SSD_list[SSD_index].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(VIDEO_CHUNK_list[video_index].requested_bandwidth, video_index));
 			}
 			else {
-				VIDEO_CHUNK_list[video_index].assigned_SSD = VIRTUAL_SSD;
+				if(SSD_index <= _num_of_SSDs)
+					VIDEO_CHUNK_list[video_index].assigned_SSD = VIRTUAL_SSD;
+				//else -> 이 경우는 나중에 prev SSD 지정 하는 부분에서 따로 해줄 것.
+				
 				_SSD_list[VIRTUAL_SSD].storage_usage += VIDEO_CHUNK_list[video_index].size;
 				_SSD_list[VIRTUAL_SSD].total_bandwidth_usage += VIDEO_CHUNK_list[video_index].requested_bandwidth;
 				_SSD_list[VIRTUAL_SSD].total_assigned_VIDEOs_low_bandwidth_first.insert(make_pair(VIDEO_CHUNK_list[video_index].requested_bandwidth, video_index));

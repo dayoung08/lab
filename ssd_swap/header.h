@@ -81,7 +81,7 @@ void setting_for_placement_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHU
 void setting_for_migration_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_VIDEO_CHUNK_list, VIDEO_CHUNK* _new_VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_existing_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _time);
 
 SSD* SSD_initalization_for_testbed(int& _num_of_SSDs);
-VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _migration_method, bool _is_migration);
+VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& num_of_new_videos, int _num_of_SSDs, int _num_of_request_per_sec, int _migration_method, bool _is_migration);
 void setting_for_placement_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int& num_of_SSDs, int& num_of_videos, int _num_of_request_per_sec);
 void setting_for_migration_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int& _num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _time);
 
@@ -108,7 +108,7 @@ void update_SSD_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _
 int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _from_ssd, int _to_ssd, int _from_vid, int _to_vid);
 
 //information_file_create.cpp
-void create_placement_infomation(SSD* _SSD_list, VIDEO_CHUNK* _new_VIDEO_CHUNK_list, int _num_of_new_videos);
+void create_placement_infomation(SSD* _SSD_list, VIDEO_CHUNK* _new_VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_new_videos);
 void create_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_existing_videos, int _num_of_new_videos, int* _prev_assigned_SSD);
 void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, bool _is_migration);
 
