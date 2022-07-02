@@ -80,8 +80,8 @@ void video_initalization_for_simulation(VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num
 void setting_for_placement_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_video, int _num_of_request_per_secs);
 void setting_for_migration_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_VIDEO_CHUNK_list, VIDEO_CHUNK* _new_VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_existing_videos, int _num_of_new_videos, int _num_of_request_per_sec, int _time);
 
-void SSD_initalization_for_testbed(SSD* _SSD_list, int& _num_of_SSDs);
-void video_initalization_for_testbed(VIDEO_CHUNK* _VIDEO_CHUNK_list, int& num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _migration_method, bool _is_migration);
+SSD* SSD_initalization_for_testbed(int& _num_of_SSDs);
+VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _migration_method, bool _is_migration);
 void setting_for_placement_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int& num_of_SSDs, int& num_of_videos, int _num_of_request_per_sec);
 void setting_for_migration_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int& _num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _time);
 
@@ -110,7 +110,7 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migr
 //information_file_create.cpp
 void create_placement_infomation(SSD* _SSD_list, VIDEO_CHUNK* _new_VIDEO_CHUNK_list, int _num_of_new_videos);
 void create_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_existing_videos, int _num_of_new_videos, int* _prev_assigned_SSD);
-void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _existed_VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_existing_videos);
+void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, bool _is_migration);
 
 //main.cpp
 void placement(bool _is_simulation);

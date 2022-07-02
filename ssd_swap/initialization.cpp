@@ -167,7 +167,8 @@ void setting_for_migration_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_V
 	vector<double>().swap(vid_pop_shuffle); //메모리 해제를 위해
 }
 
-void SSD_initalization_for_testbed(SSD* _SSD_list, int& _num_of_SSDs) {
+SSD* SSD_initalization_for_testbed(int& _num_of_SSDs) {
+	SSD* _SSD_list = NULL;
 	ifstream fin_ssd("SSD_list.in"); // fin 객체 생성(cin 처럼 이용!) -> 셸 프로그래밍 파일 실행시, 이 파일이 없으면 생성하고(가볍게 미리 만든 디폴트 파일 copy하자), storage_usage, bandwidth_usage, write_MB가 0이도록 함
 	if (fin_ssd.is_open())
 	{
@@ -208,69 +209,97 @@ void SSD_initalization_for_testbed(SSD* _SSD_list, int& _num_of_SSDs) {
 	_SSD_list[VIRTUAL_SSD].age = 1; // 첫 날 = 1이니까
 	_SSD_list[VIRTUAL_SSD].node_hostname = "virtual_node";
 	_SSD_list[VIRTUAL_SSD].storage_folder_name = "HDD_archive";
+
+	return _SSD_list;
 }
 
-void video_initalization_for_testbed(VIDEO_CHUNK* _VIDEO_CHUNK_list, int& num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _migration_method, bool _is_migration) {
-	ifstream fin_video("video_list.in"); // fin 객체 생성(cin 처럼 이용!)
-	if (fin_video.is_open()) {
-		string str;
-		int cnt = -2;
-		while (getline(fin_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
+VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _migration_method, bool _is_migration) {
+	VIDEO_CHUNK* _VIDEO_CHUNK_list = NULL;
+	ifstream fin_existing_video("existing_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
+	ifstream fin_new_video("new_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
+	string str;
+	if (fin_existing_video.is_open()) {
+		getline(fin_existing_video, str);
+		num_of_existing_videos = stoi(str);
+	}
+	else {
+		num_of_existing_videos = 0;
+	}
+	if (fin_new_video.is_open()) {
+		getline(fin_new_video, str);
+		num_of_new_videos = stoi(str);
+	}
+	else {
+		num_of_new_videos = 0;
+	}
+
+	if (_is_migration)
+		_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_existing_videos + num_of_new_videos];
+	else
+		_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_new_videos]; // placement 때는 new 파일만 대상으로 할 것
+
+	if(fin_existing_video.is_open() && num_of_existing_videos > 0 && _is_migration){
+		int cnt = 0;
+		while (getline(fin_existing_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
 		{
-			if (cnt == -2) {
-				num_of_existing_videos = stoi(str);
-			}
-			else if (cnt == -1) {
-				num_of_new_videos = stoi(str);
-				if(_is_migration)
-					_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_existing_videos + num_of_new_videos];
-				else
-					_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_new_videos]; // placement 때는 new 파일만 대상으로 할 것
-			}
-			else {
-				if (!_is_migration) // placement 때는 new 파일만 대상으로 할 것
-					continue;
+			int video_index = cnt;
+			string* video_info = split(str, '\t');
 
-				int video_index = cnt;
-				_VIDEO_CHUNK_list[video_index].index = video_index;
-				string* video_info = split(str, '\t');
-				_VIDEO_CHUNK_list[video_index].path = video_info[0];
-				_VIDEO_CHUNK_list[video_index].size = stod(video_info[1]);
-				_VIDEO_CHUNK_list[video_index].once_bandwidth = stod(video_info[2]);
+			_VIDEO_CHUNK_list[video_index].index = video_index;
+			_VIDEO_CHUNK_list[video_index].path = video_info[0];
+			_VIDEO_CHUNK_list[video_index].size = stod(video_info[1]);
+			_VIDEO_CHUNK_list[video_index].once_bandwidth = stod(video_info[2]);
 
-				if (video_info[3].find("new")) {
-					if (_migration_method >= MIGRATION_OURS) {
-						_VIDEO_CHUNK_list[video_index].assigned_SSD = VIRTUAL_SSD;
-					}
-					else {
-						_VIDEO_CHUNK_list[video_index].assigned_SSD = NONE_ALLOC;
-					}
-				}
-				else {
-					int datanode_num = video_info[3].back() - '0';
-					int ssd_num_temp;
-					if (video_info[4] == "tlc01")
-						ssd_num_temp = 1;
-					else if (video_info[4] == "qlc01")
-						ssd_num_temp = 2;
-					else if (video_info[4] == "qlc01")
-						ssd_num_temp = 3;
-					else if (video_info[4] == "qlc01")
-						ssd_num_temp = 4;
-					_VIDEO_CHUNK_list[video_index].assigned_SSD = (datanode_num - 1) * 4 + ssd_num_temp;
-				}
-			}
+			int datanode_num = video_info[3].back() - '0';
+			int ssd_num_temp;
+			if (video_info[4] == "tlc01")
+				ssd_num_temp = 1;
+			else if (video_info[4] == "qlc01")
+				ssd_num_temp = 2;
+			else if (video_info[4] == "qlc01")
+				ssd_num_temp = 3;
+			else if (video_info[4] == "qlc01")
+				ssd_num_temp = 4;
+			_VIDEO_CHUNK_list[video_index].assigned_SSD = (datanode_num - 1) * 4 + ssd_num_temp;
+
 			cnt++;
 		}
 	}
-	fin_video.close(); // 파일 닫기
+	fin_existing_video.close(); // 파일 닫기
+
+	if (fin_new_video.is_open() && num_of_new_videos > 0) {
+		int cnt;
+		if (_is_migration)
+			cnt = num_of_existing_videos;
+		else
+			cnt = 0;
+
+		while (getline(fin_new_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
+		{
+			int video_index = cnt;
+			string* video_info = split(str, '\t');
+
+			_VIDEO_CHUNK_list[video_index].index = video_index;
+			_VIDEO_CHUNK_list[video_index].path = video_info[0];
+			_VIDEO_CHUNK_list[video_index].size = stod(video_info[1]);
+			_VIDEO_CHUNK_list[video_index].once_bandwidth = stod(video_info[2]);
+
+			if (_migration_method >= MIGRATION_OURS) {
+				_VIDEO_CHUNK_list[video_index].assigned_SSD = VIRTUAL_SSD;
+			}
+			else {
+				_VIDEO_CHUNK_list[video_index].assigned_SSD = NONE_ALLOC;
+			}
+
+			cnt++;
+		}
+	}
+	fin_new_video.close(); // 파일 닫기
+
+	return _VIDEO_CHUNK_list;
 }
 
 void setting_for_placement_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int& num_of_SSDs, int& num_of_videos, int _num_of_request_per_sec) {
-	SSD_initalization_for_testbed(_SSD_list, num_of_SSDs);
-	int dummy = 0;
-	video_initalization_for_testbed(_VIDEO_CHUNK_list, dummy, num_of_videos, _num_of_request_per_sec, -INFINITY, false); // dummy와 -INFINITY 넣어준건 이유 없음... 안 쓰니까.
-
 	double* vid_pop = set_zipf_pop(num_of_videos, ALPHA, BETA);
 	vector<double>vid_pop_shuffle(vid_pop, vid_pop + num_of_videos);
 	std::default_random_engine g(SEED);
@@ -287,9 +316,6 @@ void setting_for_placement_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_
 
 
 void setting_for_migration_in_testbed(SSD* _SSD_list, VIDEO_CHUNK* VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int& num_of_existing_videos, int& num_of_new_videos, int _num_of_request_per_sec, int _time) {
-	SSD_initalization_for_testbed(_SSD_list, _num_of_SSDs);
-	video_initalization_for_testbed(VIDEO_CHUNK_list, num_of_existing_videos, num_of_new_videos, _num_of_request_per_sec, _migration_method, true); 
-
 	//우선 전부 제거함. 재계산을 위함.
 	for (int ssd = 0; ssd <= _num_of_SSDs; ssd++) {
 		int ssd_index = ssd;

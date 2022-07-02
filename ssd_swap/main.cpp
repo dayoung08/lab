@@ -11,9 +11,11 @@ int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 24; 
-int num_of_videos = 1000;
-int num_of_new_videos = 10;
-double num_of_request_per_sec = 20000;
+int num_of_videos = 4;
+int num_of_new_videos = 0;
+double num_of_request_per_sec = 500; // (560 * 24) / 2.5 = 5376...
+//그러나 한 파일당 대역폭이 최대 560을 넘어선 안되므로 조절 결과 적당히 500으로 함(임시값). 
+//이는 현재 파일 4개일 때이므로, 파일 1000개일 때는 또 다르게 수행해야 함.
 
 int main(int argc, char* argv[]) {
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
@@ -21,7 +23,8 @@ int main(int argc, char* argv[]) {
 	{
 	case 1:
 		//migartion_in_simulation();
-		placement(true);
+		//placement(true);
+		placement(false);
 	break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
@@ -71,16 +74,18 @@ int main(int argc, char* argv[]) {
 }
 
 void placement(bool _is_simulation) {
-	SSD* SSD_list = NULL;
-	VIDEO_CHUNK* VIDEO_CHUNK_list = NULL;
+	SSD* SSD_list;
+	VIDEO_CHUNK* VIDEO_CHUNK_list;
+
 	if (_is_simulation) {
-		SSD* SSD_list = new SSD[num_of_SSDs + 1];
-		VIDEO_CHUNK* VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
+		SSD_list = new SSD[num_of_SSDs + 1];
+		VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
 		setting_for_placement_in_simulation(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	}
 	else {
-		num_of_SSDs = 0;
-		num_of_videos = 0;
+		int dummy = 0;
+		SSD_list = SSD_initalization_for_testbed(num_of_SSDs);
+		VIDEO_CHUNK_list = video_initalization_for_testbed(dummy, num_of_videos, num_of_request_per_sec, -INFINITY, false); // dummy와 -INFINITY 넣어준건 이유 없음... 안 쓰니까
 		setting_for_placement_in_testbed(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	}
 
@@ -102,7 +107,7 @@ void placement(bool _is_simulation) {
 		printf("%lf\n", total_bandwidth_usage_in_placement);
 	else {
 		create_placement_infomation(SSD_list, VIDEO_CHUNK_list, num_of_videos);
-		create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos);
+		create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, false);
 	}
 	
 	delete[](SSD_list);
@@ -191,12 +196,9 @@ void migartion_in_simulation() {
 }
 
 void migration_in_testbed(int _time) {
-	SSD* SSD_list = NULL;
-	VIDEO_CHUNK* VIDEO_CHUNK_list = NULL;
-	
-	num_of_SSDs = 0;
-	num_of_videos = 0;
-	num_of_new_videos = 0;
+	SSD* SSD_list = SSD_initalization_for_testbed(num_of_SSDs);
+	VIDEO_CHUNK* VIDEO_CHUNK_list = video_initalization_for_testbed(num_of_videos, num_of_new_videos, num_of_request_per_sec, migration_method, true);
+
 	setting_for_migration_in_testbed(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, _time);
 	//기존에 저장되어있던 비디오와, 새로운 비디오의 정보를 읽어옴
 
@@ -213,7 +215,7 @@ void migration_in_testbed(int _time) {
 		migration_num = placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos + num_of_new_videos);
 
 	create_migration_infomation(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // 이동 정보 파일 생성
-	create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos + num_of_new_videos);
+	create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos + num_of_new_videos, true);
 	delete[] VIDEO_CHUNK_list;
 }
 
