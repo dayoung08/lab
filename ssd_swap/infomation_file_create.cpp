@@ -147,8 +147,6 @@ void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, i
 			line += to_string(_SSD_list[ssd_index].storage_capacity) + "\t";
 			line += to_string(_SSD_list[ssd_index].maximum_bandwidth) + "\t";
 			line += to_string(_SSD_list[ssd_index].DWPD) + "\t";
-			line += to_string(_SSD_list[ssd_index].storage_usage) + "\t";
-			line += to_string(_SSD_list[ssd_index].total_bandwidth_usage) + "\t";
 			line += to_string(_SSD_list[ssd_index].total_write) + "\t";
 			line += to_string(_SSD_list[ssd_index].age);
 

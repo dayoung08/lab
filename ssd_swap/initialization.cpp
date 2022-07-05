@@ -192,10 +192,8 @@ SSD* SSD_initalization_for_testbed(int& _num_of_SSDs) {
 				_SSD_list[ssd_index].storage_capacity = stod(ssd_info[2]); //검색해서 미리 입력해놓기
 				_SSD_list[ssd_index].maximum_bandwidth = stod(ssd_info[3]); //검색해서 미리 입력해놓기
 				_SSD_list[ssd_index].DWPD = stod(ssd_info[4]); //검색해서 미리 입력해놓기
-				_SSD_list[ssd_index].storage_usage = stod(ssd_info[5]); 
-				_SSD_list[ssd_index].total_bandwidth_usage = stod(ssd_info[6]); 
-				_SSD_list[ssd_index].total_write = stod(ssd_info[7]); // smartctl -a /dev/sda로 읽어오기 가능함 Total_LBAs_Written
-				_SSD_list[ssd_index].age = stoi(ssd_info[8]); // smartctl -a /dev/sda로 읽어오기 가능함 Power_On_Hours
+				_SSD_list[ssd_index].total_write = stod(ssd_info[5]); // smartctl -a /dev/sda로 읽어오기 가능함 Total_LBAs_Written
+				_SSD_list[ssd_index].age = stoi(ssd_info[6]); // smartctl -a /dev/sda로 읽어오기 가능함 Power_On_Hours
 				_SSD_list[ssd_index].ADWD = (_SSD_list[ssd_index].total_write / (_SSD_list[ssd_index].storage_capacity * _SSD_list[ssd_index].DWPD)) / _SSD_list[ssd_index].age;
 			}
 			cnt++;
