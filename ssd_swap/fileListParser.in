@@ -1,0 +1,13 @@
+#!/bin/bash
+echo `ls -l /home/inha/shared_folder/video_segment | grep ^- | wc -l`
+firstLine=0
+ls -l /home/inha/shared_folder/video_segment | while read file; do
+        if [ ${firstLine} -eq 0 ];then
+                firstLine=1
+        else
+                tmp=`echo $file | awk '{print $5}'`
+      size=`echo $tmp | awk '{printf "%.5f", $1 / 100000}'`
+                name=`echo $file | awk '{print $9}'`
+                echo -e "$name\t$size\t2.5"
+        fi
+done
