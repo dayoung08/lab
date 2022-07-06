@@ -1,7 +1,7 @@
 #!/bin/bash
-echo `ls -l /home/inha/shared_folder/video_segment | grep ^- | wc -l`
+echo `ls -l /home/erslab/system/video_segment | grep ^- | wc -l`
 firstLine=0
-ls -l /home/inha/shared_folder/video_segment | while read file; do
+ls -l /home/erslab/system/video_segment | while read file; do
         if [ ${firstLine} -eq 0 ];then
                 firstLine=1
         else
