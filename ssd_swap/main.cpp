@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
 	{
 	case 1:
 		//migartion_in_simulation();
-		//placement(true);
+		placement(true);
 		//placement(false);
-		migration_in_testbed(1);
+		//migration_in_testbed(1);
 	break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {
