@@ -134,8 +134,8 @@ void create_migration_infomation(SSD * _SSD_list, VIDEO_CHUNK * _VIDEO_CHUNK_lis
 	fout_new.close();  // 파일을 닫습니다.
 }
 
-void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, bool _is_migration) {
-	ofstream fout_ssd("SSD_list2.in", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
+void create_result(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, bool _is_migration) {
+	/*ofstream fout_ssd("SSD_list.in", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
 	if (fout_ssd.is_open()) {
 		fout_ssd << to_string(_num_of_SSDs) + "\n";
 		for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
@@ -156,9 +156,9 @@ void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, i
 			fout_ssd << line;   // cout처럼 출력하면 됨.
 		}
 		fout_ssd.close();  // 파일을 닫습니다.
-	}
+	}*/
 
-	ofstream fout_video("existing_video_list2.in", ios_base::in | ios_base::out | ios_base::trunc);
+	ofstream fout_video("existing_video_list.in", ios_base::in | ios_base::out | ios_base::trunc);
 	if (fout_video.is_open()) {
 		if(_is_migration) {
 			fout_video << to_string(_num_of_videos) + "\n";

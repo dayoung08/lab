@@ -89,7 +89,7 @@ void placement(bool _is_simulation) {
 	else {
 		int dummy = 0;
 		SSD_list = SSD_initalization_for_testbed(num_of_SSDs);
-		VIDEO_CHUNK_list = video_initalization_for_testbed(dummy, num_of_videos, num_of_SSDs, num_of_request_per_sec, -INFINITY, false); // dummy와 -INFINITY 넣어준건 이유 없음... 안 쓰니까
+		VIDEO_CHUNK_list = video_initalization_for_testbed(dummy, num_of_videos, num_of_SSDs, num_of_request_per_sec, -987654321, false); // dummy와 -987654321 넣어준건 이유 없음... 안 쓰니까
 		setting_for_placement_in_testbed(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	}
 
@@ -116,7 +116,7 @@ void placement(bool _is_simulation) {
 			}
 		}
 		create_placement_infomation(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos);
-		create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, false);
+		create_result(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, false);
 	}
 	
 	delete[](SSD_list);
@@ -242,7 +242,7 @@ void migration_in_testbed(int _time) {
 	}
 
 	create_migration_infomation(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // 이동 정보 파일 생성
-	create_SSD_and_video_list(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos + num_of_new_videos, true);
+	create_result(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos + num_of_new_videos, true);
 	delete[] VIDEO_CHUNK_list;
 }
 

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <random>
-#include <string>
+#include <cstring>
 #include <fstream>   
 #include <sstream>
 #include <queue>
@@ -110,7 +110,7 @@ int get_migration_flag(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migr
 //information_file_create.cpp
 void create_placement_infomation(SSD* _SSD_list, VIDEO_CHUNK* _new_VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_new_videos);
 void create_migration_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _migration_method, int _num_of_SSDs, int _num_of_existing_videos, int _num_of_new_videos, int* _prev_assigned_SSD);
-void create_SSD_and_video_list(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, bool _is_migration);
+void create_result(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, bool _is_migration);
 
 //main.cpp
 void placement(bool _is_simulation);
