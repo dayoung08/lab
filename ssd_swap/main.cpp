@@ -1,4 +1,4 @@
-//testbed에서 placement때는 new_video_list.in만 있어야함. existing_video_list.in이 있으면 infomation_file_create.cpp에서 오류가 발생함.
+//testbed에서 placement때는 new_video_list.in만 있어야함. existing_video_list.in이 제대로 된 파일이 아닌 상태로 있으면 infomation_file_create.cpp에서 오류가 발생함.
 //또한 testbed에서 migration 때, existing_video_list.in에 datanode와 어떤 SSD에 저장되어 있는지 적혀 있는지 확인 할 것. 안 적혀 있으면 세그멘테이션 폴트 발생.
 
 #include "header.h"
@@ -11,7 +11,7 @@
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 int placement_method = 1; // 2~6으로 바꾸면 비교스킴
-int migration_method = MIGRATION_RANDOM; // 8~11로 바꾸면 비교스킴
+int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 20; 
 int num_of_videos = 4;
