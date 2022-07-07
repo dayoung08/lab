@@ -4,7 +4,9 @@
 //1) 2022-7월 8일 기준, 한양대 하이닉스 컴퓨터에서는 제대로 안 돌아가길래, 알아보니 아직 movementInfo.in가 /spider-man-no-way-home-1.mp4	0	datanode1	DISK	datanode1	DISK	1 상태임. 
 //그러므로 ERSBlockMovement했을때 오류나면 우선 저거 먼저 어떤 버전인지 볼 것, 컴파일 오래 걸려서 저거 movementInfo 파일 포맷 수정하고도, 하이닉스 컴퓨터엔 반영을 안한 상태로 보임
 //여기서 뽑는건 movementInfo.in가 /spider-man-no-way-home-1.mp4	datanode1	2 datanode1	1 포맷임.
-//2) SSDListParser.sh, fileListParser.sh, 이 알고리즘이 hdfs ERSBlockPlacement와 hdfs ERSBlockMovement 내에서 순서대로 실행되도록  바꾸는게 좋겠음. 생각보다 하나하나 하는게 성가심.
+//2) 마이그레이션 시 SSDListParser.sh, fileListParser.sh, 이 알고리즘, hdfs ERSBlockMovement 툴, hdfs ERSBlockPlacement 툴이 순서대로 실행되는 셸을 짜야겠음. 
+//이걸 ERSBlockMovement 안에 다 안 넣는 이유는, 새로운 파일이 업로드 될때는 ERSBlockPlacement를 써야하는데 ERSBlockMovement 안에서 ERSBlockPlacement 호출하기는 좀..
+//그런 이유로 셸 프로그래밍이 제일 무난해 보임.
 //3) ERSBlockPlacement -> FilePlacement, ERSBlockMovement -> FileMovement 로 커맨드 교체하기
 
 #include "header.h"
