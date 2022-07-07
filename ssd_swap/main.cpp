@@ -1,6 +1,12 @@
 //testbed에서 placement때는 new_video_list.in만 있어야함. existing_video_list.in이 제대로 된 파일이 아닌 상태로 있으면 infomation_file_create.cpp에서 오류가 발생함.
 //또한 testbed에서 migration 때, existing_video_list.in에 datanode와 어떤 SSD에 저장되어 있는지 적혀 있는지 확인 할 것. 안 적혀 있으면 세그멘테이션 폴트 발생.
 
+//1) 2022-7월 8일 기준, 한양대 하이닉스 컴퓨터에서는 제대로 안 돌아가길래, 알아보니 아직 movementInfo.in가 /spider-man-no-way-home-1.mp4	0	datanode1	DISK	datanode1	DISK	1 상태임. 
+//그러므로 ERSBlockMovement했을때 오류나면 우선 저거 먼저 어떤 버전인지 볼 것, 컴파일 오래 걸려서 저거 movementInfo 파일 포맷 수정하고도, 하이닉스 컴퓨터엔 반영을 안한 상태로 보임
+//여기서 뽑는건 movementInfo.in가 /spider-man-no-way-home-1.mp4	datanode1	2 datanode1	1 포맷임.
+//2) SSDListParser.sh, fileListParser.sh, 이 알고리즘이 hdfs ERSBlockPlacement와 hdfs ERSBlockMovement 내에서 순서대로 실행되도록  바꾸는게 좋겠음. 생각보다 하나하나 하는게 성가심.
+//3) ERSBlockPlacement -> FilePlacement, ERSBlockMovement -> FileMovement 로 커맨드 교체하기
+
 #include "header.h"
 #define NUM_OF_DATEs 3 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 3
@@ -14,14 +20,10 @@ int placement_method = 1; // 2~6으로 바꾸면 비교스킴
 int migration_method = 7; // 8~11로 바꾸면 비교스킴
 
 int num_of_SSDs = 20; 
-int num_of_videos = 4;
-int num_of_new_videos = 0;
+int num_of_videos = 1000;
+int num_of_new_videos = 78;
 
-
-double num_of_request_per_sec = 500; // (560 * 24) / 2.5 = 5376...
-//그러나 한 파일당 대역폭이 최대 560을 넘어선 안되므로 조절 결과 적당히 500으로 함 (임시값). 
-//마이그레이션때는 적당히 1000으로 했음 (임시값).
-//이는 현재 파일 4개일 때이므로, 파일 1000개일 때는 또 다르게 수행해야 함.
+double num_of_request_per_sec = 5000; // 임시값
 
 int main(int argc, char* argv[]) {
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.

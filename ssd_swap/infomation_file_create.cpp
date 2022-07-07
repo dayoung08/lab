@@ -106,7 +106,7 @@ void create_migration_infomation(SSD * _SSD_list, VIDEO_CHUNK * _VIDEO_CHUNK_lis
 				string line = "";
 				line += _VIDEO_CHUNK_list[video_index].path + "\t";
 
-				if (ssd_index > 0) {
+				if (ssd_index <= _num_of_SSDs) {
 					line += _SSD_list[ssd_index].node_hostname + "\t";
 					if (_SSD_list[ssd_index].storage_folder_name == "tlc01")
 						line += "0";
