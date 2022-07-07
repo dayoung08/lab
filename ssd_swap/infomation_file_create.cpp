@@ -1,9 +1,9 @@
 #include "header.h"
-
+//datanode6이 HDD로 구성되어있다고 가정(실제로는 아님)
 void create_placement_infomation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos) {
 	ofstream fout("placementInfo.in", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
 
-	if (fout.is_open()) {
+	if (!fout.fail()) {
 		for (int vid = 0; vid < _num_of_videos; vid++) {
 			int video_index = vid;
 			int ssd_index = _VIDEO_CHUNK_list[video_index].assigned_SSD;
@@ -45,7 +45,7 @@ void create_migration_infomation(SSD * _SSD_list, VIDEO_CHUNK * _VIDEO_CHUNK_lis
 		int video_index = vid;
 		if (video_index < _num_of_existing_videos) { // 기존에 있던 파일
 
-			if (fout_existing.is_open()) {
+			if (!fout_existing.fail()) {
 				int video_index = vid;
 				int from_ssd_index = _prev_assigned_SSD[video_index];
 				int to_ssd_index = _VIDEO_CHUNK_list[video_index].assigned_SSD;
@@ -99,7 +99,7 @@ void create_migration_infomation(SSD * _SSD_list, VIDEO_CHUNK * _VIDEO_CHUNK_lis
 		}
 		else { // 새로 업로드하는 파일
 			//create_placement_infomation랑 거의 똑같은데 함수 만드는게 더 피곤할 것 같아서 그냥 복붙해서 고쳐서 썼다...
-			if (fout_new.is_open()) {
+			if (!fout_new.fail()) {
 				int video_index = vid;
 				int ssd_index = _VIDEO_CHUNK_list[video_index].assigned_SSD;
 
@@ -135,8 +135,8 @@ void create_migration_infomation(SSD * _SSD_list, VIDEO_CHUNK * _VIDEO_CHUNK_lis
 }
 
 void create_result(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_SSDs, int _num_of_videos, bool _is_migration) {
-	/*ofstream fout_ssd("SSD_list.in", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
-	if (fout_ssd.is_open()) {
+	/*ofstream fout_ssd("SSD_list.temp", ios_base::in | ios_base::out | ios_base::trunc);   // 파일 열기
+	if (!fout_ssd.fail()) {
 		fout_ssd << to_string(_num_of_SSDs) + "\n";
 		for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
 			int ssd_index = ssd;
@@ -158,8 +158,8 @@ void create_result(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_S
 		fout_ssd.close();  // 파일을 닫습니다.
 	}*/
 
-	ofstream fout_video("existing_video_list.in", ios_base::in | ios_base::out | ios_base::trunc);
-	if (fout_video.is_open()) {
+	ofstream fout_video("existing_video_list.temp", ios_base::in | ios_base::out | ios_base::trunc);
+	if (!fout_video.fail()) {
 		if(_is_migration) {
 			fout_video << to_string(_num_of_videos) + "\n";
 		}
@@ -168,7 +168,7 @@ void create_result(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_S
 			int num_of_existing_videos;
 			int num_of_new_videos = _num_of_videos;
 			string str;
-			if (fin_existing_video.is_open()) {
+			if (!fin_existing_video.fail()) {
 				getline(fin_existing_video, str);
 				num_of_existing_videos = stoi(str);
 			}
@@ -176,12 +176,15 @@ void create_result(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_S
 				num_of_existing_videos = 0;
 			}
 
-			if (fin_existing_video.is_open() && num_of_existing_videos > 0) {
-				int total_video_num = num_of_existing_videos + _num_of_videos;
-				fout_video << to_string(total_video_num) + "\n";
+			int total_video_num = num_of_existing_videos + _num_of_videos;
+			fout_video << to_string(total_video_num) + "\n";
+
+			if (!fin_existing_video.fail() && num_of_existing_videos > 0) {
 				int cnt = 0;
 				while (getline(fin_existing_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
 				{
+					if (cnt >= num_of_existing_videos)
+						break;
 					string* video_info = split(str, '\t');
 					string path = video_info[0];
 					double size = stod(video_info[1]);
@@ -230,4 +233,7 @@ void create_result(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHUNK_list, int _num_of_S
 		}
 		fout_video.close();  // 파일을 닫습니다.
 	}
+
+	remove("existing_video_list.in");
+	rename("existing_video_list.temp", "existing_video_list.in");
 }

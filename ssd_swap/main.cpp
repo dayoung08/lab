@@ -1,3 +1,6 @@
+//testbed에서 placement때는 new_video_list.in만 있어야함. existing_video_list.in이 있으면 infomation_file_create.cpp에서 오류가 발생함.
+//또한 testbed에서 migration 때, existing_video_list.in에 datanode와 어떤 SSD에 저장되어 있는지 적혀 있는지 확인 할 것. 안 적혀 있으면 세그멘테이션 폴트 발생.
+
 #include "header.h"
 #define NUM_OF_DATEs 3 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 3
@@ -26,9 +29,9 @@ int main(int argc, char* argv[]) {
 	{
 	case 1:
 		//migartion_in_simulation();
-		placement(true);
+		//placement(true);
 		//placement(false);
-		//migration_in_testbed(1);
+		migration_in_testbed(1);
 	break;
 	case 2:
 		if (!strcmp(argv[1], "placement")) {

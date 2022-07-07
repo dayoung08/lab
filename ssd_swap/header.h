@@ -7,6 +7,8 @@
 #include <fstream>   
 #include <sstream>
 #include <queue>
+#include <cstdio>
+
 using namespace std;
 
 #define SEED 1234567

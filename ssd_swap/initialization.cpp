@@ -2,7 +2,6 @@
 #define SSD_TYPE 10
 //initalization : 기존에 있던 SSD와 video 정보 가져오기
 //update_new_video: 새로운 비디오 정보 가져오면서, 기존에 있던 video의 인기도, 대역폭도 함께 갱신
-//testbed 쪽 함수 고쳐야함...
 
 int bandwidth[SSD_TYPE] = { 3500, 3100, 2400, 1800, 560, 560, 560, 560, 550, 550 };
 double DWPD[SSD_TYPE] = { 0.410958904, 0.328767123, 0.290958904, 0.109589041, 0.646575342, 0.328767123, 0.306849315, 0.197260274, 0.109589041, 0.153424658 };
@@ -173,7 +172,7 @@ void setting_for_migration_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _existed_V
 SSD* SSD_initalization_for_testbed(int& _num_of_SSDs) {
 	SSD* _SSD_list = NULL;
 	ifstream fin_ssd("SSD_list.in"); // fin 객체 생성(cin 처럼 이용!) -> 셸 프로그래밍 파일 실행시, 이 파일이 없으면 생성하고(가볍게 미리 만든 디폴트 파일 copy하자), storage_usage, bandwidth_usage, write_MB가 0이도록 함
-	if (fin_ssd.is_open())
+	if (!fin_ssd.fail())
 	{
 		string str;
 		int cnt = 0;
@@ -185,6 +184,9 @@ SSD* SSD_initalization_for_testbed(int& _num_of_SSDs) {
 			}
 			else {
 				int ssd_index = cnt;
+				if (ssd_index > _num_of_SSDs)
+					break;
+
 				_SSD_list[ssd_index].index = ssd_index;
 				string* ssd_info = split(str, '\t');
 				_SSD_list[ssd_index].node_hostname = ssd_info[0]; // datanode 이름임. TLC 1개, QLC 3개가 같은 datanode hostname을 가짐
@@ -221,14 +223,14 @@ VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& n
 	ifstream fin_existing_video("existing_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
 	ifstream fin_new_video("new_video_list.in"); // fin 객체 생성(cin 처럼 이용!)
 	string str;
-	if (fin_existing_video.is_open()) {
+	if (!fin_existing_video.fail()) {
 		getline(fin_existing_video, str);
 		num_of_existing_videos = stoi(str);
 	}
 	else {
 		num_of_existing_videos = 0;
 	}
-	if (fin_new_video.is_open()) {
+	if (!fin_new_video.fail()) {
 		getline(fin_new_video, str);
 		num_of_new_videos = stoi(str);
 	}
@@ -241,11 +243,13 @@ VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& n
 	else
 		_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_new_videos]; // placement 때는 new 파일만 대상으로 할 것
 
-	if(fin_existing_video.is_open() && num_of_existing_videos > 0 && _is_migration){
+	if(!fin_existing_video.fail() && num_of_existing_videos > 0 && _is_migration){
 		int cnt = 0;
 		while (getline(fin_existing_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
 		{
 			int video_index = cnt;
+			if (video_index >= num_of_existing_videos)
+				break;
 			string* video_info = split(str, '\t');
 
 			_VIDEO_CHUNK_list[video_index].index = video_index;
@@ -272,7 +276,7 @@ VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& n
 	}
 	fin_existing_video.close(); // 파일 닫기
 
-	if (fin_new_video.is_open() && num_of_new_videos > 0) {
+	if (!fin_new_video.fail() && num_of_new_videos > 0) {
 		int cnt;
 		if (_is_migration)
 			cnt = num_of_existing_videos;
@@ -282,6 +286,8 @@ VIDEO_CHUNK* video_initalization_for_testbed(int& num_of_existing_videos, int& n
 		while (getline(fin_new_video, str)) // 파일이 끝날때까지 한 줄씩 읽어오기
 		{
 			int video_index = cnt;
+			if (video_index >= (num_of_existing_videos + num_of_new_videos))
+				break;
 			string* video_info = split(str, '\t');
 
 			_VIDEO_CHUNK_list[video_index].index = video_index;
