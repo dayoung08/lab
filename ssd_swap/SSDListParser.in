@@ -1,8 +1,8 @@
 #!/bin/bash
 #TLC
-echo 24
+echo 20 #24
 node=1
-for Addr in a1 b1 c1 d1 f1 h1 #Hynix TLC SSD
+for Addr in a1 b1 c1 d1 f1 #h1 #Hynix TLC SSD
 do
    let written=(`sudo smartctl -a /dev/sd$Addr | grep -i Total_LBAs_Written | awk '{print $10}'`+1)*1000
    let age=`sudo smartctl -a /dev/sdb1 | grep -i Power_On_Hours | awk '{print $10}'`/24 #1day=24hour
@@ -12,7 +12,7 @@ done
 #QLC
 node=1
 ssd=1
-for Addr in e1 g1 j1 k1 l1 m1 n1 o1 p1 q1 r1 s1 t1 u1 v1 w1 x1 y1 #Samsung QLC SSD
+for Addr in e1 g1 j1 k1 l1 m1 n1 o1 p1 q1 r1 s1 t1 u1 v1 #w1 x1 y1 #Samsung QLC SSD
 do
    let written=(`sudo smartctl -a /dev/sd$Addr | grep -i Total_LBAs_Written | awk '{print $10}'`+1)/1000
    let age=`sudo smartctl -a /dev/sdb1 | grep -i Power_On_Hours | awk '{print $10}'`/24 #1day=24hour
@@ -21,7 +21,7 @@ do
    if [ ${ssd} -gt 3 ];then
       ssd=1
       let node=$node+1
-      if [ ${node} -gt 6 ];then
+      if [ ${node} -gt 5 ];then #if [ ${node} -gt 6 ];then
          node=1
       fi
    fi
