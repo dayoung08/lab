@@ -17,10 +17,10 @@ void setting_for_placement_in_simulation(SSD* _SSD_list, VIDEO_CHUNK* _VIDEO_CHU
 	SSD_initalization_for_simulation(_SSD_list, _num_of_SSDs);
 	video_initalization_for_simulation(_VIDEO_CHUNK_list, _num_of_videos, _num_of_request_per_sec);
 	//printf("초기화 완료. 이 문구가 빨리 안 뜨면 SSD 숫자를 늘리거나 비디오 세그먼트 수를 줄일 것\n");
-	default_random_engine g(SEED);
-	uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY };
+	//default_random_engine g(SEED);
+	//uniform_int_distribution<> dist_for_running_day{MIN_RUNNING_DAY, MAX_RUNNING_DAY };
 	for (int ssd = 1; ssd <= _num_of_SSDs; ssd++) {
-		_SSD_list[ssd].age = dist_for_running_day(g);
+		_SSD_list[ssd].age = RUNNING_DAY;// dist_for_running_day(g);
 		_SSD_list[ssd].ADWD = 1;
 		_SSD_list[ssd].total_write = _SSD_list[ssd].ADWD * ((_SSD_list[ssd].DWPD * _SSD_list[ssd].storage_capacity) * _SSD_list[ssd].age);
 	}

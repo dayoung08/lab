@@ -38,9 +38,9 @@ using namespace std;
 #define VIDEO_BANDWIDTH 2.5f //MB/s 
 #define VIDEO_SIZE 15.0f; //MB
 
-#define MIN_RUNNING_DAY 1
-#define MAX_RUNNING_DAY 70
-//#define RUNNING_DAY 20
+//.#define MIN_RUNNING_DAY 1
+//#define MAX_RUNNING_DAY 70
+#define RUNNING_DAY 30
 //당연히 이거 1일때가 제일 잘 나옴 으앙....
 
 struct SSD {
