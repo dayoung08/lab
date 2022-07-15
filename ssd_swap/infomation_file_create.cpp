@@ -135,19 +135,28 @@ void create_migration_infomation(SSD * _SSD_list, VIDEO_CHUNK * _VIDEO_CHUNK_lis
 
 				if (ssd_index <= _num_of_SSDs) {
 					line += _SSD_list[ssd_index].node_hostname + "\t";
-					if (_SSD_list[ssd_index].storage_folder_name == "tlc01")
+					/*if (_SSD_list[ssd_index].storage_folder_name == "tlc01")
 						line += "0";
 					else if (_SSD_list[ssd_index].storage_folder_name == "qlc01")
 						line += "1";
 					else if (_SSD_list[ssd_index].storage_folder_name == "qlc02")
 						line += "2";
 					else if (_SSD_list[ssd_index].storage_folder_name == "qlc03")
-						line += "3";
+						line += "3";*/
+					line += _SSD_list[ssd_index].storage_folder_name;
 				}
 				else {
 					line += "datanode6\t"; //datanode6이 HDD로 구성되어있다고 가정(실제로는 아님)
-					//int num = (ssd_index - 1) % 4;
-					line += to_string((ssd_index - 1) % 4);
+					//line += to_string((ssd_index - 1) % 4);
+					int temp = (ssd_index - 1) % 4;
+					if (temp == 0)
+						line += "tlc01";
+					if (temp == 1)
+						line += "qlc01";
+					if (temp == 2)
+						line += "qlc02";
+					if (temp == 3)
+						line += "qlc03";
 				}
 				if (video_index != _num_of_existing_videos +_num_of_new_videos - 1) {
 					line += "\n";
