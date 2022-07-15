@@ -20,7 +20,7 @@ int num_of_SSDs = 20;
 int num_of_videos = 1000;
 int num_of_new_videos = 76;
 
-double num_of_request_per_sec = 4000; //1000개일때 임시값
+double num_of_request_per_sec = 5000; //1000개일때 임시값
 //double num_of_request_per_sec = 500; 이 코드 돌아가는지 파일 10개 있다 가정하고 적당히 확인할 때... 500~1000으로 잡아줌
 
 int main(int argc, char* argv[]) {
