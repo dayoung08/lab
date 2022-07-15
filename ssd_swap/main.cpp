@@ -1,30 +1,30 @@
-//testbed¿¡¼­ placement¶§´Â new_video_list.in¸¸ ÀÖ¾î¾ßÇÔ. existing_video_list.inÀÌ Á¦´ë·Î µÈ ÆÄÀÏÀÌ ¾Æ´Ñ »óÅÂ·Î ÀÖÀ¸¸é infomation_file_create.cpp¿¡¼­ ¿À·ù°¡ ¹ß»ıÇÔ.
-//¶ÇÇÑ testbed¿¡¼­ migration ¶§, existing_video_list.in¿¡ datanode¿Í ¾î¶² SSD¿¡ ÀúÀåµÇ¾î ÀÖ´ÂÁö ÀûÇô ÀÖ´ÂÁö È®ÀÎ ÇÒ °Í. ¾È ÀûÇô ÀÖÀ¸¸é ¼¼±×¸àÅ×ÀÌ¼Ç ÆúÆ® ¹ß»ı.
+//testbedì—ì„œ placementë•ŒëŠ” new_video_list.inë§Œ ìˆì–´ì•¼í•¨. existing_video_list.inì´ ì œëŒ€ë¡œ ëœ íŒŒì¼ì´ ì•„ë‹Œ ìƒíƒœë¡œ ìˆìœ¼ë©´ infomation_file_create.cppì—ì„œ ì˜¤ë¥˜ê°€ ë°œìƒí•¨.
+//ë˜í•œ testbedì—ì„œ migration ë•Œ, existing_video_list.inì— datanodeì™€ ì–´ë–¤ SSDì— ì €ì¥ë˜ì–´ ìˆëŠ”ì§€ ì í˜€ ìˆëŠ”ì§€ í™•ì¸ í•  ê²ƒ. ì•ˆ ì í˜€ ìˆìœ¼ë©´ ì„¸ê·¸ë©˜í…Œì´ì…˜ í´íŠ¸ ë°œìƒ.
 
-//1) 2022-7¿ù 8ÀÏ ±âÁØ, ÇÑ¾ç´ë ÇÏÀÌ´Ğ½º ÄÄÇ»ÅÍ¿¡¼­´Â Á¦´ë·Î ¾È µ¹¾Æ°¡±æ·¡, ¾Ë¾Æº¸´Ï ¾ÆÁ÷ movementInfo.in°¡ /spider-man-no-way-home-1.mp4	0	datanode1	DISK	datanode1	DISK	1 »óÅÂÀÓ. 
-//±×·¯¹Ç·Î ERSBlockMovementÇßÀ»¶§ ¿À·ù³ª¸é ¿ì¼± Àú°Å ¸ÕÀú ¾î¶² ¹öÀüÀÎÁö º¼ °Í, ÄÄÆÄÀÏ ¿À·¡ °É·Á¼­ Àú°Å movementInfo ÆÄÀÏ Æ÷¸Ë ¼öÁ¤ÇÏ°íµµ, ÇÏÀÌ´Ğ½º ÄÄÇ»ÅÍ¿£ ¹İ¿µÀ» ¾ÈÇÑ »óÅÂ·Î º¸ÀÓ
-//¿©±â¼­ »Ì´Â°Ç movementInfo.in°¡ /spider-man-no-way-home-1.mp4	datanode1	qlc03 datanode1	qlc01 Æ÷¸ËÀÓ.
-//2) ¸¶ÀÌ±×·¹ÀÌ¼Ç ½Ã SSDListParser.sh, fileListParser.sh, ÀÌ ¾Ë°í¸®Áò, hdfs ERSBlockMovement Åø, hdfs ERSBlockPlacement ÅøÀÌ ¼ø¼­´ë·Î ½ÇÇàµÇ´Â ¼ĞÀ» Â¥¾ß°ÚÀ½. 
-//ÀÌ°É ERSBlockMovement ¾È¿¡ ´Ù ¾È ³Ö´Â ÀÌÀ¯´Â, »õ·Î¿î ÆÄÀÏÀÌ ¾÷·Îµå µÉ¶§´Â ERSBlockPlacement¸¦ ½á¾ßÇÏ´Âµ¥ ERSBlockMovement ¾È¿¡¼­ ERSBlockPlacement È£ÃâÇÏ±â´Â Á»..
-//±×·± ÀÌÀ¯·Î ¼Ğ ÇÁ·Î±×·¡¹ÖÀÌ Á¦ÀÏ ¹«³­ÇØ º¸ÀÓ.
-//3) ERSBlockPlacement -> FilePlacement, ERSBlockMovement -> FileMovement ·Î Ä¿¸Çµå ±³Ã¼ÇÏ±â
+//1) 2022-7ì›” 8ì¼ ê¸°ì¤€, í•œì–‘ëŒ€ í•˜ì´ë‹‰ìŠ¤ ì»´í“¨í„°ì—ì„œëŠ” ì œëŒ€ë¡œ ì•ˆ ëŒì•„ê°€ê¸¸ë˜, ì•Œì•„ë³´ë‹ˆ ì•„ì§ movementInfo.inê°€ /spider-man-no-way-home-1.mp4	0	datanode1	DISK	datanode1	DISK	1 ìƒíƒœì„. 
+//ê·¸ëŸ¬ë¯€ë¡œ ERSBlockMovementí–ˆì„ë•Œ ì˜¤ë¥˜ë‚˜ë©´ ìš°ì„  ì €ê±° ë¨¼ì € ì–´ë–¤ ë²„ì „ì¸ì§€ ë³¼ ê²ƒ, ì»´íŒŒì¼ ì˜¤ë˜ ê±¸ë ¤ì„œ ì €ê±° movementInfo íŒŒì¼ í¬ë§· ìˆ˜ì •í•˜ê³ ë„, í•˜ì´ë‹‰ìŠ¤ ì»´í“¨í„°ì—” ë°˜ì˜ì„ ì•ˆí•œ ìƒíƒœë¡œ ë³´ì„
+//ì—¬ê¸°ì„œ ë½‘ëŠ”ê±´ movementInfo.inê°€ /spider-man-no-way-home-1.mp4	datanode1	qlc03	datanode1	qlc01 í¬ë§·ì„.
+//2) ë§ˆì´ê·¸ë ˆì´ì…˜ ì‹œ SSDListParser.sh, fileListParser.sh, ì´ ì•Œê³ ë¦¬ì¦˜, hdfs ERSBlockMovement íˆ´, hdfs ERSBlockPlacement íˆ´ì´ ìˆœì„œëŒ€ë¡œ ì‹¤í–‰ë˜ëŠ” ì…¸ì„ ì§œì•¼ê² ìŒ. 
+//ì´ê±¸ ERSBlockMovement ì•ˆì— ë‹¤ ì•ˆ ë„£ëŠ” ì´ìœ ëŠ”, ìƒˆë¡œìš´ íŒŒì¼ì´ ì—…ë¡œë“œ ë ë•ŒëŠ” ERSBlockPlacementë¥¼ ì¨ì•¼í•˜ëŠ”ë° ERSBlockMovement ì•ˆì—ì„œ ERSBlockPlacement í˜¸ì¶œí•˜ê¸°ëŠ” ì¢€..
+//ê·¸ëŸ° ì´ìœ ë¡œ ì…¸ í”„ë¡œê·¸ë˜ë°ì´ ì œì¼ ë¬´ë‚œí•´ ë³´ì„.
+//3) ERSBlockPlacement -> FilePlacement, ERSBlockMovement -> FileMovement ë¡œ ì»¤ë§¨ë“œ êµì²´í•˜ê¸°
 
 #include "header.h"
 #define NUM_OF_DATEs 3 // for simulation 1 5 15 30
 #define NUM_OF_TIMEs 3
 
-int placement_method = 1; // 2~6À¸·Î ¹Ù²Ù¸é ºñ±³½ºÅ´
-int migration_method = 7; // 8~11·Î ¹Ù²Ù¸é ºñ±³½ºÅ´
+int placement_method = 1; // 2~6ìœ¼ë¡œ ë°”ê¾¸ë©´ ë¹„êµìŠ¤í‚´
+int migration_method = 7; // 8~11ë¡œ ë°”ê¾¸ë©´ ë¹„êµìŠ¤í‚´
 
 int num_of_SSDs = 20; 
 int num_of_videos = 1000;
-int num_of_new_videos = 78;
+int num_of_new_videos = 76;
 
-double num_of_request_per_sec = 5000; //1000°³ÀÏ¶§ ÀÓ½Ã°ª
-//double num_of_request_per_sec = 500; ÀÌ ÄÚµå µ¹¾Æ°¡´ÂÁö ÆÄÀÏ 10°³ ÀÖ´Ù °¡Á¤ÇÏ°í Àû´çÈ÷ È®ÀÎÇÒ ¶§... 500~1000À¸·Î Àâ¾ÆÁÜ
+double num_of_request_per_sec = 5000; //1000ê°œì¼ë•Œ ì„ì‹œê°’
+//double num_of_request_per_sec = 500; ì´ ì½”ë“œ ëŒì•„ê°€ëŠ”ì§€ íŒŒì¼ 10ê°œ ìˆë‹¤ ê°€ì •í•˜ê³  ì ë‹¹íˆ í™•ì¸í•  ë•Œ... 500~1000ìœ¼ë¡œ ì¡ì•„ì¤Œ
 
 int main(int argc, char* argv[]) {
-	//argv ÆÄ¶ó¹ÌÅÍ°¡ ÀÖÀ¸¸é Å×½ºÆ® ¹èµå, ¾øÀ¸¸é ½Ã¹Ä·¹ÀÌ¼Ç µ¹¸®´Â ÇÁ·Î±×·¥À» Â¥ÀÚ.
+	//argv íŒŒë¼ë¯¸í„°ê°€ ìˆìœ¼ë©´ í…ŒìŠ¤íŠ¸ ë°°ë“œ, ì—†ìœ¼ë©´ ì‹œë®¬ë ˆì´ì…˜ ëŒë¦¬ëŠ” í”„ë¡œê·¸ë¨ì„ ì§œì.
 	switch (argc)
 	{
 	case 1:
@@ -38,16 +38,16 @@ int main(int argc, char* argv[]) {
 			placement(false);
 		}
 		else
-			printf("command°¡ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù. ´Ù½Ã ½ÇÇàÇØ ÁÖ¼¼¿ä.\n");
+			printf("commandê°€ ì˜¬ë°”ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹¤í–‰í•´ ì£¼ì„¸ìš”.\n");
 		break;
 	case 3:
 		if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
 			migration_in_testbed(stoi(argv[2])); 
-			// 1, 2, 3, 4 ÀÌ·¸°Ô °¢ ³¯ÀÇ ¸î¹øÂ° migrationÀÎÁö¸¦ ¹Şµµ·Ï ÇÔ.
-			//³ªÁß¿¡ È®Àå ½Ã ½Ã°£ ¹Ş¾Æ¼­ ÆÄ½ÌÇÒ°Í 
+			// 1, 2, 3, 4 ì´ë ‡ê²Œ ê° ë‚ ì˜ ëª‡ë²ˆì§¸ migrationì¸ì§€ë¥¼ ë°›ë„ë¡ í•¨.
+			//ë‚˜ì¤‘ì— í™•ì¥ ì‹œ ì‹œê°„ ë°›ì•„ì„œ íŒŒì‹±í• ê²ƒ 
 		}
 		else
-			printf("command°¡ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù. ´Ù½Ã ½ÇÇàÇØ ÁÖ¼¼¿ä.\n");
+			printf("commandê°€ ì˜¬ë°”ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹¤í–‰í•´ ì£¼ì„¸ìš”.\n");
 		break;
 	case 6:
 		if (!strcmp(argv[1], "placement")) {
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 			placement(true);
 		}
 		else
-			printf("command°¡ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù. ´Ù½Ã ½ÇÇàÇØ ÁÖ¼¼¿ä.\n");
+			printf("commandê°€ ì˜¬ë°”ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹¤í–‰í•´ ì£¼ì„¸ìš”.\n");
 		break;
 	case 7:
 		if (!strcmp(argv[1], "movement") || !strcmp(argv[1], "migration")) {
@@ -70,10 +70,10 @@ int main(int argc, char* argv[]) {
 			migartion_in_simulation();
 		}
 		else
-			printf("command°¡ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù. ´Ù½Ã ½ÇÇàÇØ ÁÖ¼¼¿ä.\n");
+			printf("commandê°€ ì˜¬ë°”ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹¤í–‰í•´ ì£¼ì„¸ìš”.\n");
 		break;
 	default:
-		printf("command°¡ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù. ´Ù½Ã ½ÇÇàÇØ ÁÖ¼¼¿ä.\n");
+		printf("commandê°€ ì˜¬ë°”ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹¤í–‰í•´ ì£¼ì„¸ìš”.\n");
 		break;
 	}
 	//printf("\n[END]\n\n");
@@ -92,7 +92,7 @@ void placement(bool _is_simulation) {
 	else {
 		int dummy = 0;
 		SSD_list = SSD_initalization_for_testbed(num_of_SSDs);
-		VIDEO_CHUNK_list = video_initalization_for_testbed(dummy, num_of_videos, num_of_SSDs, num_of_request_per_sec, -987654321, false); // dummy¿Í -987654321 ³Ö¾îÁØ°Ç ÀÌÀ¯ ¾øÀ½... ¾È ¾²´Ï±î
+		VIDEO_CHUNK_list = video_initalization_for_testbed(dummy, num_of_videos, num_of_SSDs, num_of_request_per_sec, -987654321, false); // dummyì™€ -987654321 ë„£ì–´ì¤€ê±´ ì´ìœ  ì—†ìŒ... ì•ˆ ì“°ë‹ˆê¹Œ
 		setting_for_placement_in_testbed(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	}
 
@@ -132,14 +132,14 @@ void migartion_in_simulation() {
 	VIDEO_CHUNK* VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_videos];
 	setting_for_placement_in_simulation(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos, num_of_request_per_sec);
 	placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos);
-	//·£´ıÀ¸·Î ºñµğ¿À¸¦ placement ÇÑ °÷¿¡¼­ migarationÀÌ ¼öÇàµÈ´Ù.
+	//ëœë¤ìœ¼ë¡œ ë¹„ë””ì˜¤ë¥¼ placement í•œ ê³³ì—ì„œ migarationì´ ìˆ˜í–‰ëœë‹¤.
 
 	int total_migration_num = 0;
 	for (int day = 1; day <= NUM_OF_DATEs; day++) {
 		for (int time = 1; time <= NUM_OF_TIMEs; time++) {
-			//¾Æ·¡´Â »õ·Î¿î ºñµğ¿À Ãß°¡ °úÁ¤
+			//ì•„ë˜ëŠ” ìƒˆë¡œìš´ ë¹„ë””ì˜¤ ì¶”ê°€ ê³¼ì •
 			if (num_of_new_videos > 0) {
-				// »õ·Î¿î ºñµğ¿À Ãß°¡¿¡ µû¶ó ºñµğ¿À Á¤º¸µéÀ» ¾÷µ¥ÀÌÆ® ÇØÁÜ.
+				// ìƒˆë¡œìš´ ë¹„ë””ì˜¤ ì¶”ê°€ì— ë”°ë¼ ë¹„ë””ì˜¤ ì •ë³´ë“¤ì„ ì—…ë°ì´íŠ¸ í•´ì¤Œ.
 				VIDEO_CHUNK* new_VIDEO_CHUNK_list = new VIDEO_CHUNK[num_of_new_videos];
 				setting_for_migration_in_simulation(SSD_list, VIDEO_CHUNK_list, new_VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, time);
 
@@ -149,14 +149,14 @@ void migartion_in_simulation() {
 				copy(new_VIDEO_CHUNK_list, new_VIDEO_CHUNK_list + num_of_new_videos, _VIDEO_CHUNK_conbined_list + num_of_videos);
 				delete[] new_VIDEO_CHUNK_list;
 				VIDEO_CHUNK_list = _VIDEO_CHUNK_conbined_list;
-				num_of_videos += num_of_new_videos;  //±âÁ¸ ºñµğ¿À ¸®½ºÆ®¿¡ »õ·Î¿î ºñµğ¿À Ãß°¡
+				num_of_videos += num_of_new_videos;  //ê¸°ì¡´ ë¹„ë””ì˜¤ ë¦¬ìŠ¤íŠ¸ì— ìƒˆë¡œìš´ ë¹„ë””ì˜¤ ì¶”ê°€
 			}
 			else {
-				//»õ·Î¿î ºñµğ¿À ¾÷µ¥ÀÌÆ® ¾ÈÇÏ°í, ÀÎ±âµµ¸¸ ¹Ù²Ü ¶§ ¾¸. 
+				//ìƒˆë¡œìš´ ë¹„ë””ì˜¤ ì—…ë°ì´íŠ¸ ì•ˆí•˜ê³ , ì¸ê¸°ë„ë§Œ ë°”ê¿€ ë•Œ ì”€. 
 				setting_for_migration_in_simulation(SSD_list, VIDEO_CHUNK_list, NULL, migration_method, num_of_SSDs, num_of_videos, 0, num_of_request_per_sec, time);
 			}
-			//migration ¼öÇà
-			//printf("%dÀÏ-%d ", day, time);
+			//migration ìˆ˜í–‰
+			//printf("%dì¼-%d ", day, time);
 			if(migration_method >= MIGRATION_OURS)
 				total_migration_num += migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos);
 			else 
@@ -164,7 +164,7 @@ void migartion_in_simulation() {
 			//printf("migration_num %d\n", migration_num);
 		}
 
-		// °á°ú Ãâ·Â : SSDÀÇ Æò±Õ, Ç¥ÁØÆíÂ÷ ADWD Ãâ·Â
+		// ê²°ê³¼ ì¶œë ¥ : SSDì˜ í‰ê· , í‘œì¤€í¸ì°¨ ADWD ì¶œë ¥
 		if (day == NUM_OF_DATEs) {
 		//if (day == 1 || day == 3 || day == 7 || day == 15 || day == 30) {
 			double sum_for_AVG_in_migration = 0;
@@ -194,8 +194,8 @@ void migartion_in_simulation() {
 			printf("error\n");
 		}
 	}
-	printf("ÀúÀåµÈ ºñµğ¿À ÃÑ °¹¼ö %d/%d\n", num_of_alloc_videos, num_of_videos);
-	printf("ÀúÀåµÈ ºñµğ¿ÀÀÇ Total requested bandwidth %lf / %lf\n", total_bandwidth_of_alloc_videos, ((double)VIDEO_BANDWIDTH * (double)num_of_request_per_sec));
+	printf("ì €ì¥ëœ ë¹„ë””ì˜¤ ì´ ê°¯ìˆ˜ %d/%d\n", num_of_alloc_videos, num_of_videos);
+	printf("ì €ì¥ëœ ë¹„ë””ì˜¤ì˜ Total requested bandwidth %lf / %lf\n", total_bandwidth_of_alloc_videos, ((double)VIDEO_BANDWIDTH * (double)num_of_request_per_sec));
 	
 	for (int ssd = 1; ssd <= num_of_SSDs; ssd++) {
 		printf("[SSD %d] bandwidth usage %.2f / %.2f (%.2f%%)\n", ssd, SSD_list[ssd].total_bandwidth_usage, SSD_list[ssd].maximum_bandwidth, (SSD_list[ssd].total_bandwidth_usage * 100 / SSD_list[ssd].maximum_bandwidth));
@@ -212,13 +212,13 @@ void migration_in_testbed(int _time) {
 	VIDEO_CHUNK* VIDEO_CHUNK_list = video_initalization_for_testbed(num_of_videos, num_of_new_videos, num_of_SSDs, num_of_request_per_sec, migration_method, true);
 
 	setting_for_migration_in_testbed(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, num_of_request_per_sec, _time);
-	//±âÁ¸¿¡ ÀúÀåµÇ¾îÀÖ´ø ºñµğ¿À¿Í, »õ·Î¿î ºñµğ¿ÀÀÇ Á¤º¸¸¦ ÀĞ¾î¿È
+	//ê¸°ì¡´ì— ì €ì¥ë˜ì–´ìˆë˜ ë¹„ë””ì˜¤ì™€, ìƒˆë¡œìš´ ë¹„ë””ì˜¤ì˜ ì •ë³´ë¥¼ ì½ì–´ì˜´
 
 	int* prev_assigned_SSD = new int[num_of_videos];
 	for (int vid = 0; vid < num_of_videos; vid++) {
 		prev_assigned_SSD[vid] = VIDEO_CHUNK_list[vid].assigned_SSD;
 		
-		//µ¥ÀÌÅÍ³ëµå6À» HDD Á¸À¸·Î »ç¿ëÇÒ °ÍÀÌ±â ¶§¹®¿¡, ¾Ë°í¸®Áò¿¡¼­´Â HDD Á¸À» ÇÏ³ª·Î ¹­¾î ¾²¹Ç·Î
+		//ë°ì´í„°ë…¸ë“œ6ì„ HDD ì¡´ìœ¼ë¡œ ì‚¬ìš©í•  ê²ƒì´ê¸° ë•Œë¬¸ì—, ì•Œê³ ë¦¬ì¦˜ì—ì„œëŠ” HDD ì¡´ì„ í•˜ë‚˜ë¡œ ë¬¶ì–´ ì“°ë¯€ë¡œ
 		if (VIDEO_CHUNK_list[vid].assigned_SSD > num_of_SSDs){
 			if (migration_method >= MIGRATION_OURS) {
 				VIDEO_CHUNK_list[vid].assigned_SSD = VIRTUAL_SSD;
@@ -229,22 +229,22 @@ void migration_in_testbed(int _time) {
 		}
 	}
 	
-	//ºñµğ¿À migration
+	//ë¹„ë””ì˜¤ migration
 	int migration_num;
 	if (migration_method >= MIGRATION_OURS)
 		migration_num = migration(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos + num_of_new_videos);
 	else
 		migration_num = placement(SSD_list, VIDEO_CHUNK_list, placement_method, num_of_SSDs, num_of_videos + num_of_new_videos);
 
-	//datanode 6À» HDD Á¸À¸·Î »ç¿ëÇÏ±â À§ÇÔ. ¾î¶² ½ºÅä¸®Áö¿¡ µé¾î°¥Áö´Â ·£´ı ¼±ÅÃ 
-	//(Áß¿äÇÑ°Ô ¾Æ´Ï¶ó¼­ ÀÌ·¸°Ô Àû´çÈ÷ ±¸ÇöÇß´Âµ¥, ½ÇÁ¦·Î´Â HDDÀÇ ½ºÅä¸®Áö ¿ë·®ÀÌ ¾ó¸¶³ª ³²¾Ò´ÂÁö °è»êÇØ¼­ ³Ö¾î¾ßÇÔ)
+	//datanode 6ì„ HDD ì¡´ìœ¼ë¡œ ì‚¬ìš©í•˜ê¸° ìœ„í•¨. ì–´ë–¤ ìŠ¤í† ë¦¬ì§€ì— ë“¤ì–´ê°ˆì§€ëŠ” ëœë¤ ì„ íƒ 
+	//(ì¤‘ìš”í•œê²Œ ì•„ë‹ˆë¼ì„œ ì´ë ‡ê²Œ ì ë‹¹íˆ êµ¬í˜„í–ˆëŠ”ë°, ì‹¤ì œë¡œëŠ” HDDì˜ ìŠ¤í† ë¦¬ì§€ ìš©ëŸ‰ì´ ì–¼ë§ˆë‚˜ ë‚¨ì•˜ëŠ”ì§€ ê³„ì‚°í•´ì„œ ë„£ì–´ì•¼í•¨)
 	for (int vid = 0; vid < num_of_videos + num_of_new_videos; vid++) {
 		if (VIDEO_CHUNK_list[vid].assigned_SSD <= 0) {
 			VIDEO_CHUNK_list[vid].assigned_SSD = 21 + rand() % 4;
 		}
 	}
 
-	create_migration_infomation(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // ÀÌµ¿ Á¤º¸ ÆÄÀÏ »ı¼º
+	create_migration_infomation(SSD_list, VIDEO_CHUNK_list, migration_method, num_of_SSDs, num_of_videos, num_of_new_videos, prev_assigned_SSD); // ì´ë™ ì •ë³´ íŒŒì¼ ìƒì„±
 	create_result(SSD_list, VIDEO_CHUNK_list, num_of_SSDs, num_of_videos + num_of_new_videos, true);
 	delete[] VIDEO_CHUNK_list;
 }
