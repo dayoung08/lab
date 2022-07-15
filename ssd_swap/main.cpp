@@ -20,7 +20,8 @@ int num_of_SSDs = 20;
 int num_of_videos = 1000;
 int num_of_new_videos = 78;
 
-double num_of_request_per_sec = 5000; // 임시값
+double num_of_request_per_sec = 1000;
+//5000; 1000개일때 임시값
 
 int main(int argc, char* argv[]) {
 	//argv 파라미터가 있으면 테스트 배드, 없으면 시뮬레이션 돌리는 프로그램을 짜자.
